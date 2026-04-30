@@ -135,6 +135,11 @@ colors: {
 - **Champagne:** RARE — launch event RSVP CTA, "Invitation Only" badge, key trademark moments
 - **Contrast:** body text 4.5:1 minimum, large text 3:1 minimum, always.
 
+### Color Pairings (canonical)
+
+- **Eyebrow on bone:** `brand-700` (`#2B5688`) — passes AA on bone-100 (~8:1). Brand-blue accent retained, but darkened from brand-500 which fails contrast.
+- **Eyebrow on midnight / midnight-deep:** `brand-300` (`#A8C8E8`) — logo blue, passes AA on midnight backgrounds.
+
 ---
 
 ## Typography

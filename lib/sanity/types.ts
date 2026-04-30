@@ -50,7 +50,7 @@ export interface ProtocolParameter {
 
 export interface ProtocolReference {
   _key: string;
-  _type: "reference";
+  _type: "clinicalReference";
   citation: string;
   url?: string;
 }

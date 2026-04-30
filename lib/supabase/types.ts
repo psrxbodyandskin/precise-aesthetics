@@ -25,6 +25,7 @@ export interface Database {
           utm_source: string | null;
           utm_medium: string | null;
           utm_campaign: string | null;
+          interest: string[];
           created_at: string;
         };
         Insert: {
@@ -38,6 +39,7 @@ export interface Database {
           utm_source?: string | null;
           utm_medium?: string | null;
           utm_campaign?: string | null;
+          interest?: string[];
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["leads"]["Insert"]>;

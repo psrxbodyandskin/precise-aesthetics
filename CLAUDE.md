@@ -177,3 +177,25 @@ The ui-ux-pro-max skill is installed and may auto-activate on UI work.
 
 ## Communication
 When unclear, ask before assuming. When in doubt about brand voice, default to: clinical authority with editorial restraint and premium warmth. The system is the subject. Never personality-driven.
+
+## Known Issues / Tech Debt
+
+### Tailwind v4 ↔ shadcn token mismatch (decision needed before Session 5+)
+shadcn primitives use `bg-popover`, `bg-card`, `bg-accent`, etc., which in Tailwind v4 resolve from `--color-popover` / `--color-card` / `--color-accent`. `globals.css` defines the shadcn-style `--popover` / `--card` / `--accent` variables but **not** the `--color-*` aliases Tailwind v4 expects. Result: those utilities render transparent.
+
+Discovered Session 4 in `<SelectContent>` (popover bg). Worked around by passing explicit brand classes (`bg-bone-50`, `text-ink-900`, etc.) in `components/forms/LeadForm.tsx`.
+
+Will hit any other shadcn floating component that lands in future sessions: **Sheet, Dialog, Tooltip, DropdownMenu, Popover, HoverCard, Menubar, ContextMenu, Command** at minimum. Decide before more land:
+
+- **Option A** — One-time fix in `globals.css`: add `--color-popover: var(--popover);` (and equivalent aliases for `card`, `accent`, `muted`, `secondary`, `destructive`, `primary`, `border`, `input`, `ring`, `foreground`, `background`). Restores shadcn defaults across the board with one diff.
+- **Option B** — Keep patching each primitive's `className` per-component. Stays scoped but adds friction every time a new shadcn floating component is introduced.
+
+Recommend Option A before Session 5 (full homepage) ships, since Sheet/Dialog/Tooltip are likely needed.
+
+### `brand-500` on light backgrounds fails WCAG AA (audit links/CTAs before launch)
+[BRAND-IDENTITY.md:295](design-system/BRAND-IDENTITY.md#L295) prescribes `brand-500 #5891CA` for *"links, CTAs on light"*. Computed contrast on bone-100 (`#FAF7F2`) is **3.11:1** — fails 4.5:1 for normal text. Discovered Session 4 via Lighthouse on the eyebrow (already fixed: bone eyebrow now uses `brand-700`, see MASTER.md "Color Pairings (canonical)").
+
+Implication: any `<a>` or non-large CTA text rendered in `brand-500` on a light surface will fail contrast the same way. Before launch:
+- Audit every link/CTA across the site for foreground = `brand-500` on bone/cream/champagne.
+- Decide canonical: either bump light-surface link color to `brand-700` (~8:1, brand-blue retained) or `ink-700` (~14:1, neutral). Update BRAND-IDENTITY.md L295 to match shipped reality.
+- Large-text CTAs (≥18pt or ≥14pt bold) only need 3:1, so some uses of `brand-500` may still be compliant — verify per-instance, don't blanket replace.
