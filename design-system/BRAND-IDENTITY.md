@@ -1,6 +1,6 @@
 # Precise Aesthetics — Brand Identity System
 
-**Version 1.1 — April 2026**
+**Version 1.2 — April 2026**
 **Owner:** PS Medical Aesthetics, LLC
 **Domain:** preciseaesthetics.com
 **Launch:** August 8, 2026 — Civic Opera Building Rooftop, Chicago
@@ -13,9 +13,10 @@ This is the brand identity system. It defines who we are, what we sound like, an
 
 - For **technical design tokens** (CSS variables, Tailwind config, component specs), see `design-system/MASTER.md`. That file is the implementation source of truth.
 - For **brand strategy, voice, and visual direction**, this document is the source of truth.
-- When the two conflict, MASTER.md wins for code, this wins for brand.
+- For **canonical marketing copy** (homepage lines, boilerplate, CTAs), see `design-system/COPY-DECK.md`.
+- When the docs conflict, MASTER wins for code, this wins for brand strategy, COPY-DECK wins for exact wording.
 
-If you're producing anything with the Precise Aesthetics name on it — site, deck, post, signage, email signature, business card — start here.
+If you're producing anything with the Precise Aesthetics name on it, start here.
 
 ---
 
@@ -23,16 +24,17 @@ If you're producing anything with the Precise Aesthetics name on it — site, de
 
 ### 1.1 What We Are
 
-Precise Aesthetics is a **clinical technology and protocol IP company** advancing dermatologic outcomes through engineering, protocol, and data. Our flagship system, Precise Pico™, is a protocol-driven pico laser engineered to deliver predictable results across every Fitzpatrick skin type.
+Precise Aesthetics is a **clinical technology company that builds complete dermatologic systems**. Each system pairs a device with proprietary protocols, biologic control, and a data intelligence layer — engineered together as a closed loop. Our first system, Precise Pico™, is built around a multi-wavelength pico laser. Future systems will follow the same architecture with different devices.
 
 We are owned and operated by PS Medical Aesthetics, LLC.
 
 ### 1.2 What We Are Not
 
+- We are not a pico laser company. We are a system company that ships a flagship system whose first instance is built around a pico laser.
 - We are not a medspa.
 - We are not a consumer beauty brand.
 - We are not a generic device manufacturer.
-- We are not a personality-led brand. **No founder, no clinician, no individual face represents us publicly.** The product, the protocols, and the outcomes are the brand.
+- We are not a personality-led brand. **No founder, no clinician, no individual face represents us publicly.** The system, the protocols, and the outcomes are the brand.
 - We do not sell direct-to-consumer.
 
 ### 1.3 Mission
@@ -55,13 +57,19 @@ A world where every patient, regardless of skin tone, has access to laser dermat
 
 **Predictable outcomes across every skin type.**
 
-This sentence is the contract we sign with every practitioner who buys our system. Everything else in the brand serves this promise.
+This sentence is the contract we sign with every practitioner who buys into the system. Everything else in the brand serves this promise.
 
-### 1.7 Why No Personalities
+### 1.7 Why "System," Not "Device"
+
+A laser alone produces inconsistent results. A protocol without biologic control produces complications. A device without outcome data can't improve. The Precise System closes the loop. By framing ourselves as a system company — not a laser company — we sell something competitors can't replicate by building a better device. They'd have to rebuild the protocols, the biologic control, and the data infrastructure. That moat is the company.
+
+This framing also scales: Precise RF, Precise IPL, and future devices each ship as their own complete system using the same four-pillar architecture.
+
+### 1.8 Why No Personalities
 
 Personality-led brands cap at the personality. Apple is not Tim Cook. Stripe is not Patrick Collison. Linear is not Karri Saarinen. The product is the brand because the product can scale, can outlast any individual, and cannot be undone by any individual.
 
-We sell devices to practitioners. Practitioners trust outcomes, protocols, and clinical evidence — not brand-builder narratives. By keeping personalities out of the public brand, we make the system itself the credibility anchor.
+We sell systems to practitioners. Practitioners trust outcomes, protocols, and clinical evidence — not brand-builder narratives. By keeping personalities out of the public brand, we make the system itself the credibility anchor.
 
 ---
 
@@ -70,32 +78,34 @@ We sell devices to practitioners. Practitioners trust outcomes, protocols, and c
 ### 2.1 Architecture Diagram
 
 ```
-PS Medical Aesthetics, LLC                    [Legal entity]
-└── Precise Aesthetics™                       [Master brand / company / website]
-    ├── Precise Pico™                         [Flagship product — pico laser system]
-    │   ├── Precise Pico Device
-    │   ├── PIH Prevention Protocol™
-    │   ├── Protocol Library                  [Gated, proprietary]
-    │   ├── Practitioner Portal               [Gated, authenticated]
-    │   └── Data Intelligence Layer           [Outcome tracking + protocol refinement]
-    ├── Precise Skin (working name)           [Treatment kits — Phase 2]
-    └── Future products                       [Precise RF, Precise IPL, etc.]
+PS Medical Aesthetics, LLC                          [Legal entity]
+└── Precise Aesthetics™                             [Master brand / company / website]
+    └── The Precise System™ (working name)         [Architecture / IP]
+        ├── First instance: Precise Pico™
+        │   ├── Pillar 1 — Device (4-wavelength pico laser)
+        │   ├── Pillar 2 — Protocols (incl. PIH Prevention Protocol™)
+        │   ├── Pillar 3 — Biologic Control (pre/post treatment kits)
+        │   └── Pillar 4 — Data Intelligence Layer
+        └── Future instances: Precise RF, Precise IPL, etc.
+            └── Each ships with its own four pillars
 ```
 
 ### 2.2 Naming Rules
 
 - **PS Medical Aesthetics, LLC** — used only in legal copy: Terms of Service, Privacy Policy, copyright lines, regulatory documents, contracts, invoices.
-- **Precise Aesthetics** — used in all marketing, the website, social, press, and event communications. This is the brand the world sees.
-- **Precise Pico™** — used when referring to the flagship device. Always with the trademark symbol on first appearance per page or document.
-- **PIH Prevention Protocol™** — always with trademark symbol on first appearance.
+- **Precise Aesthetics** — used in all marketing, the website, social, press, and event communications. The brand the world sees.
+- **The Precise System™** — used when describing the architecture itself. Working name; may change before trademark filing. Trademark with ™ on first appearance.
+- **Precise Pico™** — used when referring to the flagship device-system. Always with ™ on first appearance.
+- **PIH Prevention Protocol™** — always with ™ on first appearance.
 - **Protocol Library** — capitalized when referring to ours specifically.
 - **Data Intelligence Layer** — capitalized when referring to ours specifically.
+- **Biologic Control** — capitalized when referring to the pillar; lowercase when describing the concept generally.
 
 ### 2.3 Trademark Usage
 
 Mark with ™ on first appearance in any document or page. Subsequent appearances within the same document do not need ™.
 
-In legal/contractual contexts, full attribution: *"Precise Aesthetics™ and Precise Pico™ are trademarks of PS Medical Aesthetics, LLC."*
+In legal/contractual contexts, full attribution: *"Precise Aesthetics™, The Precise System™, Precise Pico™, and PIH Prevention Protocol™ are trademarks of PS Medical Aesthetics, LLC."*
 
 ---
 
@@ -118,6 +128,7 @@ Our voice is consistent. Our tone shifts by context.
 | Context | Tone |
 | --- | --- |
 | Homepage hero | Confident, declarative, single-sentence thesis |
+| System / pillar pages | Architectural, measured, structurally clear |
 | Protocol pages (gated) | Clinical, precise, data-led |
 | Demo request follow-up | Warm, professional, genuinely helpful |
 | Launch invitation | Refined, anticipatory, scarce-feeling |
@@ -129,10 +140,11 @@ Our voice is consistent. Our tone shifts by context.
 
 **Yes:**
 - "Predictable outcomes across every skin type."
+- "Built for the patients the industry has historically struggled to treat."
+- "A laser is a tool. The protocol is the medicine. The system is what makes both work."
 - "Engineered for safety on Fitzpatrick IV–VI."
-- "The protocol leads. The laser follows."
-- "A new standard in laser dermatology."
 - "Skin of every shade."
+- "Four pillars. One closed loop."
 
 **No:**
 - "Revolutionary breakthrough in skin rejuvenation!" *(too marketing)*
@@ -140,6 +152,7 @@ Our voice is consistent. Our tone shifts by context.
 - "Industry-leading proprietary technology" *(jargon, brag)*
 - "World-class results you can trust" *(empty claim)*
 - "Game-changing innovation" *(reflexive cliché)*
+- "Our cutting-edge pico laser device" *(device-first, generic)*
 
 ### 3.4 Copywriting Rules
 
@@ -148,32 +161,32 @@ Our voice is consistent. Our tone shifts by context.
 3. **Numbers earn trust.** Replace "many" with "247." Replace "fast" with "in under 2 minutes."
 4. **Cut hedge words.** "Just," "really," "very," "actually," "basically." Remove them all.
 5. **No exclamation points** outside of internal Slack and friendly support emails.
-6. **No emoji** in marketing copy. Sparingly in support emails if the team voice already includes them.
-7. **Sentence case headlines.** Not Title Case. Not ALL CAPS. (ALL CAPS reserved for tracked overlines like CLINICAL TECHNOLOGY.)
+6. **No emoji** in marketing copy.
+7. **Sentence case headlines.** Not Title Case. ALL CAPS reserved for tracked overlines.
 8. **Oxford comma:** yes.
-9. **Em dashes (—)** with no surrounding spaces for asides. Not hyphens with spaces.
+9. **Em dashes (—)** with no surrounding spaces for asides.
 10. **Curly quotes (" ")** in body copy, never straight (" ").
+11. **The system is the subject.** Not "we." Not "our team." Not "our clinicians."
 
 ### 3.5 No "We Built This" Storytelling
 
 We don't write founder origin stories. We don't say "our team of clinicians believes…" We don't reference individuals in marketing copy.
 
 Instead:
-
-- "Precise Pico is engineered to…"
+- "The Precise System is engineered to…"
 - "The protocol library covers…"
 - "The system delivers…"
 - "Real-world data refines…"
 
-The system is the subject of every sentence. Not us. Not them. The system.
+The system is the subject of every sentence.
 
 ### 3.6 Words We Use
 
-Pico. Protocol. Predictable. Outcome. Indication. Fitzpatrick. Practitioner. Clinical. Endpoint. Fluence. Wavelength. Engineered. System. Library. Standard. Data.
+System. Pico. Protocol. Predictable. Outcome. Indication. Fitzpatrick. Practitioner. Clinical. Endpoint. Fluence. Wavelength. Engineered. Library. Standard. Data. Pillar. Closed loop. Biologic.
 
 ### 3.7 Words We Avoid
 
-Revolutionary. Game-changing. Cutting-edge. World-class. Innovative (overused — show, don't tell). Unleash. Transform (use sparingly). Experience (as in "the X experience"). Solution. Leverage (verb). Synergy. Empower. Disrupt. "Our team." "Our founders." "Our clinicians."
+Revolutionary. Game-changing. Cutting-edge. World-class. Innovative (overused). Unleash. Transform (use sparingly). Experience (as in "the X experience"). Solution. Leverage (verb). Synergy. Empower. Disrupt. "Our team." "Our founders." "Our clinicians."
 
 ### 3.8 The Reader Is a Practitioner
 
@@ -183,43 +196,63 @@ Most brand voice guides say "write so a fifth grader can understand it." We say 
 
 ## 4. Messaging Architecture
 
-### 4.1 The One-Liner
+### 4.1 The Tagline System
 
-**Predictable outcomes across every skin type.**
+Three lines, three jobs:
 
-This is the line that goes on the homepage hero, in press boilerplate, in elevator pitches, on conference badges. It does not change.
+**Hero (declarative — the brand promise):**
+> Predictable outcomes across every skin type.
+
+**Section thesis (heavier — the why):**
+> Built for the patients the industry has historically struggled to treat.
+
+**Short tag (banner / hashtag / chant):**
+> Skin of every shade.
+
+The hero is the contract. The section thesis is the argument. The short tag is the call to arms. Together they hit different registers across the site.
+
+For exact application copy, see `COPY-DECK.md`.
 
 ### 4.2 The 30-Second Pitch
 
-> Precise Aesthetics is a clinical technology company advancing dermatologic care through engineering and data. Our flagship system, Precise Pico™, pairs a multi-wavelength pico laser with the PIH Prevention Protocol™ — a proprietary clinical framework engineered for safety on darker skin. Real-world treatment data refines the protocols continuously through our Data Intelligence Layer. We launch August 8, 2026.
+> Precise Aesthetics is a clinical technology company that ships complete dermatologic systems. Our first system, Precise Pico™, has four pillars: a multi-wavelength pico laser, proprietary clinical protocols, biologic control kits, and a data intelligence layer that refines outcomes over time. We built it for the patients the industry has historically struggled to treat — Fitzpatrick IV through VI. We launch August 8, 2026.
 
-### 4.3 The Three Pillars (use across decks, site, press)
+### 4.3 The Four Pillars (Equal Weight)
 
-**The Protocol Leads.**
-A laser is a tool. The protocol is the medicine. We built the protocol first and engineered the device to execute it.
+The Precise System has four pillars. The device does not lead the others. They function as a closed loop.
 
-**Skin of Every Shade.**
-The PIH Prevention Protocol™ is engineered for the patients most pico systems fail: Fitzpatrick IV, V, VI. Safety isn't a setting. It's a design principle.
+**Device.** Multi-wavelength pico laser engineered to execute the protocol — not the other way around.
 
-**Data Makes Us Better.**
-Real-world treatment outcomes feed back into protocol refinement through our Data Intelligence Layer. Every session makes the system smarter.
+**Protocols.** Indication-specific clinical frameworks, including the proprietary PIH Prevention Protocol™ for Fitzpatrick IV–VI.
 
-### 4.4 Audience-Specific Messaging
+**Biologic Control.** Pre- and post-treatment kits engineered to optimize healing, reduce complication risk, and stabilize outcomes across skin types.
+
+**Data Intelligence Layer.** Every session contributes to a real-world dataset that refines our protocols continuously.
+
+### 4.4 The Three Strategic Pillars (use in decks, press)
+
+**The Protocol Leads.** A laser is a tool. The protocol is the medicine. We built the protocol first and engineered the device to execute it.
+
+**Skin of Every Shade.** The PIH Prevention Protocol is engineered for the patients most pico systems fail. Safety isn't a setting. It's a design principle.
+
+**Data Makes Us Better.** Real-world treatment outcomes feed back into protocol refinement. Every session makes the system smarter.
+
+### 4.5 Audience-Specific Messaging
 
 | Audience | Lead With |
 | --- | --- |
 | Dermatologists | Clinical authority, protocol depth, FDA clearance status, peer publications |
 | Aesthetic APRNs / PAs | Safety on darker skin, training pathway, predictable outcomes, ROI |
 | Medspa owners | ROI, brand differentiation, treatment outcome reliability, training |
-| Investors | Category creation, IP moat (protocols + Data Intelligence Layer), recurring revenue |
-| Press | The PIH wedge, the equity story, the August 8 launch, the data feedback loop |
+| Investors | System architecture, IP moat (protocols + biologic control + data), recurring revenue, scalability across future devices |
+| Press | The PIH wedge, the equity story, the August 8 launch, the system framing as category redefinition |
 
-### 4.5 Boilerplate (for press and partner use)
+### 4.6 Boilerplate (for press and partner use)
 
 > **About Precise Aesthetics**
-> Precise Aesthetics™ is a clinical technology company building the next generation of laser dermatology. The company's flagship system, Precise Pico™, pairs a multi-wavelength pico laser with the proprietary PIH Prevention Protocol™ — a clinical framework engineered to deliver predictable outcomes across every Fitzpatrick skin type. Real-world treatment data refines the protocols continuously through the company's Data Intelligence Layer. Precise Aesthetics is owned and operated by PS Medical Aesthetics, LLC, headquartered in Chicago, Illinois.
+> Precise Aesthetics™ is a clinical technology company building complete dermatologic systems. Its flagship system, Precise Pico™, pairs a multi-wavelength pico laser with the proprietary PIH Prevention Protocol™, pre- and post-treatment biologic control, and a data intelligence layer that refines outcomes through real-world treatment data. The system is engineered for predictable outcomes across every Fitzpatrick skin type — built for the patients the industry has historically struggled to treat. Precise Aesthetics is owned and operated by PS Medical Aesthetics, LLC, headquartered in Chicago, Illinois.
 
-### 4.6 Press Inquiries
+### 4.7 Press Inquiries
 
 Press inquiries route to `press@preciseaesthetics.com`. The boilerplate above is the only authorized public statement until further notice. Individual team members do not give on-record interviews under their own names — quotes attributed to "a Precise Aesthetics spokesperson" only.
 
@@ -301,11 +334,9 @@ Reserved for premium moments. The "wax seal" of the brand. Use sparingly.
 - **Never use pure black (`#000000`)** in body text. Use `ink-900` for nuance.
 - **The brand blue is an accent, not a fill.** Never paint a section in `brand-300`. Use it for strokes, focus rings, links, and the soft glow on logos.
 - **Champagne is sacred.** Use only when the moment is premium or scarce: launch CTA, "invitation only" badges, key trademark symbols, premium card edges. If you find yourself using champagne three times on a page, remove two.
-- **Contrast is non-negotiable.** Body text 4.5:1 minimum, large text 3:1 minimum. Run the contrast check before shipping anything.
+- **Contrast is non-negotiable.** Body text 4.5:1 minimum, large text 3:1 minimum.
 
 ### 5.3 Color Pairings (canonical)
-
-These pairings are tested and approved. Use them.
 
 | Background | Body text | Headline | Accent |
 | --- | --- | --- | --- |
@@ -314,7 +345,7 @@ These pairings are tested and approved. Use them.
 | midnight-800 | cream-100 | cream-50 | brand-300 |
 | champagne-200 | ink-900 | ink-900 | midnight-800 |
 
-### 5.4 Print & Pantone (for event signage, business cards, packaging)
+### 5.4 Print & Pantone
 
 | Brand color | Pantone (closest) | CMYK | RGB |
 | --- | --- | --- | --- |
@@ -333,14 +364,9 @@ Always verify Pantone against a physical Pantone book before mass production.
 
 ### 6.1 Typefaces
 
-**Display & Headings: Fraunces**
-A variable serif by Phaedra Charles for Undercase Type. Editorial warmth, optical sizing, and three custom axes (SOFT, WONK, opsz) that let us tune the feel. Free, open source, hosted via Google Fonts or self-hosted via next/font.
-
-**Body & UI: Inter**
-A neutral, hyper-legible sans by Rasmus Andersson. Industry standard for modern interfaces. Free, open source.
-
-**Monospace (code, technical): JetBrains Mono**
-Used in Sanity Studio, code samples, and any technical documentation. Free.
+**Display & Headings: Fraunces** — variable serif, editorial warmth, free.
+**Body & UI: Inter** — neutral sans, hyper-legible, free.
+**Monospace: JetBrains Mono** — for Sanity Studio, code samples, technical docs.
 
 ### 6.2 Type Scale
 
@@ -361,14 +387,13 @@ Used in Sanity Studio, code samples, and any technical documentation. Free.
 
 ### 6.3 Typography Rules
 
-- **Headlines in sentence case.** "Predictable outcomes across every skin type." Not Title Case.
-- **Overlines in ALL CAPS** with `0.12em` letter-spacing. The only place we use all caps.
-- **Display text gets generous tracking-tight** (-0.02em). Body stays at 0.
-- **Line length:** body 60-72ch max. Headlines 14-22ch max.
-- **No font weights above 600.** Fraunces is luxurious at 400-500. Above that, it loses elegance.
-- **No italics in body copy** unless quoting a publication or using technical conventions.
-- **Trademark symbols (™)** stay inline with the word, full size — no superscript.
-- **Numerals:** use Fraunces' lining figures for tabular data, oldstyle for body copy.
+- Headlines in sentence case.
+- Overlines in ALL CAPS with `0.12em` letter-spacing. The only place we use all caps.
+- Display text gets generous tracking-tight (-0.02em). Body stays at 0.
+- Line length: body 60-72ch max. Headlines 14-22ch max.
+- No font weights above 600. Fraunces is luxurious at 400-500.
+- No italics in body copy unless quoting a publication or using technical conventions.
+- ™ stays inline with the word, full size — no superscript.
 
 ---
 
@@ -387,15 +412,15 @@ The full logo package is in `/brand/logos/`. See `/brand/logos/README.md` for fi
 
 ### 7.2 Logo Usage Rules
 
-**Clear space:** Maintain clear space around the lockup equal to the height of the cap "P" in the wordmark. Nothing — text, images, edges — enters this zone.
+**Clear space:** Maintain clear space around the lockup equal to the height of the cap "P" in the wordmark.
 
 **Minimum size:**
-- Horizontal lockup: 120px wide on screen, 1 inch wide in print
+- Horizontal lockup: 120px wide on screen, 1 inch in print
 - Circle monogram: 32px on screen (favicon), 0.5 inch in print
 
-**Backgrounds:** Place on solid backgrounds when possible. On photography, ensure the placement area is uncluttered and the contrast is sufficient.
+**Backgrounds:** Place on solid backgrounds when possible. On photography, ensure contrast is sufficient.
 
-**Co-branding:** When pairing with a partner logo, use a vertical hairline divider in `brand-500` between marks. Equal visual weight. Equal clear space.
+**Co-branding:** Vertical hairline divider in `brand-500` between marks. Equal visual weight. Equal clear space.
 
 ### 7.3 Logo Don'ts
 
@@ -415,13 +440,13 @@ The full logo package is in `/brand/logos/`. See `/brand/logos/README.md` for fi
 
 ### 8.1 Photographic Style
 
-**The mood:** clinical authority meets editorial warmth. Documentary-style, natural light. No gloss. No obvious retouching.
+**The mood:** clinical authority meets editorial warmth. Documentary-style, natural light. No gloss.
 
-**Reference brands:** Aesop product photography (light + restraint). The New York Times Magazine photo essays (documentary). Le Labo (texture and detail). Augustinus Bader (clinical-luxury).
+**Reference brands:** Aesop product photography. NYT Magazine photo essays. Le Labo. Augustinus Bader.
 
 **What we shoot:**
 - The device — close-ups, materials, the screen UI, in environment
-- Clinical environments — procedure rooms, training settings (without people identifying)
+- Clinical environments — procedure rooms, training settings (without identifying people)
 - Before/after patient photography (always with signed consent, anonymized)
 - Abstract textures and materials supporting the brand atmosphere
 
@@ -444,7 +469,7 @@ The full logo package is in `/brand/logos/`. See `/brand/logos/README.md` for fi
 ### 8.3 Subject Matter Rules
 
 **Patient photography — always:**
-- Signed consent on file (with explicit consent for marketing use)
+- Signed consent on file with explicit consent for marketing use
 - Same lighting, angle, distance for before/after pairs
 - Honest framing — no flattering pose differences
 - Treatment context labeled (sessions, indication, Fitzpatrick type, time elapsed)
@@ -454,14 +479,13 @@ The full logo package is in `/brand/logos/`. See `/brand/logos/README.md` for fi
 **Practitioner photography (post-launch only):**
 - Practitioners who use Precise Pico can be featured with their consent
 - Their practice and credentials are attributed
-- This is not "Precise Aesthetics personalities" — it's customers/users
-- Post-launch only, after KOL adoption is real
+- This is customer/user content, not Precise Aesthetics personalities
 
 ### 8.4 AI-Generated Imagery
 
 Permitted only for:
-- Abstract or conceptual brand imagery (textures, atmospheric, no people)
-- Internal mockups, decks, and ideation
+- Abstract or conceptual brand imagery
+- Internal mockups, decks, ideation
 - Stock-style supporting imagery clearly disclosed as illustrative
 
 Never permitted for:
@@ -472,22 +496,20 @@ Never permitted for:
 ### 8.5 Image Treatment
 
 - All images use natural color (no heavy LUTs or filters)
-- 16:9 hero images preferred for site, 4:5 for social, 1:1 for avatars
+- 16:9 hero images for site, 4:5 for social, 1:1 for avatars
 - Subtle vignette acceptable on hero images, never elsewhere
-- No borders or framing devices except the brand-500 hairline (used sparingly as editorial accent)
+- No borders or framing devices except the brand-500 hairline (used sparingly)
 
 ---
 
 ## 9. Iconography
-
-### 9.1 Icon System
 
 **We use Lucide React exclusively.** No mixed icon libraries. No emoji as icons.
 
 **Stroke widths:** 1.5 default, 1.75 hero, never 1 or 2.5+.
 **Sizes:** 16, 20, 24, 32, 48px.
 
-### 9.2 Icon Color Rules
+### 9.1 Icon Color Rules
 
 - Inherit from text color by default
 - Brand-blue icons only when intentionally accenting
@@ -518,11 +540,11 @@ Never permitted for:
 
 ### 10.4 Composition Principles
 
-**1. Whitespace is content.** If the layout looks "empty," it's working. Resist the urge to fill.
-**2. One focal point per fold.** Each scroll-height section has one thing the reader should look at first.
-**3. Hierarchy through scale, not weight.** Use type size to establish hierarchy before reaching for bold or color.
-**4. Asymmetry over symmetry.** Centered layouts feel templated. Off-center, rhythmic layouts feel intentional.
-**5. Editorial pacing.** Vary section widths and densities like a magazine.
+1. **Whitespace is content.** If the layout looks "empty," it's working.
+2. **One focal point per fold.** Each scroll-height section has one thing the reader should look at first.
+3. **Hierarchy through scale, not weight.** Use type size to establish hierarchy before reaching for bold or color.
+4. **Asymmetry over symmetry.** Centered layouts feel templated.
+5. **Editorial pacing.** Vary section widths and densities like a magazine.
 
 ### 10.5 Grid System
 
@@ -537,10 +559,10 @@ Never permitted for:
 
 ### 11.1 Motion Principles
 
-**1. Purposeful.** Every animation must serve comprehension.
-**2. Restrained.** Linear, Stripe, Vercel — that's our motion register.
-**3. Earned.** Hero animations on first load, yes. Every section fading in on scroll, no.
-**4. Reduced-motion-aware.** All motion respects `prefers-reduced-motion: reduce`.
+1. **Purposeful.** Every animation must serve comprehension.
+2. **Restrained.** Linear, Stripe, Vercel — that's our motion register.
+3. **Earned.** Hero animations on first load, yes. Every section fading in on scroll, no.
+4. **Reduced-motion-aware.** All motion respects `prefers-reduced-motion: reduce`.
 
 ### 11.2 Easing & Timing
 
@@ -556,12 +578,12 @@ Never permitted for:
 ### 11.3 Where Motion Is Allowed
 
 - Hero entrance (one deliberate animation per page load)
-- The System diagram (sequenced reveal of pillars)
-- The Treatment Flow (sequenced reveal of seven steps)
+- The System diagram (sequenced reveal of the four pillars)
+- The Treatment Flow (sequenced reveal)
 - Hover states on interactive elements
 - Modal / sheet open/close
 - Form field focus
-- Launch countdown (continuous tick)
+- Launch countdown
 
 ### 11.4 Where Motion Is Forbidden
 
@@ -570,7 +592,7 @@ Never permitted for:
 - Parallax decoration
 - Auto-playing video
 - Looping animations in marketing copy
-- Cursor effects (custom cursors, trailing dots)
+- Cursor effects
 - Page transition effects between routes
 
 ---
@@ -591,7 +613,7 @@ Never permitted for:
 
 ### 12.2 Email Signatures
 
-Internal team email signatures:
+External-facing internal team email signatures:
 
 ```
 [Title]
@@ -599,19 +621,16 @@ Precise Aesthetics™
 preciseaesthetics.com
 ```
 
-Note: titles, not names, in external-facing capacity. For one-on-one professional communication where rapport matters, names appear. For mass or brand communication, no individual names.
+For one-on-one professional communication where rapport matters, names appear. For mass or brand communication, no individual names.
 
 ### 12.3 Marketing Emails
 
-For nurture sequences and launch announcements:
-
 - Editorial layout, image-led, single CTA per email
 - Subject line: 6-9 words, sentence case, no emoji
-- Preview text: complementary to subject, not redundant
 - Plain text version always provided
-- Unsubscribe link in footer, not buried
+- Unsubscribe link in footer
 - Frequency cap: maximum 1 marketing email per practitioner per week
-- **No "From [Person Name]" framing** — always from "Precise Aesthetics"
+- **No "From [Person Name]"** framing — always from "Precise Aesthetics"
 
 ---
 
@@ -619,10 +638,10 @@ For nurture sequences and launch announcements:
 
 ### 13.1 Platforms (priority order)
 
-1. **LinkedIn** — primary for B2B. Practitioners and industry.
-2. **Instagram** — visual storytelling, before/after (with consent), behind the scenes.
-3. **YouTube** — long-form clinical education, demonstrations, training previews.
-4. **X / Twitter** — selective, news-driven, KOL engagement.
+1. **LinkedIn** — primary for B2B
+2. **Instagram** — visual storytelling
+3. **YouTube** — long-form clinical education
+4. **X / Twitter** — selective, news-driven
 
 ### 13.2 Profile Setup
 
@@ -633,13 +652,13 @@ For nurture sequences and launch announcements:
 
 ### 13.3 Content Pillars
 
-1. **The system** — what makes Precise different
-2. **The science** — clinical content, protocols (general, non-proprietary), education
-3. **The data** — outcome trends, anonymized aggregate insights from the Data Intelligence Layer
+1. **The system** — what makes Precise different (the four pillars)
+2. **The science** — clinical content, education
+3. **The data** — outcome trends, anonymized aggregate insights
 4. **Patient outcomes** (with consent) — real shade variety, real results
 5. **The journey** — building the company, launch countdown
 
-**Notably absent:** team profiles, founder posts, "meet our clinicians" content. The brand is the system, not the people.
+**Notably absent:** team profiles, founder posts, "meet our clinicians" content. The brand is the system.
 
 ### 13.4 Visual Templates (Instagram)
 
@@ -669,10 +688,11 @@ Two master decks: investor and clinical.
 - Cover: midnight-800 background, cream lockup centered, deck title in Fraunces
 - Section dividers: full-bleed champagne with single-line title in midnight
 - Content slides: bone background, Fraunces headlines, Inter body
+- The four-pillar system diagram is the core architectural slide
 - Data slides: minimal charts, brand colors only
 
 **Clinical deck:**
-- Same structure, content emphasizes protocol, parameters, before/afters
+- Same structure, content emphasizes protocol depth, parameters, before/afters
 - Reserve champagne for "results" and "outcomes" sections only
 
 ### 14.2 Slide Rules
@@ -682,7 +702,7 @@ Two master decks: investor and clinical.
 - One image OR one chart, never both on the same slide
 - Page numbers: lower-right, Inter 11px, ink-500
 - Footer: brand name + section label, lower-left, Inter 11px
-- **Bio slides minimal:** if a "team" slide is needed for an investor pitch, list roles and credentials only. No headshots in marketing decks.
+- **No headshots in marketing decks.** Acceptable in private fundraising decks under NDA.
 
 ### 14.3 Forbidden in Decks
 
@@ -691,7 +711,7 @@ Two master decks: investor and clinical.
 - Stock illustrations
 - Slides with more than one "wow" moment
 - Animations on bullet reveals
-- "Meet the team" headshot slides in marketing/customer decks (acceptable in private fundraising decks under NDA)
+- "Meet the team" headshot slides in marketing/customer decks
 
 ---
 
@@ -704,8 +724,6 @@ Two master decks: investor and clinical.
 - Front: monogram circle dark or navy lockup, centered
 - Back: name, role, contact info, in Inter
 - Print: 1-color (midnight) on bone stock, OR 2-color (midnight + brand-500) on bone
-
-Note: business cards are professional networking tools. Names appear on individual cards. The marketing site does not.
 
 ### 15.2 Letterhead
 
@@ -720,20 +738,7 @@ Note: business cards are professional networking tools. Names appear on individu
 **Invitation (printed)**
 - Format: 5 × 7 in, double-sided, on Mohawk Superfine Cover, soft white
 - Front: champagne foil monogram circle, centered, on midnight stock
-- Back: Fraunces typesetting:
-  ```
-  Precise Aesthetics™ requests your presence
-  for the unveiling of Precise Pico™
-
-  Saturday, the eighth of August, two thousand twenty-six
-  Civic Opera Building Rooftop · Chicago
-
-  Cocktails and clinical demonstrations at seven o'clock
-  Black tie optional · By invitation only
-
-  Kindly respond by July 25th
-  preciseaesthetics.com/launch
-  ```
+- Back: Fraunces typesetting, by-invitation language
 
 **Step & repeat / press wall**
 - 8 × 8 ft, midnight background
@@ -751,11 +756,7 @@ Note: business cards are professional networking tools. Names appear on individu
 - Stage signage: full-bleed cream lockup on midnight, oversized
 - Bar / station signs: champagne backgrounds, midnight Fraunces
 
-**Programs / agenda cards**
-- 4 × 9 in, bone stock, single-fold or flat
-- Same typography rules as letterhead
-
-### 15.4 Packaging (Phase 2 — Treatment Kits)
+### 15.4 Packaging (Phase 2 — Treatment Kits / Biologic Control)
 
 - Boxes: rigid, soft-touch midnight finish
 - Foil monogram circle in champagne on lid
@@ -797,7 +798,6 @@ When Precise Aesthetics appears alongside another brand:
 ### 17.2 Typography
 
 - Minimum body size: 16px on web, 14pt in print
-- Avoid text below 13px even in captions
 - Line-height: 1.5 minimum for body
 - Letter-spacing: never negative on body text
 
@@ -817,9 +817,9 @@ When Precise Aesthetics appears alongside another brand:
 
 ### 17.5 Imagery
 
-- Alt text required on every image (Sanity field enforces)
-- Decorative imagery: empty alt (`alt=""`)
-- Complex imagery (charts, diagrams): long-description or accessible alternative
+- Alt text required on every image
+- Decorative imagery: empty alt
+- Complex imagery: long-description or accessible alternative
 
 ---
 
@@ -831,7 +831,7 @@ When Precise Aesthetics appears alongside another brand:
 | --- | --- |
 | Brand strategy / positioning changes | Leadership |
 | New product naming | Leadership + Legal |
-| Visual identity changes | Brand owner (designate one person) |
+| Visual identity changes | Brand owner |
 | Co-branding agreements | Leadership + Legal |
 | Press releases / boilerplate edits | Marketing lead + Leadership |
 | Clinical claims / protocol language | Internal clinical lead + regulatory consultant |
@@ -860,6 +860,7 @@ Once per quarter, the brand owner conducts a 30-minute audit:
 The following marks should be filed with the USPTO before the August 8, 2026 launch:
 
 - **Precise Aesthetics™** — words, in class 10 (medical apparatus) and class 44 (medical/aesthetic services)
+- **The Precise System™** — words *(name not final, confirm before filing)*
 - **Precise Pico™** — words, in class 10
 - **PIH Prevention Protocol™** — words, in class 10 and class 44
 - **The P|A monogram** — design mark, in class 10
@@ -869,9 +870,7 @@ Engage trademark counsel by **May 15, 2026**.
 
 ### 19.2 Trademark Notices
 
-Use ™ on all uses until registered. Once registered:
-- Switch to ® on registered marks
-- Add registration notice in legal copy
+Use ™ on all uses until registered. Once registered, switch to ®.
 
 ### 19.3 Copyright
 
@@ -880,9 +879,8 @@ Footer copyright on all materials:
 
 ### 19.4 Regulatory Disclaimers
 
-When making any medical claim, follow FDA guidance for the device's clearance status:
-- **Pre-clearance:** No specific therapeutic claims. Marketing limited to general "laser dermatology technology" language.
-- **Post-clearance:** Claims must match the indications-for-use exactly. Run all marketing through regulatory consultant.
+- **Pre-FDA-clearance:** No specific therapeutic claims. Marketing limited to general "laser dermatology technology" language.
+- **Post-clearance:** Claims must match the indications-for-use exactly.
 
 ---
 
@@ -890,7 +888,7 @@ When making any medical claim, follow FDA guidance for the device's clearance st
 
 This brand identity is a starting point, not a cage.
 
-As Precise Aesthetics grows — new products, new audiences, new market understanding — this document evolves. The bones (positioning, voice pillars, core visual identity) should remain stable. The expression flexes.
+The bones — positioning, voice pillars, core visual identity — should remain stable. The expression flexes as we grow.
 
 When in doubt about whether something is "on brand," return to the brand promise:
 
@@ -900,6 +898,6 @@ If the work serves that promise, it's probably on brand. If it doesn't, it's pro
 
 ---
 
-**End of brand identity system. Version 1.1. April 2026.**
+**End of brand identity system. Version 1.2. April 2026.**
 
 Maintained by PS Medical Aesthetics, LLC. Questions: hello@preciseaesthetics.com.
