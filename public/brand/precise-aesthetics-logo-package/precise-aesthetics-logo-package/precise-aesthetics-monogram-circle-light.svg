@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Precise Aesthetics monogram">
+  <title>Precise Aesthetics</title>
+  <g transform="translate(100,100)">
+    <circle cx="0" cy="0" r="88" fill="#FAF7F2" stroke="#0A0F1C" stroke-width="2"/>
+    <text x="-36" y="22" font-family="'Fraunces','Playfair Display',Georgia,serif" font-size="78" font-weight="400" fill="#0A0F1C" text-anchor="middle">P</text>
+    <line x1="0" y1="-46" x2="0" y2="46" stroke="#0A0F1C" stroke-width="1.5"/>
+    <text x="36" y="22" font-family="'Fraunces','Playfair Display',Georgia,serif" font-size="78" font-weight="400" fill="#0A0F1C" text-anchor="middle">A</text>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" role="img" aria-label="Precise Aesthetics — Clinical Technology">
+  <title>Precise Aesthetics — Clinical Technology</title>
+  <g transform="translate(100,100)">
+    <text x="-32" y="18" font-family="'Fraunces','Playfair Display',Georgia,serif" font-size="68" font-weight="400" fill="#FFFFFF" text-anchor="middle">P</text>
+    <line x1="0" y1="-38" x2="0" y2="38" stroke="#FFFFFF" stroke-width="1.5"/>
+    <text x="32" y="18" font-family="'Fraunces','Playfair Display',Georgia,serif" font-size="68" font-weight="400" fill="#FFFFFF" text-anchor="middle">A</text>
+  </g>
+  <line x1="180" y1="50" x2="180" y2="150" stroke="#FFFFFF" stroke-width="1"/>
+  <text x="212" y="100" font-family="'Fraunces','Playfair Display',Georgia,serif" font-size="52" font-weight="400" fill="#FFFFFF">Precise Aesthetics</text>
+  <text x="212" y="138" font-family="'Inter',-apple-system,sans-serif" font-size="16" font-weight="500" letter-spacing="6" fill="#FFFFFF">CLINICAL TECHNOLOGY</text>
+</svg>

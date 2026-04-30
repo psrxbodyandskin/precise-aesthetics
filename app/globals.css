@@ -1,0 +1,301 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ---------------------------------------------------------------------------
+   Precise Aesthetics — Design Tokens
+   Source of truth: design-system/MASTER.md
+   --------------------------------------------------------------------------- */
+
+@theme inline {
+  /* Fonts (variables set by next/font in app/layout.tsx) */
+  --font-display: var(--font-display-google), Georgia, serif;
+  --font-body: var(--font-body-google), -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Midnight scale */
+  --color-midnight-50: #eef1f7;
+  --color-midnight-100: #d4dcea;
+  --color-midnight-200: #a8b6cf;
+  --color-midnight-300: #6f82a6;
+  --color-midnight-400: #3f567f;
+  --color-midnight-500: #1f2f4f;
+  --color-midnight-600: #182542;
+  --color-midnight-700: #121c33;
+  --color-midnight-800: #0c1426;
+  --color-midnight-900: #070c18;
+
+  /* Brand blue */
+  --color-brand-50: #f2f7fc;
+  --color-brand-100: #e0ecf7;
+  --color-brand-200: #c2d9ef;
+  --color-brand-300: #a8c8e8;
+  --color-brand-400: #7faedb;
+  --color-brand-500: #5891ca;
+  --color-brand-600: #3d74ae;
+  --color-brand-700: #2b5688;
+  --color-brand-800: #1f3f65;
+  --color-brand-900: #152b47;
+
+  /* Champagne */
+  --color-champagne-50: #fbf8f1;
+  --color-champagne-100: #f4ecd9;
+  --color-champagne-200: #e8dcc4;
+  --color-champagne-300: #d9c9a8;
+  --color-champagne-400: #c5b187;
+  --color-champagne-500: #a89366;
+  --color-champagne-600: #87764f;
+
+  /* Bone */
+  --color-bone-50: #fdfcf9;
+  --color-bone-100: #faf7f2;
+  --color-bone-200: #f2ede3;
+  --color-bone-300: #e5ddcc;
+
+  /* Ink (text on bone) */
+  --color-ink-300: #8b95a7;
+  --color-ink-500: #4a5568;
+  --color-ink-700: #1f2a3d;
+  --color-ink-900: #0a0f1c;
+
+  /* Cream (text on midnight) */
+  --color-cream-50: #fdfcf9;
+  --color-cream-100: #f4f0e8;
+  --color-cream-300: #c9c2b5;
+
+  /* Semantic */
+  --color-success: #2d7a4f;
+  --color-warning: #b8862f;
+  --color-error: #b23b3b;
+  --color-info: #5891ca;
+}
+
+/* ---------------------------------------------------------------------------
+   CSS variables (raw token primitives, used directly in Tailwind utilities
+   like bg-[var(--pa-...)] and shadcn variable mappings)
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Primitives mirror MASTER.md verbatim */
+  --pa-midnight-50: #eef1f7;
+  --pa-midnight-100: #d4dcea;
+  --pa-midnight-200: #a8b6cf;
+  --pa-midnight-300: #6f82a6;
+  --pa-midnight-400: #3f567f;
+  --pa-midnight-500: #1f2f4f;
+  --pa-midnight-600: #182542;
+  --pa-midnight-700: #121c33;
+  --pa-midnight-800: #0c1426;
+  --pa-midnight-900: #070c18;
+
+  --pa-blue-50: #f2f7fc;
+  --pa-blue-100: #e0ecf7;
+  --pa-blue-200: #c2d9ef;
+  --pa-blue-300: #a8c8e8;
+  --pa-blue-400: #7faedb;
+  --pa-blue-500: #5891ca;
+  --pa-blue-600: #3d74ae;
+  --pa-blue-700: #2b5688;
+  --pa-blue-800: #1f3f65;
+  --pa-blue-900: #152b47;
+
+  --pa-champagne-50: #fbf8f1;
+  --pa-champagne-100: #f4ecd9;
+  --pa-champagne-200: #e8dcc4;
+  --pa-champagne-300: #d9c9a8;
+  --pa-champagne-400: #c5b187;
+  --pa-champagne-500: #a89366;
+  --pa-champagne-600: #87764f;
+
+  --pa-bone-50: #fdfcf9;
+  --pa-bone-100: #faf7f2;
+  --pa-bone-200: #f2ede3;
+  --pa-bone-300: #e5ddcc;
+
+  --pa-ink-300: #8b95a7;
+  --pa-ink-500: #4a5568;
+  --pa-ink-700: #1f2a3d;
+  --pa-ink-900: #0a0f1c;
+
+  --pa-cream-50: #fdfcf9;
+  --pa-cream-100: #f4f0e8;
+  --pa-cream-300: #c9c2b5;
+
+  --pa-success: #2d7a4f;
+  --pa-warning: #b8862f;
+  --pa-error: #b23b3b;
+  --pa-info: #5891ca;
+
+  /* Surfaces */
+  --pa-surface-bone: var(--pa-bone-100);
+  --pa-surface-bone-raised: var(--pa-bone-50);
+  --pa-surface-midnight: var(--pa-midnight-500);
+  --pa-surface-midnight-deep: var(--pa-midnight-800);
+  --pa-surface-elevated: #ffffff;
+
+  /* Borders */
+  --pa-border-subtle: rgba(10, 15, 28, 0.08);
+  --pa-border-default: rgba(10, 15, 28, 0.14);
+  --pa-border-strong: rgba(10, 15, 28, 0.24);
+  --pa-border-on-dark-subtle: rgba(244, 240, 232, 0.1);
+  --pa-border-on-dark-default: rgba(244, 240, 232, 0.18);
+
+  /* Focus */
+  --pa-focus-ring: 0 0 0 3px rgba(168, 200, 232, 0.5);
+
+  /* Type scale */
+  --text-display-xl: clamp(3.5rem, 6vw + 1rem, 6.5rem);
+  --text-display-lg: clamp(2.75rem, 4vw + 1rem, 4.75rem);
+  --text-display-md: clamp(2.25rem, 3vw + 1rem, 3.5rem);
+  --text-h1: clamp(2rem, 2.5vw + 1rem, 3rem);
+  --text-h2: clamp(1.625rem, 1.5vw + 1rem, 2.25rem);
+  --text-h3: 1.5rem;
+  --text-h4: 1.25rem;
+  --text-lead: 1.25rem;
+  --text-body: 1.0625rem;
+  --text-small: 0.9375rem;
+  --text-caption: 0.8125rem;
+  --text-overline: 0.75rem;
+
+  --leading-display: 1.05;
+  --leading-heading: 1.15;
+  --leading-body: 1.6;
+  --leading-tight: 1.3;
+
+  --tracking-display: -0.02em;
+  --tracking-heading: -0.015em;
+  --tracking-body: 0;
+  --tracking-overline: 0.12em;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-40: 160px;
+
+  --container-max: 1280px;
+  --container-prose: 720px;
+  --container-narrow: 560px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Shadows (two levels max) */
+  --shadow-soft: 0 1px 2px rgba(10, 15, 28, 0.04), 0 4px 12px rgba(10, 15, 28, 0.04);
+  --shadow-lift: 0 2px 4px rgba(10, 15, 28, 0.06), 0 12px 32px rgba(10, 15, 28, 0.08);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 400ms;
+  --duration-deliberate: 700ms;
+
+  /* ---- shadcn variable mappings (light) ---- */
+  --background: var(--pa-bone-100);
+  --foreground: var(--pa-ink-700);
+  --card: var(--pa-bone-50);
+  --card-foreground: var(--pa-ink-700);
+  --popover: var(--pa-bone-50);
+  --popover-foreground: var(--pa-ink-700);
+  --primary: var(--pa-midnight-800);
+  --primary-foreground: var(--pa-cream-50);
+  --secondary: var(--pa-bone-200);
+  --secondary-foreground: var(--pa-ink-700);
+  --muted: var(--pa-bone-200);
+  --muted-foreground: var(--pa-ink-500);
+  --accent: var(--pa-blue-100);
+  --accent-foreground: var(--pa-midnight-800);
+  --destructive: var(--pa-error);
+  --destructive-foreground: var(--pa-cream-50);
+  --border: var(--pa-border-default);
+  --input: var(--pa-border-default);
+  --ring: var(--pa-blue-300);
+  --radius: var(--radius-md);
+}
+
+.dark {
+  /* shadcn dark — kept available, no toggle this session */
+  --background: var(--pa-midnight-800);
+  --foreground: var(--pa-cream-100);
+  --card: var(--pa-midnight-700);
+  --card-foreground: var(--pa-cream-100);
+  --popover: var(--pa-midnight-700);
+  --popover-foreground: var(--pa-cream-100);
+  --primary: var(--pa-cream-50);
+  --primary-foreground: var(--pa-midnight-800);
+  --secondary: var(--pa-midnight-700);
+  --secondary-foreground: var(--pa-cream-100);
+  --muted: var(--pa-midnight-700);
+  --muted-foreground: var(--pa-cream-300);
+  --accent: var(--pa-midnight-600);
+  --accent-foreground: var(--pa-cream-100);
+  --destructive: var(--pa-error);
+  --destructive-foreground: var(--pa-cream-50);
+  --border: var(--pa-border-on-dark-default);
+  --input: var(--pa-border-on-dark-default);
+  --ring: var(--pa-blue-300);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--pa-bone-100);
+    color: var(--pa-ink-700);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-body);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--pa-ink-900);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    font-weight: 500;
+  }
+
+  ::selection {
+    background-color: var(--pa-midnight-800);
+    color: var(--pa-cream-50);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--pa-focus-ring);
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
