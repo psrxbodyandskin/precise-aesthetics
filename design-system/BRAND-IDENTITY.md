@@ -595,6 +595,20 @@ Never permitted for:
 - Cursor effects
 - Page transition effects between routes
 
+### 11.5 Sanctioned Exception — Hero System Visualization
+
+The hero "system activation" 3D visualization is a sanctioned looping
+animation under the §11.3 *System diagram* exception. It is **not** subject
+to the §11.4 looping prohibition.
+
+Rationale: the activation cycle (drift → converge → spark → ignite → flow → fade)
+is the system diagram itself in motion, and the loop reinforces the brand's
+data-feedback story — every cycle gets smarter. Champagne fires only at the
+contact-spark moment under §5.2 ("champagne is sacred").
+
+The `prefers-reduced-motion` path collapses the loop to the locked + lit
+static frame, with no animation.
+
 ---
 
 ## 12. Email Identity
