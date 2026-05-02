@@ -16,6 +16,7 @@ import { Lead } from "@/components/marketing/typography/Lead";
 import { BodyText } from "@/components/marketing/typography/BodyText";
 import { Eyebrow } from "@/components/marketing/typography/Eyebrow";
 import { TrademarkSymbol } from "@/components/marketing/typography/TrademarkSymbol";
+import { RevealPlaceholder } from "@/components/marketing/pico/RevealPlaceholder";
 
 export const metadata: Metadata = {
   title: "Design System Sandbox",
@@ -42,6 +43,60 @@ export default function SandboxPage() {
           Every primitive built in Session 3, in every relevant variant. Not linked from
           production navigation.
         </Lead>
+      </Section>
+
+      {/* — Pico RevealPlaceholder concept (Session 7) — */}
+      <Section
+        tone="midnight-deep"
+        eyebrow="00 · Pico RevealPlaceholder concept"
+        className="relative isolate overflow-hidden bg-[radial-gradient(ellipse_55%_70%_at_50%_45%,_#1F2F4F_0%,_#0C1426_72%)]"
+      >
+        <Heading level={2}>Veiled exhibit — pre-launch reveal treatment.</Heading>
+        <Lead className="mt-6 text-cream-100">
+          Two placements demoed below. Section 1 hero size (4:3) and Section 7
+          crescendo size (16:9 desktop, 4:3 mobile). Subtle 12s breathing motion
+          on the brand-blue and champagne ambient blooms; collapses to static
+          under <code className="font-mono text-small">prefers-reduced-motion</code>.
+        </Lead>
+
+        <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* Hero size */}
+          <div>
+            <Eyebrow tone="cream" className="mb-4 block">
+              Section 1 hero · 4:3
+            </Eyebrow>
+            <RevealPlaceholder aspectRatio="4/3" tone="midnight" fig="01" />
+          </div>
+
+          {/* Crescendo size */}
+          <div>
+            <Eyebrow tone="cream" className="mb-4 block">
+              Section 7 crescendo · 16:9 desktop / 4:3 mobile
+            </Eyebrow>
+            <RevealPlaceholder
+              aspectRatio="16/9"
+              tone="midnight"
+              fig="07"
+              caption="Unveiled at the Civic Opera Building"
+            />
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <Eyebrow tone="cream" className="mb-4 block">
+            Bone variant (reference — not used on /pico but supported by the prop)
+          </Eyebrow>
+          <div className="max-w-[640px]">
+            <div className="bg-bone-100 p-8">
+              <RevealPlaceholder
+                aspectRatio="4/3"
+                tone="bone"
+                fig="01"
+                caption="Pre-launch · Bone surface"
+              />
+            </div>
+          </div>
+        </div>
       </Section>
 
       {/* 1. Section tone matrix */}

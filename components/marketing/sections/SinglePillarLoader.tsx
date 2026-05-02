@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { PillarKey } from "./SinglePillarScene";
+import type { CameraPreset, PillarKey } from "./SinglePillarScene";
 
 const SinglePillarScene = dynamic(() => import("./SinglePillarScene"), {
   ssr: false,
@@ -10,6 +10,12 @@ const SinglePillarScene = dynamic(() => import("./SinglePillarScene"), {
   ),
 });
 
-export function SinglePillarLoader({ pillar }: { pillar: PillarKey }) {
-  return <SinglePillarScene pillar={pillar} />;
+export function SinglePillarLoader({
+  pillar,
+  cameraPreset,
+}: {
+  pillar: PillarKey;
+  cameraPreset?: CameraPreset;
+}) {
+  return <SinglePillarScene pillar={pillar} cameraPreset={cameraPreset} />;
 }

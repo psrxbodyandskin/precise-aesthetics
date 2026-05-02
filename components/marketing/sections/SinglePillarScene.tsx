@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Environment } from "@react-three/drei";
 import { useInView } from "react-intersection-observer";
@@ -14,7 +14,36 @@ import { useReducedMotion } from "@/components/marketing/hero-3d/motion";
 
 export type PillarKey = "protocols" | "delivery" | "biologic" | "data";
 
-type Props = { pillar: PillarKey };
+export interface CameraPreset {
+  position: [number, number, number];
+  target: [number, number, number];
+  fov: number;
+}
+
+type Props = {
+  pillar: PillarKey;
+  /** Optional camera override. Defaults to the homepage Section 3 angle:
+   *  position [0, 0.5, 2.5], target [0, 0, 0], fov 36. */
+  cameraPreset?: CameraPreset;
+};
+
+const DEFAULT_CAMERA_PRESET: CameraPreset = {
+  position: [0, 0.5, 2.5],
+  target: [0, 0, 0],
+  fov: 36,
+};
+
+// Sets camera lookAt on mount + whenever target changes. R3F's <Canvas
+// camera={...}> only sets position/fov; the camera stays oriented down -Z.
+// We need explicit lookAt for non-trivial angles (bird's-eye, oblique, etc.).
+function CameraSetup({ target }: { target: [number, number, number] }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    camera.lookAt(target[0], target[1], target[2]);
+    camera.updateProjectionMatrix();
+  }, [camera, target]);
+  return null;
+}
 
 const TABLET_BP = 768;
 
@@ -81,7 +110,8 @@ function StaticPlaceholder({ pillar }: { pillar: PillarKey }) {
 type Tier = "static" | "tablet" | "desktop";
 const DESKTOP_BP = 1024;
 
-export default function SinglePillarScene({ pillar }: Props) {
+export default function SinglePillarScene({ pillar, cameraPreset }: Props) {
+  const preset = cameraPreset ?? DEFAULT_CAMERA_PRESET;
   const [tier, setTier] = useState<Tier | null>(null);
   const reducedMotion = useReducedMotion();
   const { ref, inView } = useInView({ threshold: 0.05 });
@@ -109,7 +139,7 @@ export default function SinglePillarScene({ pillar }: Props) {
   return (
     <div ref={ref} className="relative h-full w-full">
       <Canvas
-        camera={{ position: [0, 0.5, 2.5], fov: 36 }}
+        camera={{ position: preset.position, fov: preset.fov }}
         dpr={[1, 2]}
         gl={{
           antialias: true,
@@ -120,6 +150,7 @@ export default function SinglePillarScene({ pillar }: Props) {
         frameloop={inView ? "always" : "demand"}
         style={{ background: "transparent" }}
       >
+        <CameraSetup target={preset.target} />
         <Suspense fallback={null}>
           <Environment files="/hdr/warehouse_1k.hdr" background={false} />
         </Suspense>
