@@ -129,12 +129,13 @@ export default function SinglePillarScene({ pillar, cameraPreset }: Props) {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Pre-hydration / mobile / reduced-motion → styled placeholder (no canvas).
-  if (tier === null || tier === "static" || reducedMotion) {
+  // Pre-hydration / reduced-motion → styled placeholder (no canvas). Mobile
+  // gets the 3D scene in simplified mode (matching tablet performance).
+  if (tier === null || reducedMotion) {
     return <StaticPlaceholder pillar={pillar} />;
   }
 
-  const simplified = tier === "tablet";
+  const simplified = tier !== "desktop";
 
   return (
     <div ref={ref} className="relative h-full w-full">

@@ -39,8 +39,10 @@ export default function ConvergenceHero() {
   const reducedMotion = useReducedMotion();
   const { ref, inView } = useInView({ threshold: 0.05 });
 
-  // Pre-hydration / mobile / reduced-motion → static silhouette only.
-  const useStatic = tier === null || tier === "static" || reducedMotion;
+  // Pre-hydration / reduced-motion → static silhouette only. Mobile gets the
+  // 3D scene in tablet-simplified mode (no postprocessing, lower geometry).
+  const useStatic = tier === null || reducedMotion;
+  const sceneTier: "tablet" | "desktop" = tier === "desktop" ? "desktop" : "tablet";
 
   return (
     <div
@@ -65,7 +67,7 @@ export default function ConvergenceHero() {
           frameloop={inView ? "always" : "demand"}
           style={{ background: "transparent" }}
         >
-          <Scene tier={tier as "tablet" | "desktop"} />
+          <Scene tier={sceneTier} />
         </Canvas>
       )}
     </div>
