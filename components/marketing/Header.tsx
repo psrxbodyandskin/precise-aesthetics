@@ -57,7 +57,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/demo", label: "Practitioners" },
   { href: "/launch", label: "Launch" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function Header({ defaultTone }: HeaderProps) {
