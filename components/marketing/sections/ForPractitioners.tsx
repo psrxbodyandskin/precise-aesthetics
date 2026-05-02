@@ -28,7 +28,7 @@ const INCLUDED: IncludedItem[] = [
   {
     number: "03",
     name: "Biologic Control starter kit",
-    caption: "Pre- and post-treatment supplies",
+    caption: "Prep, recovery, and maintenance supplies",
   },
   {
     number: "04",
