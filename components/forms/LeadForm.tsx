@@ -202,7 +202,7 @@ export function LeadForm({ tone = "light" }: LeadFormProps) {
     "h-11",
     isDark
       ? "bg-midnight-700/40 border-cream-100/30 text-cream-50 placeholder:text-cream-100/60"
-      : "bg-bone-50 border-bone-300 text-ink-900 placeholder:text-ink-500",
+      : "bg-bone-50 border-ink-700/35 text-ink-900 placeholder:text-ink-500",
   );
 
   return (
@@ -296,7 +296,7 @@ export function LeadForm({ tone = "light" }: LeadFormProps) {
                       "w-full !h-11 text-body data-[size=default]:h-11",
                       isDark
                         ? "bg-midnight-700/40 border-cream-100/30 text-cream-50 data-[placeholder]:text-cream-100/60"
-                        : "bg-bone-50 border-bone-300 text-ink-900 data-[placeholder]:text-ink-500",
+                        : "bg-bone-50 border-ink-700/35 text-ink-900 data-[placeholder]:text-ink-500",
                     )}
                   >
                     <SelectValue placeholder="Select role" />
@@ -307,7 +307,7 @@ export function LeadForm({ tone = "light" }: LeadFormProps) {
                     "border shadow-lg",
                     isDark
                       ? "bg-midnight-700 border-cream-100/30 text-cream-50"
-                      : "bg-bone-50 border-bone-300 text-ink-900",
+                      : "bg-bone-50 border-ink-700/35 text-ink-900",
                   )}
                 >
                   {LEAD_ROLES.map((r) => (
@@ -366,8 +366,9 @@ export function LeadForm({ tone = "light" }: LeadFormProps) {
                         }}
                         className={cn(
                           "mt-1",
-                          isDark &&
-                            "border-cream-100/40 data-[state=checked]:bg-cream-50 data-[state=checked]:text-midnight-800",
+                          isDark
+                            ? "border-cream-100/40 data-[state=checked]:bg-cream-50 data-[state=checked]:text-midnight-800"
+                            : "border-ink-700/40 data-[state=checked]:bg-ink-900 data-[state=checked]:border-ink-900",
                         )}
                       />
                       <span>{INTEREST_LABEL[item]}</span>

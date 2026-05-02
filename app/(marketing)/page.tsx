@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/marketing/Section";
+import { BoneBlooms } from "@/components/marketing/BoneBlooms";
 import { ConvergenceHeroLoader } from "@/components/marketing/hero-3d/ConvergenceHeroLoader";
 import { DisplayHeading } from "@/components/marketing/typography/DisplayHeading";
 import { Heading } from "@/components/marketing/typography/Heading";
@@ -9,6 +10,11 @@ import { BodyText } from "@/components/marketing/typography/BodyText";
 import { TrademarkSymbol } from "@/components/marketing/typography/TrademarkSymbol";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/forms/LeadForm";
+import { FourPillars } from "@/components/marketing/sections/FourPillars";
+import { Outcomes } from "@/components/marketing/sections/Outcomes";
+import { ForPractitioners } from "@/components/marketing/sections/ForPractitioners";
+import { LaunchSection } from "@/components/marketing/sections/LaunchSection";
+import { DemoCta } from "@/components/marketing/sections/DemoCta";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -109,10 +115,10 @@ export default function HomePage() {
             </Lead>
             <div className="mt-12 flex flex-col gap-4 sm:flex-row">
               <Button asChild variant="primary-on-dark" size="lg">
-                <a href="#updates">Get launch updates</a>
+                <Link href="/demo">Request a demonstration</Link>
               </Button>
               <Button asChild variant="secondary-on-dark" size="lg">
-                <Link href="/?interest=launch_event#updates">Request an invitation</Link>
+                <a href="#updates">Get launch updates</a>
               </Button>
             </div>
           </div>
@@ -182,71 +188,101 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* Section 2 — Thesis */}
+      {/* Section 2 — Thesis. Editorial, anchoring. The "why this exists" moment.
+          Plate number + asymmetric brackets establish the editorial rhythm
+          carried throughout the page. */}
       <Section
         tone="bone"
         size="default"
-        containerWidth="prose"
-        eyebrow="Why the system exists"
-        className="md:pb-16"
+        className="relative isolate overflow-hidden"
       >
-        <DisplayHeading level="md" as="h2">
-          Built for the patients the industry has historically struggled to treat.
-        </DisplayHeading>
-        <BodyText className="mt-8">
-          Most pico systems were optimized for the easiest cases. The Precise
-          System was engineered for Fitzpatrick IV, V, and VI &mdash; where
-          post-inflammatory hyperpigmentation, complication risk, and protocol
-          inconsistency have made laser dermatology unreliable. We changed
-          the inputs. The outcomes followed.
-        </BodyText>
+        <BoneBlooms variant="thesis" />
+
+        {/* Editorial plate header — section starter */}
+        <div className="relative flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="block h-px w-[60px] bg-brand-500"
+          />
+          <p className="font-body text-overline tracking-overline font-medium uppercase text-brand-700">
+            § Why the system exists
+          </p>
+        </div>
+
+        {/* 2-up magazine spread — pull quote on left, body on right */}
+        <div className="relative mt-12 grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* Left column — pull quote with vertical hairline accent */}
+          <div className="lg:col-span-6">
+            <div className="relative pl-6 md:pl-10">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute left-0 top-2 bottom-2 w-px bg-ink-900/40"
+              />
+              <p className="font-display italic leading-tight text-ink-900 text-[clamp(2.25rem,4vw+1rem,4rem)] tracking-display">
+                We changed the inputs. The outcomes followed.
+              </p>
+              <span
+                aria-hidden="true"
+                className="mt-8 block h-px w-[40px] bg-ink-700/40"
+              />
+              <p className="mt-4 font-body text-caption uppercase tracking-overline text-ink-500">
+                The Precise System<TrademarkSymbol />
+              </p>
+            </div>
+          </div>
+
+          {/* Right column — heading + lead with drop cap */}
+          <div className="lg:col-span-6">
+            <DisplayHeading level="md" as="h2" className="max-w-[18ch]">
+              Built for the patients the industry has historically struggled to treat.
+            </DisplayHeading>
+            <p className="mt-8 font-body text-body leading-body text-ink-700 max-w-[58ch] first-letter:font-display first-letter:italic first-letter:text-[3.5em] first-letter:font-medium first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:leading-[0.8] first-letter:text-ink-900">
+              Most pico systems were optimized for the easiest cases. The Precise
+              System<TrademarkSymbol /> was engineered for Fitzpatrick I&ndash;VI
+              &mdash; where post-inflammatory hyperpigmentation, complication
+              risk, and protocol inconsistency have made laser dermatology
+              unreliable.
+            </p>
+          </div>
+        </div>
       </Section>
 
-      {/* Section 3 — Lead Capture */}
+      {/* Section 3 — The Four Pillars. Premium, technical, dense.
+          Header + four alternating left/right blocks separated by hairline dividers. */}
+      <FourPillars />
+
+      {/* Section 4 — Outcomes. Bone, evidence-led. */}
+      <Outcomes />
+
+      {/* Section 5 — For Practitioners. Two-column on desktop. */}
+      <ForPractitioners />
+
+      {/* Section 6 — Launch. Champagne sanctioned moment. */}
+      <LaunchSection />
+
+      {/* Section 7 — Demo CTA. Direct, action-oriented close. */}
+      <DemoCta />
+
+      {/* Lead capture (kept functional under hero secondary CTA). #updates anchor. */}
       <Section
         tone="bone"
-        size="default"
+        size="compact"
         id="updates"
         containerWidth="prose"
-        eyebrow="Stay informed"
-        className="md:pt-16"
+        className="relative isolate overflow-hidden"
       >
-        <Heading level={2}>Get launch updates.</Heading>
-        <Lead className="mt-6 text-ink-700">
-          For practitioners who want first access to demo scheduling and
-          launch event invitations.
-        </Lead>
-        <div className="mt-10">
-          <LeadForm tone="light" />
+        <BoneBlooms variant="lead" />
+        <div className="relative border-t border-[color:var(--pa-border-strong)] pt-16">
+          <Heading level={3} as="h2">
+            Get launch updates.
+          </Heading>
+          <Lead className="mt-4 text-ink-700">
+            For practitioners who want first access to demo scheduling and launch event invitations.
+          </Lead>
+          <div className="mt-8">
+            <LeadForm tone="light" />
+          </div>
         </div>
-      </Section>
-
-      {/* Section 4 — Launch */}
-      <Section
-        tone="midnight"
-        size="default"
-        id="launch"
-        eyebrow="By invitation"
-      >
-        <DisplayHeading level="md" as="h2">
-          The Precise System launches August 8, 2026.
-        </DisplayHeading>
-        <Lead className="mt-8 text-cream-100">
-          An evening of clinical demonstrations and conversation at the Civic
-          Opera Building, Chicago. Attendance is by invitation only.
-        </Lead>
-        <div className="mt-10">
-          <Button asChild variant="primary-on-dark" size="lg">
-            <Link href="/?interest=launch_event#updates">Request an invitation</Link>
-          </Button>
-        </div>
-      </Section>
-
-      {/* Section 5 — Closing */}
-      <Section tone="midnight-deep" size="compact" containerWidth="narrow">
-        <DisplayHeading level="md" as="p" className="text-center tracking-[0.02em]">
-          Skin of every shade.
-        </DisplayHeading>
       </Section>
     </>
   );

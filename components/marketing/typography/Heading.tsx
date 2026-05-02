@@ -1,11 +1,12 @@
-import type { ElementType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type HeadingLevel = 1 | 2 | 3 | 4;
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "p" | "span" | "div";
 
 interface HeadingProps {
   level: HeadingLevel;
-  as?: ElementType;
+  as?: HeadingTag;
   className?: string;
   children: ReactNode;
 }
@@ -17,7 +18,7 @@ const sizeClass: Record<HeadingLevel, string> = {
   4: "text-h4",
 };
 
-const defaultTag: Record<HeadingLevel, ElementType> = {
+const defaultTag: Record<HeadingLevel, "h1" | "h2" | "h3" | "h4"> = {
   1: "h1",
   2: "h2",
   3: "h3",
@@ -25,7 +26,7 @@ const defaultTag: Record<HeadingLevel, ElementType> = {
 };
 
 export function Heading({ level, as, className, children }: HeadingProps) {
-  const Tag: ElementType = as ?? defaultTag[level];
+  const Tag: HeadingTag = as ?? defaultTag[level];
   return (
     <Tag
       className={cn(

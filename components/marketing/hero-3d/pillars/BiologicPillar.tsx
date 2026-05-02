@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import {
@@ -12,6 +12,9 @@ import { createBottleMaterial, createCapMaterial } from "../materials";
 import { idleYRotation, loopSeconds, pillarLitMix } from "../motion";
 
 type Props = { simplified?: boolean };
+
+const MONOGRAM_PATH =
+  "/brand/precise-aesthetics-brand-identity/assets/logos/precise-aesthetics-monogram-navy-400.png";
 
 // Cluster of 5–7 cylindrical containers with champagne caps.
 // Heights and widths vary per spec; arranged informally on the pedestal top.
@@ -39,6 +42,27 @@ export function BiologicPillar({ simplified = false }: Props) {
   const bottleMatRef = useRef(bottleMaterial);
   const capMatRef = useRef(capMaterial);
 
+  // PA monogram label texture — placed on each bottle's outer face like a
+  // printed label. Loaded imperatively to avoid Suspense interaction with
+  // the postprocessing pipeline.
+  const [monogramTex, setMonogramTex] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      MONOGRAM_PATH,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 8;
+        setMonogramTex(tex);
+      },
+      undefined,
+      () => {
+        setMonogramTex(null);
+      },
+    );
+  }, []);
+
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
     groupRef.current.rotation.y = idleYRotation(
@@ -60,6 +84,15 @@ export function BiologicPillar({ simplified = false }: Props) {
       {BOTTLES.map((b, i) => {
         const cy = b.height / 2;
         const capY = b.height + b.capHeight / 2;
+        // Each bottle's PA label faces OUTWARD from the cluster center — gives
+        // the rotating cluster visual variety (PAs on near-side bottles read,
+        // far-side ones rotate around).
+        const outwardAngle = Math.atan2(b.pos[0], b.pos[1]);
+        const ox = Math.sin(outwardAngle);
+        const oz = Math.cos(outwardAngle);
+        const labelOffset = b.rTop + 0.002;
+        // Label sized ~70% of bottle width, capped so it fits vertically.
+        const labelSize = Math.min(b.rTop * 1.3, b.height * 0.55);
         return (
           <group key={i} position={[b.pos[0], 0, b.pos[1]]}>
             {/* Bottle body */}
@@ -71,6 +104,22 @@ export function BiologicPillar({ simplified = false }: Props) {
                 ref={i === 0 ? bottleMatRef : undefined}
               />
             </mesh>
+            {/* PA monogram label — printed on the outer face of the bottle */}
+            {monogramTex && (
+              <mesh
+                position={[ox * labelOffset, cy, oz * labelOffset]}
+                rotation={[0, outwardAngle, 0]}
+              >
+                <planeGeometry args={[labelSize, labelSize]} />
+                <meshBasicMaterial
+                  map={monogramTex}
+                  transparent
+                  opacity={0.92}
+                  toneMapped={false}
+                  depthWrite={false}
+                />
+              </mesh>
+            )}
             {/* Cap */}
             <mesh position={[0, capY, 0]}>
               <cylinderGeometry
