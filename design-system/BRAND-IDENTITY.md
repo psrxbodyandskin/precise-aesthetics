@@ -84,7 +84,7 @@ PS Medical Aesthetics, LLC                          [Legal entity]
         ├── First instance: Precise Pico™
         │   ├── Pillar 1 — Device (4-wavelength pico laser)
         │   ├── Pillar 2 — Protocols (incl. PIH Prevention Protocol™)
-        │   ├── Pillar 3 — Biologic Control (pre/post treatment kits)
+        │   ├── Pillar 3 — Biologic Control (prep, recovery, maintenance kits)
         │   └── Pillar 4 — Data Intelligence Layer
         └── Future instances: Precise RF, Precise IPL, etc.
             └── Each ships with its own four pillars
@@ -142,7 +142,7 @@ Our voice is consistent. Our tone shifts by context.
 - "Predictable outcomes across every skin type."
 - "Built for the patients the industry has historically struggled to treat."
 - "A laser is a tool. The protocol is the medicine. The system is what makes both work."
-- "Engineered for safety on Fitzpatrick IV–VI."
+- "Engineered for safety on Fitzpatrick I–VI."
 - "Skin of every shade."
 - "Four pillars. One closed loop."
 
@@ -223,9 +223,9 @@ The Precise System has four pillars. The device does not lead the others. They f
 
 **Device.** Multi-wavelength pico laser engineered to execute the protocol — not the other way around.
 
-**Protocols.** Indication-specific clinical frameworks, including the proprietary PIH Prevention Protocol™ for Fitzpatrick IV–VI.
+**Protocols.** Indication-specific clinical frameworks, including the proprietary PIH Prevention Protocol™ — engineered for Fitzpatrick I–VI, including the darker skin types the industry has historically struggled to treat.
 
-**Biologic Control.** Pre- and post-treatment kits engineered to optimize healing, reduce complication risk, and stabilize outcomes across skin types.
+**Biologic Control.** Prep, recovery, and maintenance kits engineered to optimize healing, reduce complication risk, and stabilize outcomes across skin types.
 
 **Data Intelligence Layer.** Every session contributes to a real-world dataset that refines our protocols continuously.
 
@@ -250,7 +250,7 @@ The Precise System has four pillars. The device does not lead the others. They f
 ### 4.6 Boilerplate (for press and partner use)
 
 > **About Precise Aesthetics**
-> Precise Aesthetics™ is a clinical technology company building complete dermatologic systems. Its flagship system, Precise Pico™, pairs a multi-wavelength pico laser with the proprietary PIH Prevention Protocol™, pre- and post-treatment biologic control, and a data intelligence layer that refines outcomes through real-world treatment data. The system is engineered for predictable outcomes across every Fitzpatrick skin type — built for the patients the industry has historically struggled to treat. Precise Aesthetics is owned and operated by PS Medical Aesthetics, LLC, headquartered in Chicago, Illinois.
+> Precise Aesthetics™ is a clinical technology company building complete dermatologic systems. Its flagship system, Precise Pico™, pairs a multi-wavelength pico laser with the proprietary PIH Prevention Protocol™, prep / recovery / maintenance biologic control kits, and a data intelligence layer that refines outcomes through real-world treatment data. The system is engineered for predictable outcomes across Fitzpatrick I–VI — including the darker skin types the industry has historically struggled to treat. Precise Aesthetics is owned and operated by PS Medical Aesthetics, LLC, headquartered in Chicago, Illinois.
 
 ### 4.7 Press Inquiries
 

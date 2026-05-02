@@ -30,7 +30,7 @@ The Precise System™ *(working name, may change)* is the architecture. Four pil
 | --- | --- | --- |
 | 1 | **Device** | Multi-wavelength pico laser engineered to execute the protocol. |
 | 2 | **Protocols** | Indication-specific clinical frameworks, including the PIH Prevention Protocol™. |
-| 3 | **Biologic Control** | Pre- and post-treatment kits that optimize healing and outcome consistency. |
+| 3 | **Biologic Control** | Prep, recovery, and maintenance kits that optimize healing and outcome consistency. |
 | 4 | **Data Intelligence Layer** | Real-world treatment outcomes feed back into protocol refinement. |
 
 **The system framing line:**
@@ -98,10 +98,10 @@ session refines the next.
 > Multi-wavelength pico laser engineered to execute the protocol — not the other way around.
 
 **Protocols**
-> Indication-specific clinical frameworks, including the proprietary PIH Prevention Protocol™ for Fitzpatrick IV–VI.
+> Indication-specific clinical frameworks, including the proprietary PIH Prevention Protocol™ — engineered for Fitzpatrick I–VI, including the darker skin types the industry has historically struggled to treat.
 
 **Biologic Control**
-> Pre- and post-treatment kits engineered to optimize healing, reduce complication risk, and stabilize outcomes across skin types.
+> Prep, recovery, and maintenance kits engineered to optimize healing, reduce complication risk, and stabilize outcomes across skin types.
 
 **Data Intelligence Layer**
 > Every session contributes to a real-world dataset that refines our protocols continuously.
@@ -150,11 +150,11 @@ Skin of every shade.
 Precise Aesthetics™ is a clinical technology company building complete
 dermatologic systems. Its flagship system, Precise Pico™, pairs a
 multi-wavelength pico laser with the proprietary PIH Prevention
-Protocol™, pre- and post-treatment biologic control, and a data
-intelligence layer that refines outcomes through real-world treatment
-data. The system is engineered for predictable outcomes across every
-Fitzpatrick skin type — built for the patients the industry has
-historically struggled to treat. Precise Aesthetics is owned and
+Protocol™, prep / recovery / maintenance biologic control kits, and a
+data intelligence layer that refines outcomes through real-world
+treatment data. The system is engineered for predictable outcomes
+across Fitzpatrick I–VI — including the darker skin types the industry
+has historically struggled to treat. Precise Aesthetics is owned and
 operated by PS Medical Aesthetics, LLC, headquartered in Chicago,
 Illinois.
 ```

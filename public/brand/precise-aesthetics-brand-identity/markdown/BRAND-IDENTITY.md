@@ -117,7 +117,7 @@ Our voice is consistent. Our tone shifts by context.
 
 **Yes:**
 - "Predictable outcomes across every skin type."
-- "Engineered for safety on Fitzpatrick IV–VI."
+- "Engineered for safety on Fitzpatrick I–VI."
 - "The protocol leads. The laser follows."
 - "A new standard in laser dermatology."
 - "Skin of every shade."
@@ -174,7 +174,7 @@ This is the line that goes on the homepage hero, in press boilerplate, in elevat
 A laser is a tool. The protocol is the medicine. We built the protocol first and engineered the device to execute it.
 
 **Skin of Every Shade.**
-The PIH Prevention Protocol™ is engineered for the patients most pico systems fail: Fitzpatrick IV, V, VI. Safety isn't a setting. It's a design principle.
+The PIH Prevention Protocol™ is engineered for Fitzpatrick I–VI — including the darker skin types most pico systems fail. Safety isn't a setting. It's a design principle.
 
 **Data Makes Us Better.**
 Real-world treatment data feeds back into protocol refinement. Every session makes the system smarter.
@@ -350,7 +350,7 @@ Used in Sanity Studio, code samples, and any technical documentation. Free.
 [lead, Inter]                       Predictable outcomes across every skin type. The
                                     Precise Pico™ system pairs a multi-wavelength pico
                                     platform with the PIH Prevention Protocol™ —
-                                    engineered for safety on Fitzpatrick IV–VI.
+                                    engineered for safety on Fitzpatrick I–VI.
 ```
 
 **Section pattern:**
