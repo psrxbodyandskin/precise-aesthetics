@@ -8,9 +8,12 @@ import { LeadWelcomeEmail } from "@/emails/LeadWelcome";
 import { InternalLeadNotificationEmail } from "@/emails/InternalLeadNotification";
 import { DemoRequestConfirmationEmail } from "@/emails/DemoRequestConfirmation";
 import { InternalDemoNotificationEmail } from "@/emails/InternalDemoNotification";
+import { ContactMessageConfirmationEmail } from "@/emails/ContactMessageConfirmation";
+import { InternalContactNotificationEmail } from "@/emails/InternalContactNotification";
 import { SITE } from "@/lib/constants";
 import type { LeadFormValues } from "@/lib/schemas/lead-form";
 import type { DemoRequestValues } from "@/lib/schemas/demo-request";
+import type { ContactMessageValues } from "@/lib/schemas/contact-message";
 
 export type SendResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -64,6 +67,61 @@ export async function sendInternalDemoNotification({
       replyTo: values.email,
       subject: `Demo request: ${values.firstName} ${values.lastName} (${values.practiceName})`,
       react: InternalDemoNotificationEmail({ values, submittedAt }),
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+interface SendContactConfirmationArgs {
+  to: string;
+  fullName: string;
+  subject: string;
+}
+
+export async function sendContactConfirmation({
+  to,
+  fullName,
+  subject,
+}: SendContactConfirmationArgs): Promise<SendResult> {
+  if (!resend) {
+    return { ok: false, error: "Resend not configured (missing RESEND_API_KEY)" };
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Precise Aesthetics <${RESEND_FROM_EMAIL}>`,
+      to,
+      subject: "Message received",
+      react: ContactMessageConfirmationEmail({ fullName, subject }),
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+interface SendInternalContactNotificationArgs {
+  values: ContactMessageValues;
+  submittedAt?: string;
+}
+
+export async function sendInternalContactNotification({
+  values,
+  submittedAt,
+}: SendInternalContactNotificationArgs): Promise<SendResult> {
+  if (!resend) {
+    return { ok: false, error: "Resend not configured (missing RESEND_API_KEY)" };
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Precise Aesthetics <${RESEND_FROM_EMAIL}>`,
+      to: RESEND_INTERNAL_NOTIFY_EMAIL,
+      replyTo: values.email,
+      subject: `Contact message: ${values.fullName} — ${values.subject}`,
+      react: InternalContactNotificationEmail({ values, submittedAt }),
     });
     if (error) return { ok: false, error: error.message };
     return { ok: true, id: data?.id };

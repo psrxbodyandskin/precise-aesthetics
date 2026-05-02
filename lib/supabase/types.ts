@@ -156,6 +156,34 @@ export interface Database {
           },
         ];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          created_at: string;
+          full_name: string;
+          email: string;
+          organization: string | null;
+          subject: string;
+          message: string;
+          utm_source: string | null;
+          utm_medium: string | null;
+          utm_campaign: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          full_name: string;
+          email: string;
+          organization?: string | null;
+          subject: string;
+          message: string;
+          utm_source?: string | null;
+          utm_medium?: string | null;
+          utm_campaign?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
+        Relationships: [];
+      };
       treatment_logs: {
         Row: {
           id: string;
