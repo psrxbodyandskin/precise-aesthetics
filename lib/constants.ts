@@ -28,7 +28,6 @@ export const NAV = {
   legal: [
     { href: "/privacy", label: "Privacy" },
     { href: "/terms", label: "Terms" },
-    { href: "/hipaa-notice", label: "HIPAA Notice" },
   ],
   cta: { href: "/demo", label: "Request a demo" },
 } as const;

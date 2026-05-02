@@ -21,7 +21,6 @@ const SYSTEM_NAV = [
 const LEGAL_NAV = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
-  { href: "/hipaa-notice", label: "HIPAA Notice" },
 ];
 
 const FALLBACK_TAGLINE = "Skin of every shade.";
