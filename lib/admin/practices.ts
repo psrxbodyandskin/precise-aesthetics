@@ -194,6 +194,62 @@ export async function setPracticeStatus(
 }
 
 // ------------------------------------------------------------
+// Hard delete — drops the practices row and the linked auth user.
+// FK cascades take out practice_users, practice_devices, and
+// practice_authorized_users. Audit_log entries are kept (target_id
+// becomes orphaned but that's fine — compliance trail outlives the
+// record). Used by the admin "Delete permanently" action.
+// ------------------------------------------------------------
+export async function deletePracticeHard(
+  practiceId: string,
+): Promise<
+  | { status: "ok"; authUserId: string | null }
+  | { status: "error"; message: string }
+> {
+  const supabase = getServiceClient();
+
+  // Look up the auth user link first so we can drop them after the row goes.
+  const { data: practice, error: lookupError } = await supabase
+    .from("practices")
+    .select("auth_user_id")
+    .eq("id", practiceId)
+    .single();
+  if (lookupError || !practice) {
+    return {
+      status: "error",
+      message: lookupError?.message ?? "Practice not found",
+    };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("practices")
+    .delete()
+    .eq("id", practiceId);
+  if (deleteError) {
+    return { status: "error", message: deleteError.message };
+  }
+
+  // Best-effort auth user removal. If the auth user is somehow shared
+  // with another record (shouldn't happen — practices.auth_user_id is
+  // unique) the delete will fail and we surface that as a soft warning
+  // rather than rolling back the practice delete.
+  if (practice.auth_user_id) {
+    const { error: authError } = await supabase.auth.admin.deleteUser(
+      practice.auth_user_id,
+    );
+    if (authError) {
+      console.error("[practices] auth user delete failed", {
+        practiceId,
+        authUserId: practice.auth_user_id,
+        error: authError.message,
+      });
+    }
+  }
+
+  return { status: "ok", authUserId: practice.auth_user_id };
+}
+
+// ------------------------------------------------------------
 // Audit log lookup for a specific practice (used on detail page).
 // ------------------------------------------------------------
 

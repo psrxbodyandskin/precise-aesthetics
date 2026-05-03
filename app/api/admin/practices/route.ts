@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
   // Step 6: invite link + send branded email
   const inviteResult = await generateInviteLink(values.primaryEmail);
   let emailSent = false;
+  let emailError: string | null = null;
   if (inviteResult.status === "ok") {
     const sendResult = await sendPracticeInvite({
       to: values.primaryEmail,
@@ -125,9 +126,11 @@ export async function POST(req: NextRequest) {
     });
     emailSent = sendResult.ok;
     if (!sendResult.ok) {
+      emailError = sendResult.error;
       console.error("[provision] invite email failed", { error: sendResult.error });
     }
   } else {
+    emailError = inviteResult.message;
     console.error("[provision] generateInviteLink failed", {
       error: inviteResult.message,
     });
@@ -154,6 +157,7 @@ export async function POST(req: NextRequest) {
     ok: true,
     id: practiceId,
     emailSent,
+    emailError,
   });
 }
 

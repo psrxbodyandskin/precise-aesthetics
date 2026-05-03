@@ -101,6 +101,7 @@ export function PracticeProvisioningForm({ devices }: PracticeProvisioningFormPr
         error?: string;
         field?: string;
         emailSent?: boolean;
+        emailError?: string | null;
       };
 
       if (!res.ok || !data.ok) {
@@ -115,11 +116,15 @@ export function PracticeProvisioningForm({ devices }: PracticeProvisioningFormPr
         return;
       }
 
-      toast.success(
-        data.emailSent
-          ? "Practice provisioned. Invite email sent."
-          : "Practice provisioned. Invite email failed — review the record.",
-      );
+      if (data.emailSent) {
+        toast.success("Practice provisioned. Invite email sent.");
+      } else {
+        const detail = data.emailError ? ` (${data.emailError})` : "";
+        toast.error(
+          `Practice provisioned, but invite email failed${detail}. Use Resend invite from the detail page.`,
+          { duration: 12000 },
+        );
+      }
       router.push(`/admin/practices/${data.id}`);
       router.refresh();
     } catch {

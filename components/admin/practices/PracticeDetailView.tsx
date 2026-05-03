@@ -101,7 +101,13 @@ function formatDate(iso: string | null) {
   }
 }
 
-type Modal = null | "identity" | "address" | "confirm-suspend" | "confirm-archive";
+type Modal =
+  | null
+  | "identity"
+  | "address"
+  | "confirm-suspend"
+  | "confirm-archive"
+  | "confirm-destroy";
 
 export function PracticeDetailView({
   practice,
@@ -145,6 +151,32 @@ export function PracticeDetailView({
         toast.error(data.error ?? "Could not archive.");
       } else {
         toast.success("Practice archived.");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Network error.");
+    } finally {
+      setActionPending(null);
+      setModal(null);
+    }
+  }
+
+  async function destroyAction() {
+    setActionPending("destroy");
+    try {
+      const res = await fetch(
+        `/api/admin/practices/${practice.id}/destroy`,
+        { method: "DELETE" },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!res.ok || !data.ok) {
+        toast.error(data.error ?? "Could not delete.");
+      } else {
+        toast.success("Practice deleted permanently.");
+        router.push("/admin/practices");
         router.refresh();
       }
     } catch {
@@ -261,6 +293,15 @@ export function PracticeDetailView({
               Archive
             </Button>
           )}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setModal("confirm-destroy")}
+            className="text-red-700 hover:text-red-900"
+            suppressHydrationWarning
+          >
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -516,6 +557,45 @@ export function PracticeDetailView({
               {actionPending === "archive"
                 ? "Archiving…"
                 : "Archive"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={modal === "confirm-destroy"}
+        onOpenChange={(o) => !o && setModal(null)}
+      >
+        <DialogContent className="bg-bone-50 border-ink-700/35">
+          <DialogHeader>
+            <DialogTitle className="font-display text-ink-900">
+              Delete this practice permanently?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 font-body text-body text-ink-700">
+            <p>
+              This removes the practice record, the linked auth user,
+              all authorized users, and all device assignments. The
+              audit log entries are preserved.
+            </p>
+            <p className="text-red-700">
+              This cannot be undone. Use Archive instead unless this is
+              a test or half-provisioned account.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setModal(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={destroyAction}
+              disabled={actionPending === "destroy"}
+              className="bg-red-700 hover:bg-red-800"
+            >
+              {actionPending === "destroy"
+                ? "Deleting…"
+                : "Delete permanently"}
             </Button>
           </DialogFooter>
         </DialogContent>
