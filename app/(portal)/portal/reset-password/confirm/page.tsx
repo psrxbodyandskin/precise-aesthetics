@@ -24,7 +24,7 @@ export default function PortalResetPasswordConfirmPage() {
           className="font-body text-overline font-medium uppercase text-ink-500"
           style={EYEBROW_TRACKING}
         >
-          {/* [DRAFT] */}§ New password
+          § New password
         </p>
         <h1
           className="mt-10 font-display text-ink-900"
@@ -35,7 +35,7 @@ export default function PortalResetPasswordConfirmPage() {
             fontWeight: 400,
           }}
         >
-          {/* [DRAFT] */}Set a new password.
+          Set a new password.
         </h1>
       </header>
 

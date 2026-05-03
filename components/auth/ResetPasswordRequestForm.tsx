@@ -29,7 +29,7 @@ export function ResetPasswordRequestForm({ redirectPath }: Props) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim()) {
-      toast.error(/* [DRAFT] */ "Enter your email.");
+      toast.error("Enter your email.");
       return;
     }
     setSubmitting(true);
@@ -57,13 +57,13 @@ export function ResetPasswordRequestForm({ redirectPath }: Props) {
         className="rounded-md border border-ink-700/35 bg-bone-50 p-8 text-center"
       >
         <p className="font-body text-overline font-medium uppercase text-ink-500" style={{ letterSpacing: "0.18em" }}>
-          {/* [DRAFT] */}Sent
+          Sent
         </p>
         <p className="mt-3 font-display text-h3 leading-heading text-ink-900">
-          {/* [DRAFT] */}Check your inbox.
+          Check your inbox.
         </p>
         <p className="mt-3 font-body text-body leading-body text-ink-700 max-w-[36ch] mx-auto">
-          {/* [DRAFT] */}If an account exists for{" "}
+          If an account exists for{" "}
           <span className="text-ink-900">{email}</span>, a reset link is on
           its way.
         </p>
@@ -75,7 +75,7 @@ export function ResetPasswordRequestForm({ redirectPath }: Props) {
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       <div>
         <Label htmlFor="reset-email" className={labelClass}>
-          {/* [DRAFT] */}Email
+          Email
         </Label>
         <Input
           id="reset-email"
@@ -98,7 +98,7 @@ export function ResetPasswordRequestForm({ redirectPath }: Props) {
           loading={submitting}
           className="w-full sm:w-auto"
         >
-          {submitting ? /* [DRAFT] */ "Sending" : /* [DRAFT] */ "Send reset link"}
+          {submitting ? "Sending" : "Send reset link"}
         </Button>
       </div>
     </form>

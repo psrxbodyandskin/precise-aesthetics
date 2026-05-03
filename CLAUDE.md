@@ -180,6 +180,26 @@ When unclear, ask before assuming. When in doubt about brand voice, default to: 
 
 ## Known Gotchas
 
+### Supabase project Site URL must match production domain (locked Session P2)
+
+The Supabase project's **Site URL** setting (Dashboard → Authentication → URL Configuration → Site URL) is used as the default base for all auth-flow redirects: invite links, password-reset links, magic links, OAuth callbacks. Any `redirect_to` we pass to `supabase.auth.admin.generateLink()` or `resetPasswordForEmail()` is **silently overridden** if the Site URL is set to anything other than the production domain.
+
+**Required setting for production:**
+- Site URL: `https://preciseaesthetics.com`
+- Additional Redirect URLs: `http://localhost:3457` (for local dev)
+
+**How this surfaces:** During P1 password-reset debugging on 2026-05-02, generated invite/recovery links came back with `redirect_to: "http://localhost:3000"` despite explicit `redirect_to: "https://preciseaesthetics.com/..."` in the API call. Cost ~30 minutes to diagnose.
+
+**Pre-test step before any production invite/reset flow:** verify Site URL matches the active deploy domain. The setting only changes via the dashboard — there's no env var or migration that controls it.
+
+---
+
+### audit_log types added in P2 (housekeeping)
+
+P1's `0004_rls_framework.sql` added the `audit_log` table but didn't add types to `lib/supabase/types.ts`. P2 backfilled the types (Row/Insert/Update + the `Functions` block for `log_audit`, `auth_role`, `is_admin`, `is_practice`, `current_practice_id`). That loop is closed — future sessions can use `Database["public"]["Tables"]["audit_log"]["Row"]` directly without further work.
+
+---
+
 ### Auth: roles MUST live in `app_metadata`, not `user_metadata` (locked Session P1)
 
 Supabase Auth has two metadata buckets on every user:

@@ -21,7 +21,7 @@ export default function PortalResetPasswordPage() {
           className="font-body text-overline font-medium uppercase text-ink-500"
           style={EYEBROW_TRACKING}
         >
-          {/* [DRAFT] */}§ Reset password
+          § Reset password
         </p>
         <h1
           className="mt-10 font-display text-ink-900"
@@ -32,13 +32,13 @@ export default function PortalResetPasswordPage() {
             fontWeight: 400,
           }}
         >
-          {/* [DRAFT] */}Request a reset link.
+          Request a reset link.
         </h1>
         <p
           className="mt-6 max-w-[44ch] font-body text-ink-700"
           style={{ fontSize: "1.0625rem", lineHeight: 1.6 }}
         >
-          {/* [DRAFT] */}Enter your work email. We&rsquo;ll send a one-time
+          Enter your work email. We&rsquo;ll send a one-time
           link to set a new password.
         </p>
       </header>

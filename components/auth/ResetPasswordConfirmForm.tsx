@@ -46,11 +46,11 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (password.length < 12) {
-      toast.error(/* [DRAFT] */ "Password must be at least 12 characters.");
+      toast.error("Password must be at least 12 characters.");
       return;
     }
     if (password !== confirmPassword) {
-      toast.error(/* [DRAFT] */ "Passwords don't match.");
+      toast.error("Passwords don't match.");
       return;
     }
     setSubmitting(true);
@@ -58,11 +58,11 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
     const supabase = getAuthBrowserClient();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      toast.error(error.message || /* [DRAFT] */ "Could not update password.");
+      toast.error(error.message || "Could not update password.");
       setSubmitting(false);
       return;
     }
-    toast.success(/* [DRAFT] */ "Password updated.");
+    toast.success("Password updated.");
     router.push(successRedirect);
     router.refresh();
   }
@@ -70,7 +70,7 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
   if (!sessionReady) {
     return (
       <p className="font-body text-body text-ink-500">
-        {/* [DRAFT] */}Verifying reset link&hellip;
+        Verifying reset link&hellip;
       </p>
     );
   }
@@ -79,7 +79,7 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       <div>
         <Label htmlFor="new-password" className={labelClass}>
-          {/* [DRAFT] */}New password
+          New password
         </Label>
         <Input
           id="new-password"
@@ -93,13 +93,13 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
           className={cn(inputClass, "mt-2")}
         />
         <p className="mt-2 text-caption text-ink-500">
-          {/* [DRAFT] */}Minimum 12 characters.
+          Minimum 12 characters.
         </p>
       </div>
 
       <div>
         <Label htmlFor="confirm-password" className={labelClass}>
-          {/* [DRAFT] */}Confirm new password
+          Confirm new password
         </Label>
         <Input
           id="confirm-password"
@@ -122,7 +122,7 @@ export function ResetPasswordConfirmForm({ successRedirect }: Props) {
           loading={submitting}
           className="w-full sm:w-auto"
         >
-          {submitting ? /* [DRAFT] */ "Saving" : /* [DRAFT] */ "Update password"}
+          {submitting ? "Saving" : "Update password"}
         </Button>
       </div>
     </form>

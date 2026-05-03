@@ -33,7 +33,7 @@ export default async function AdminLoginPage() {
             className="font-body text-overline font-medium uppercase text-ink-500"
             style={EYEBROW_TRACKING}
           >
-            {/* [DRAFT] */}§ Internal sign-in
+            § Internal sign-in
           </p>
           <h1
             className="mt-4 font-display text-ink-900"
@@ -44,13 +44,13 @@ export default async function AdminLoginPage() {
               fontWeight: 400,
             }}
           >
-            {/* [DRAFT] */}Sign in.
+            Sign in.
           </h1>
           <p
             className="mt-3 max-w-[44ch] font-body text-ink-700"
             style={{ fontSize: "0.9375rem", lineHeight: 1.5 }}
           >
-            {/* [DRAFT] */}Internal team only.
+            Internal team only.
           </p>
         </header>
 
@@ -60,7 +60,7 @@ export default async function AdminLoginPage() {
 
         <footer className="mt-6">
           <p className="text-caption text-ink-500">
-            {/* [DRAFT] */}Forgot your password?{" "}
+            Forgot your password?{" "}
             <Link
               href="/admin/reset-password"
               className="text-brand-700 underline-offset-[3px] decoration-1 transition-colors duration-[150ms] hover:text-ink-900 hover:underline outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"

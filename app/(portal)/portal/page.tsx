@@ -26,7 +26,7 @@ export default async function PortalIndexPage() {
           className="font-body text-overline font-medium uppercase text-ink-500"
           style={EYEBROW_TRACKING}
         >
-          {/* [DRAFT] */}§ Portal
+          § Portal
         </p>
         <h1
           className="mt-10 font-display text-ink-900"
@@ -37,13 +37,13 @@ export default async function PortalIndexPage() {
             fontWeight: 400,
           }}
         >
-          {/* [DRAFT] */}Welcome.
+          Welcome.
         </h1>
         <p
           className="mt-10 max-w-[58ch] font-body text-ink-700"
           style={{ fontSize: "1.0625rem", lineHeight: 1.7 }}
         >
-          {/* [DRAFT] */}Your portal is being prepared. The protocol library,
+          Your portal is being prepared. The protocol library,
           treatment logging, and notifications surface here as each module
           ships.
         </p>

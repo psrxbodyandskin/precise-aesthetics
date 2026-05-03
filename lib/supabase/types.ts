@@ -156,6 +156,164 @@ export interface Database {
           },
         ];
       };
+      audit_log: {
+        Row: {
+          id: string;
+          created_at: string;
+          actor_id: string | null;
+          actor_role: string | null;
+          action: string;
+          target_type: string | null;
+          target_id: string | null;
+          metadata: Json;
+          ip_address: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          actor_id?: string | null;
+          actor_role?: string | null;
+          action: string;
+          target_type?: string | null;
+          target_id?: string | null;
+          metadata?: Json;
+          ip_address?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["audit_log"]["Insert"]>;
+        Relationships: [];
+      };
+      practices: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          name: string;
+          primary_email: string;
+          phone: string | null;
+          address_line1: string | null;
+          address_line2: string | null;
+          city: string | null;
+          state: string | null;
+          postal_code: string | null;
+          country: string | null;
+          status: "pending" | "active" | "suspended" | "archived";
+          status_changed_at: string | null;
+          status_changed_by: string | null;
+          auth_user_id: string | null;
+          provisioned_by: string | null;
+          provisioned_at: string | null;
+          internal_notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          name: string;
+          primary_email: string;
+          phone?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          status?: "pending" | "active" | "suspended" | "archived";
+          status_changed_at?: string | null;
+          status_changed_by?: string | null;
+          auth_user_id?: string | null;
+          provisioned_by?: string | null;
+          provisioned_at?: string | null;
+          internal_notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["practices"]["Insert"]>;
+        Relationships: [];
+      };
+      practice_users: {
+        Row: {
+          id: string;
+          created_at: string;
+          practice_id: string;
+          full_name: string;
+          role_at_practice: string | null;
+          is_active: boolean;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          practice_id: string;
+          full_name: string;
+          role_at_practice?: string | null;
+          is_active?: boolean;
+          notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["practice_users"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "practice_users_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      devices: {
+        Row: {
+          id: string;
+          created_at: string;
+          slug: string;
+          display_name: string;
+          short_description: string | null;
+          is_active: boolean;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          slug: string;
+          display_name: string;
+          short_description?: string | null;
+          is_active?: boolean;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["devices"]["Insert"]>;
+        Relationships: [];
+      };
+      practice_devices: {
+        Row: {
+          id: string;
+          created_at: string;
+          practice_id: string;
+          device_id: string;
+          serial_number: string | null;
+          acquired_at: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          practice_id: string;
+          device_id: string;
+          serial_number?: string | null;
+          acquired_at?: string | null;
+          notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["practice_devices"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "practice_devices_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_devices_device_id_fkey";
+            columns: ["device_id"];
+            referencedRelation: "devices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contact_messages: {
         Row: {
           id: string;
@@ -245,7 +403,36 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      log_audit: {
+        Args: {
+          p_actor_id?: string | null;
+          p_actor_role?: string | null;
+          p_action: string;
+          p_target_type?: string | null;
+          p_target_id?: string | null;
+          p_metadata?: Json;
+          p_ip_address?: string | null;
+        };
+        Returns: string;
+      };
+      auth_role: {
+        Args: Record<string, never>;
+        Returns: string | null;
+      };
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_practice: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      current_practice_id: {
+        Args: Record<string, never>;
+        Returns: string | null;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

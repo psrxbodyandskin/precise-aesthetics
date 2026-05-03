@@ -28,7 +28,7 @@ export function AdminLoginForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim() || !password) {
-      toast.error(/* [DRAFT] */ "Email and password are required.");
+      toast.error("Email and password are required.");
       return;
     }
     setSubmitting(true);
@@ -39,7 +39,7 @@ export function AdminLoginForm() {
       password,
     });
     if (error) {
-      toast.error(/* [DRAFT] */ "Sign-in failed.");
+      toast.error("Sign-in failed.");
       setSubmitting(false);
       return;
     }
@@ -51,7 +51,7 @@ export function AdminLoginForm() {
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       <div>
         <Label htmlFor="admin-email" className={labelClass}>
-          {/* [DRAFT] */}Email
+          Email
         </Label>
         <Input
           id="admin-email"
@@ -73,7 +73,7 @@ export function AdminLoginForm() {
 
       <div>
         <Label htmlFor="admin-password" className={labelClass}>
-          {/* [DRAFT] */}Password
+          Password
         </Label>
         <div className="relative mt-2">
           <Input
@@ -92,8 +92,8 @@ export function AdminLoginForm() {
             onClick={() => setShowPassword((v) => !v)}
             aria-label={
               showPassword
-                ? /* [DRAFT] */ "Hide password"
-                : /* [DRAFT] */ "Show password"
+                ? "Hide password"
+                : "Show password"
             }
             aria-pressed={showPassword}
             className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center text-ink-500 transition-colors duration-[150ms] hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
@@ -117,7 +117,7 @@ export function AdminLoginForm() {
           className="w-full sm:w-auto"
           suppressHydrationWarning
         >
-          {submitting ? /* [DRAFT] */ "Signing in" : /* [DRAFT] */ "Sign in"}
+          {submitting ? "Signing in" : "Sign in"}
         </Button>
       </div>
     </form>

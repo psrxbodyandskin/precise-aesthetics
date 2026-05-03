@@ -21,7 +21,7 @@ export function LogoutButton({ surface, className }: Props) {
         size="sm"
         className={className}
       >
-        {/* [DRAFT] */}Sign out
+        Sign out
       </Button>
     </form>
   );

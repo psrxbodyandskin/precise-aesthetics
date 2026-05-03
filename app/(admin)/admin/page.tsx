@@ -1,52 +1,35 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/server";
+import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
 
-// Placeholder admin landing. Real admin dashboard is built incrementally
-// across P2 (provisioning) → P11 (AI agents). P1 just needs a destination
-// so logged-in admins don't 404.
+// Admin dashboard placeholder. Real metrics dashboard ships in P7 (admin
+// data dashboard). P2 leaves this as a quiet welcome surface that points
+// the admin at the Practices module.
 export const metadata: Metadata = {
   title: "Admin — Precise Aesthetics",
   robots: { index: false, follow: false },
 };
 
-const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
-
 export default async function AdminIndexPage() {
   const user = await requireAdmin();
 
   return (
-    <article className="relative mx-auto max-w-[680px] px-6 py-32 md:px-12 md:py-40">
-      <div aria-hidden="true" className="mb-16 flex justify-center md:mb-24">
-        <span className="block h-px w-[60px] bg-brand-500/50" />
-      </div>
+    <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-12 md:py-16">
+      <AdminPageHeader
+        eyebrow={"Console"}
+        title={"Welcome back."}
+        lead={`Signed in as ${user.email ?? "—"}. The full dashboard with metrics ships later — for now, head to Practices to provision accounts.`}
+      />
 
-      <header>
-        <p
-          className="font-body text-overline font-medium uppercase text-ink-500"
-          style={EYEBROW_TRACKING}
+      <div className="mt-12">
+        <Link
+          href="/admin/practices"
+          className="inline-flex h-11 items-center rounded-md bg-midnight-800 px-6 font-body font-medium text-cream-50 transition-colors duration-[150ms] hover:bg-midnight-700"
         >
-          {/* [DRAFT] */}§ Admin
-        </p>
-        <h1
-          className="mt-10 font-display text-ink-900"
-          style={{
-            fontSize: "clamp(2.25rem, 3vw + 1rem, 3.5rem)",
-            lineHeight: 1.05,
-            letterSpacing: "-0.02em",
-            fontWeight: 400,
-          }}
-        >
-          {/* [DRAFT] */}Internal console.
-        </h1>
-        <p
-          className="mt-10 max-w-[58ch] font-body text-ink-700"
-          style={{ fontSize: "1.0625rem", lineHeight: 1.7 }}
-        >
-          {/* [DRAFT] */}Signed in as <span className="text-ink-900">{user.email ?? "—"}</span>.
-          Practice provisioning, the lead inbox, and AI agents land in
-          subsequent sessions.
-        </p>
-      </header>
-    </article>
+          Go to Practices
+        </Link>
+      </div>
+    </div>
   );
 }

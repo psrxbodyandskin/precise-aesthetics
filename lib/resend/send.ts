@@ -10,6 +10,8 @@ import { DemoRequestConfirmationEmail } from "@/emails/DemoRequestConfirmation";
 import { InternalDemoNotificationEmail } from "@/emails/InternalDemoNotification";
 import { ContactMessageConfirmationEmail } from "@/emails/ContactMessageConfirmation";
 import { InternalContactNotificationEmail } from "@/emails/InternalContactNotification";
+import { PracticeInviteEmail } from "@/emails/PracticeInvite";
+import { PracticeRecoveryEmail } from "@/emails/PracticeRecovery";
 import { SITE } from "@/lib/constants";
 import type { LeadFormValues } from "@/lib/schemas/lead-form";
 import type { DemoRequestValues } from "@/lib/schemas/demo-request";
@@ -67,6 +69,64 @@ export async function sendInternalDemoNotification({
       replyTo: values.email,
       subject: `Demo request: ${values.firstName} ${values.lastName} (${values.practiceName})`,
       react: InternalDemoNotificationEmail({ values, submittedAt }),
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+interface SendPracticeInviteArgs {
+  to: string;
+  practiceName: string;
+  inviteLink: string;
+}
+
+export async function sendPracticeInvite({
+  to,
+  practiceName,
+  inviteLink,
+}: SendPracticeInviteArgs): Promise<SendResult> {
+  if (!resend) {
+    return { ok: false, error: "Resend not configured (missing RESEND_API_KEY)" };
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Precise Aesthetics <${RESEND_FROM_EMAIL}>`,
+      to,
+      
+      subject: "Welcome to Precise Aesthetics",
+      react: PracticeInviteEmail({ practiceName, inviteLink }),
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+interface SendPracticeRecoveryArgs {
+  to: string;
+  practiceName: string;
+  recoveryLink: string;
+}
+
+export async function sendPracticeRecovery({
+  to,
+  practiceName,
+  recoveryLink,
+}: SendPracticeRecoveryArgs): Promise<SendResult> {
+  if (!resend) {
+    return { ok: false, error: "Resend not configured (missing RESEND_API_KEY)" };
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Precise Aesthetics <${RESEND_FROM_EMAIL}>`,
+      to,
+      
+      subject: "Set a new password for Precise Aesthetics",
+      react: PracticeRecoveryEmail({ practiceName, recoveryLink }),
     });
     if (error) return { ok: false, error: error.message };
     return { ok: true, id: data?.id };
