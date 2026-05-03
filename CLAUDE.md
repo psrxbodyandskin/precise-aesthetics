@@ -178,6 +178,39 @@ The ui-ux-pro-max skill is installed and may auto-activate on UI work.
 ## Communication
 When unclear, ask before assuming. When in doubt about brand voice, default to: clinical authority with editorial restraint and premium warmth. The system is the subject. Never personality-driven.
 
+## Known Gotchas
+
+### Auth: roles MUST live in `app_metadata`, not `user_metadata` (locked Session P1)
+
+Supabase Auth has two metadata buckets on every user:
+
+- **`user_metadata`** — user-editable through the standard `auth.updateUser()` endpoint. Suitable only for non-security preferences (display name, locale).
+- **`app_metadata`** — admin-only writable (requires the service-role key). The only trustworthy bucket for authorization claims.
+
+**Storing role in `user_metadata` is a privilege-escalation vulnerability.** Any authenticated user can call `auth.updateUser({ data: { role: 'admin' } })` and promote themselves.
+
+**Canonical claims:**
+- `app_metadata.role: "practice" | "admin"` — used by middleware + RLS
+- `app_metadata.practice_id: uuid` — populated during practice provisioning (P2)
+
+These are read by `lib/auth/server.ts` helpers (`getCurrentUser`, `requirePractice`, `requireAdmin`) and by SQL helpers in `0004_rls_framework.sql` (`auth_role()`, `is_admin()`, `current_practice_id()`).
+
+When provisioning users (P2 onward), set claims via the **service role** client only:
+
+```ts
+// CORRECT — service role, app_metadata
+await getServiceClient().auth.admin.updateUserById(userId, {
+  app_metadata: { role: "practice", practice_id: newPracticeId },
+});
+
+// WRONG — never store role in user_metadata
+await supabase.auth.updateUser({ data: { role: "practice" } });
+```
+
+See `spec/RLS-PATTERNS.md` for the full RLS conventions that downstream sessions follow.
+
+---
+
 ## Known Issues / Tech Debt
 
 ### Tailwind v4 ↔ shadcn token mismatch (decision needed before Session 5+)

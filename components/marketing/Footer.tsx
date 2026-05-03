@@ -9,6 +9,7 @@ const COMPANY_NAV = [
   { href: "/about", label: "About" },
   { href: "/press", label: "Press" },
   { href: "/contact", label: "Contact" },
+  { href: "/portal/login", label: "Practitioner sign-in" },
 ];
 
 const SYSTEM_NAV = [
