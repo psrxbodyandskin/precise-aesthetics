@@ -66,8 +66,16 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+    console.error("[provision] createPracticeAuthUser failed", {
+      email: values.primaryEmail,
+      message: authResult.message,
+      code: authResult.code,
+    });
     return NextResponse.json(
-      { ok: false, error: "Could not create auth account." },
+      {
+        ok: false,
+        error: `Could not create auth account: ${authResult.message}`,
+      },
       { status: 500 },
     );
   }
