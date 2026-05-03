@@ -106,6 +106,9 @@ export function PortalLoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={cn(inputClass, "mt-2")}
+          // Password managers inject fdprocessedid attributes after hydration —
+          // suppress the warning so the form's submit handler stays attached.
+          suppressHydrationWarning
         />
       </div>
 
@@ -124,6 +127,7 @@ export function PortalLoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={cn(inputClass, "mt-0 pr-11")}
+              suppressHydrationWarning
             />
             <button
               type="button"
@@ -135,6 +139,7 @@ export function PortalLoginForm() {
               }
               aria-pressed={showPassword}
               className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center text-ink-500 transition-colors duration-[150ms] hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
+              suppressHydrationWarning
             >
               {showPassword ? (
                 <EyeOff className="size-5" strokeWidth={1.5} aria-hidden="true" />
@@ -153,6 +158,7 @@ export function PortalLoginForm() {
           size="lg"
           loading={submitting}
           className="w-full sm:w-auto"
+          suppressHydrationWarning
         >
           {submitting
             ? /* [DRAFT] */ "Signing in"

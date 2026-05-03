@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 import { getAuthBrowserClient } from "@/lib/supabase/client-auth";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export function AdminLoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -61,6 +63,11 @@ export function AdminLoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={cn(inputClass, "mt-2")}
+          // Password managers (1Password, Bitwarden, LastPass) inject
+          // fdprocessedid onto inputs after hydration, breaking React's
+          // event-handler attachment. Suppress the warning so the form
+          // hydrates and submit works.
+          suppressHydrationWarning
         />
       </div>
 
@@ -68,16 +75,37 @@ export function AdminLoginForm() {
         <Label htmlFor="admin-password" className={labelClass}>
           {/* [DRAFT] */}Password
         </Label>
-        <Input
-          id="admin-password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={cn(inputClass, "mt-2")}
-        />
+        <div className="relative mt-2">
+          <Input
+            id="admin-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={cn(inputClass, "mt-0 pr-11")}
+            suppressHydrationWarning
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={
+              showPassword
+                ? /* [DRAFT] */ "Hide password"
+                : /* [DRAFT] */ "Show password"
+            }
+            aria-pressed={showPassword}
+            className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center text-ink-500 transition-colors duration-[150ms] hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
+            suppressHydrationWarning
+          >
+            {showPassword ? (
+              <EyeOff className="size-5" strokeWidth={1.5} aria-hidden="true" />
+            ) : (
+              <Eye className="size-5" strokeWidth={1.5} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="pt-2">
@@ -87,6 +115,7 @@ export function AdminLoginForm() {
           size="lg"
           loading={submitting}
           className="w-full sm:w-auto"
+          suppressHydrationWarning
         >
           {submitting ? /* [DRAFT] */ "Signing in" : /* [DRAFT] */ "Sign in"}
         </Button>
