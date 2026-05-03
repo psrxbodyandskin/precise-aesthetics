@@ -49,10 +49,12 @@ const LINES: Record<Variant, LineConfig[]> = {
     // Long vertical anchor, left side, descending from top
     { orient: "v", left: "6%", top: "8%", length: "62%", opacity: 0.22 },
     // Short horizontal at upper-right, hard right anchor
-    { orient: "h", right: "0%", top: "22%", length: "28%", opacity: 0.2 },
+    // Pulled up from top:22% to top:8% — at 22%, mobile section is tall enough
+    // that the line landed on top of "We changed the inputs..." body copy.
+    { orient: "h", right: "0%", top: "8%", length: "28%", opacity: 0.2 },
     // Medium horizontal — moved to below the right-column lead paragraph
-    // (was hitting the body text at bottom: 32%)
-    { orient: "h", right: "12%", bottom: "8%", length: "38%", opacity: 0.18 },
+    // (was hitting the body text at bottom: 32%, then bottom: 8%)
+    { orient: "h", right: "12%", bottom: "3%", length: "38%", opacity: 0.18 },
     // Short vertical accent on the right margin (past the right column lead
     // paragraph to avoid crossing text)
     { orient: "v", right: "2%", bottom: "12%", length: "22%", opacity: 0.2 },
@@ -60,10 +62,11 @@ const LINES: Record<Variant, LineConfig[]> = {
   outcomes: [
     // Long vertical anchor, right side
     { orient: "v", right: "5%", top: "12%", length: "55%", opacity: 0.22 },
-    // Short horizontal at upper-left
-    { orient: "h", left: "0%", top: "32%", length: "26%", opacity: 0.2 },
-    // Medium horizontal lower-left
-    { orient: "h", left: "8%", bottom: "20%", length: "34%", opacity: 0.18 },
+    // Short horizontal at upper-left — moved up from top:32% (was landing on
+    // body copy mid-section on tall mobile single-column layouts)
+    { orient: "h", left: "0%", top: "3%", length: "26%", opacity: 0.2 },
+    // Medium horizontal lower-left — moved down from bottom:20% (same reason)
+    { orient: "h", left: "8%", bottom: "1%", length: "34%", opacity: 0.18 },
     // Short vertical accent upper-mid
     { orient: "v", left: "55%", top: "0%", length: "18%", opacity: 0.2 },
   ],
@@ -76,13 +79,18 @@ const LINES: Record<Variant, LineConfig[]> = {
     // when placed at left:58% — that was the 2-up gap, no longer needed)
     { orient: "v", right: "5%", top: "10%", length: "70%", opacity: 0.18 },
     // Bottom-right horizontal — below all content
-    { orient: "h", right: "0%", bottom: "10%", length: "28%", opacity: 0.2 },
+    // Pushed down from bottom:10% to bottom:3% — at 10%, mobile section was
+    // tall enough that the line landed on top of the "A demonstration covers..."
+    // body copy. 3% sits below the CTA in section bottom-padding.
+    { orient: "h", right: "0%", bottom: "3%", length: "28%", opacity: 0.2 },
     // Short vertical accent on the bottom-left, in the left margin
     { orient: "v", left: "5%", bottom: "5%", length: "12%", opacity: 0.22 },
   ],
-  // Lead capture — very minimal, two lines only
+  // Lead capture — very minimal, two lines only.
+  // Horizontal moved up from top:30% (was landing on body copy on tall
+  // mobile single-column sections).
   lead: [
-    { orient: "h", left: "0%", top: "30%", length: "20%", opacity: 0.18 },
+    { orient: "h", left: "0%", top: "8%", length: "20%", opacity: 0.18 },
     { orient: "v", right: "10%", top: "0%", length: "55%", opacity: 0.2 },
   ],
   // Practitioner application form — no lines (form is content-dense and
