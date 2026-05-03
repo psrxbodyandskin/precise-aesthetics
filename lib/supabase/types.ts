@@ -279,6 +279,37 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["devices"]["Insert"]>;
         Relationships: [];
       };
+      practice_authorized_users: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          practice_id: string;
+          full_name: string;
+          role_label: string | null;
+          is_active: boolean;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          practice_id: string;
+          full_name: string;
+          role_label?: string | null;
+          is_active?: boolean;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["practice_authorized_users"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "practice_authorized_users_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       practice_devices: {
         Row: {
           id: string;
