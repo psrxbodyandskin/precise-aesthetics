@@ -38,6 +38,11 @@ interface LineConfig {
   opacity?: number;
   // Thickness in pixels (defaults to 1).
   thickness?: number;
+  // Hide on viewports below the md breakpoint (768px). Use for lines whose
+  // % positions land in column gaps on desktop but cross body text on mobile
+  // single-column. Desktop rendering is preserved exactly; only mobile drops
+  // the line.
+  hideBelowMd?: boolean;
 }
 
 // Sparse hand-composed asymmetric line sets per section. Bauhaus / De Stijl
@@ -48,13 +53,15 @@ const LINES: Record<Variant, LineConfig[]> = {
   thesis: [
     // Long vertical anchor, left side, descending from top
     { orient: "v", left: "6%", top: "8%", length: "62%", opacity: 0.22 },
-    // Short horizontal at upper-right, hard right anchor
-    // Pulled up from top:22% to top:8% — at 22%, mobile section is tall enough
-    // that the line landed on top of "We changed the inputs..." body copy.
-    { orient: "h", right: "0%", top: "8%", length: "28%", opacity: 0.2 },
+    // Short horizontal at upper-right, hard right anchor.
+    // Hidden on mobile: at 22% from top of a tall mobile single-column
+    // section, the line lands on body copy.
+    { orient: "h", right: "0%", top: "22%", length: "28%", opacity: 0.2, hideBelowMd: true },
     // Medium horizontal — moved to below the right-column lead paragraph
-    // (was hitting the body text at bottom: 32%, then bottom: 8%)
-    { orient: "h", right: "12%", bottom: "3%", length: "38%", opacity: 0.18 },
+    // (was hitting the body text at bottom: 32%).
+    // Hidden on mobile: at 8% from bottom of a tall mobile section, the
+    // line still lands on body copy on /system/* pages.
+    { orient: "h", right: "12%", bottom: "8%", length: "38%", opacity: 0.18, hideBelowMd: true },
     // Short vertical accent on the right margin (past the right column lead
     // paragraph to avoid crossing text)
     { orient: "v", right: "2%", bottom: "12%", length: "22%", opacity: 0.2 },
@@ -62,13 +69,18 @@ const LINES: Record<Variant, LineConfig[]> = {
   outcomes: [
     // Long vertical anchor, right side
     { orient: "v", right: "5%", top: "12%", length: "55%", opacity: 0.22 },
-    // Short horizontal at upper-left — moved up from top:32% (was landing on
-    // body copy mid-section on tall mobile single-column layouts)
-    { orient: "h", left: "0%", top: "3%", length: "26%", opacity: 0.2 },
-    // Medium horizontal lower-left — moved down from bottom:20% (same reason)
-    { orient: "h", left: "8%", bottom: "1%", length: "34%", opacity: 0.18 },
-    // Short vertical accent upper-mid
-    { orient: "v", left: "55%", top: "0%", length: "18%", opacity: 0.2 },
+    // Short horizontal at upper-left.
+    // Hidden on mobile: at 32% from top of a tall mobile section, the line
+    // lands on body copy.
+    { orient: "h", left: "0%", top: "32%", length: "26%", opacity: 0.2, hideBelowMd: true },
+    // Medium horizontal lower-left.
+    // Hidden on mobile: at 20% from bottom, the line lands on body copy.
+    { orient: "h", left: "8%", bottom: "20%", length: "34%", opacity: 0.18, hideBelowMd: true },
+    // Short vertical accent upper-mid.
+    // Hidden on mobile: 55% from left lands on the centered/full-width
+    // heading on mobile single-column ("Predictable on Fitzpatrick IV
+    // through VI." on the homepage outcomes section).
+    { orient: "v", left: "55%", top: "0%", length: "18%", opacity: 0.2, hideBelowMd: true },
   ],
   // Demo CTA — section is centered single-column. Lines hug the outer margins
   // so none cross the centered heading / lead / paragraph.
@@ -78,20 +90,21 @@ const LINES: Record<Variant, LineConfig[]> = {
     // Long vertical anchor on the right margin (was crossing centered content
     // when placed at left:58% — that was the 2-up gap, no longer needed)
     { orient: "v", right: "5%", top: "10%", length: "70%", opacity: 0.18 },
-    // Bottom-right horizontal — below all content
-    // Pushed down from bottom:10% to bottom:3% — at 10%, mobile section was
-    // tall enough that the line landed on top of the "A demonstration covers..."
-    // body copy. 3% sits below the CTA in section bottom-padding.
-    { orient: "h", right: "0%", bottom: "3%", length: "28%", opacity: 0.2 },
+    // Bottom-right horizontal — below all content.
+    // Hidden on mobile: at 10% from bottom, the line lands on the
+    // "A demonstration covers..." paragraph on mobile.
+    { orient: "h", right: "0%", bottom: "10%", length: "28%", opacity: 0.2, hideBelowMd: true },
     // Short vertical accent on the bottom-left, in the left margin
     { orient: "v", left: "5%", bottom: "5%", length: "12%", opacity: 0.22 },
   ],
   // Lead capture — very minimal, two lines only.
-  // Horizontal moved up from top:30% (was landing on body copy on tall
-  // mobile single-column sections).
   lead: [
-    { orient: "h", left: "0%", top: "8%", length: "20%", opacity: 0.18 },
-    { orient: "v", right: "10%", top: "0%", length: "55%", opacity: 0.2 },
+    // Hidden on mobile: at 30% from top, the line lands on body copy on
+    // tall mobile single-column sections.
+    { orient: "h", left: "0%", top: "30%", length: "20%", opacity: 0.18, hideBelowMd: true },
+    // Hidden on mobile: 55%-tall vertical at right:10% intersects the
+    // full-column-width "Get launch updates" heading on mobile.
+    { orient: "v", right: "10%", top: "0%", length: "55%", opacity: 0.2, hideBelowMd: true },
   ],
   // Practitioner application form — no lines (form is content-dense and
   // long-scrolling, lines would inevitably cross inputs/labels). Bloom only.
@@ -179,11 +192,15 @@ export function BoneBlooms({ variant }: { variant: Variant }) {
       {lines.map((line, i) => {
         const thickness = line.thickness ?? 1;
         const isHorizontal = line.orient === "h";
+        // `hideBelowMd` hides the line on viewports below the md breakpoint.
+        // Used for lines whose % positions land in column gaps on desktop
+        // but cross body text on mobile single-column. Desktop is unchanged.
+        const hideClass = line.hideBelowMd ? "hidden md:block" : "";
         return (
           <span
             key={`line-${i}`}
             aria-hidden="true"
-            className="pointer-events-none absolute -z-10 bg-ink-700"
+            className={`pointer-events-none absolute -z-10 bg-ink-700 ${hideClass}`}
             style={{
               top: line.top,
               bottom: line.bottom,
