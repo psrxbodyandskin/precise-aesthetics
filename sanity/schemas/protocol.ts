@@ -284,7 +284,7 @@ export const protocol = defineType({
       of: [
         defineArrayMember({
           type: "object",
-          name: "reference",
+          name: "clinicalReference",
           fields: [
             defineField({
               name: "citation",
