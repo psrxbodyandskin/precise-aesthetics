@@ -157,30 +157,30 @@ export default function HomePage() {
               {/* Bottom-left small bracket */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-32 -left-2 h-3 w-px bg-brand-300/20"
+                className="pointer-events-none absolute bottom-16 -left-2 h-3 w-px bg-brand-300/20"
               />
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-32 -left-2 h-px w-3 bg-brand-300/20"
+                className="pointer-events-none absolute bottom-16 -left-2 h-px w-3 bg-brand-300/20"
               />
               {/* Bottom-right small bracket */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-32 -right-2 h-3 w-px bg-brand-300/20"
+                className="pointer-events-none absolute bottom-16 -right-2 h-3 w-px bg-brand-300/20"
               />
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-32 -right-2 h-px w-3 bg-brand-300/20"
+                className="pointer-events-none absolute bottom-16 -right-2 h-px w-3 bg-brand-300/20"
               />
               {/* Editorial caption mark */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-[106px] right-0 font-body text-[10px] tracking-[0.24em] uppercase text-ink-300"
+                className="pointer-events-none absolute bottom-[42px] right-0 font-body text-[10px] tracking-[0.24em] uppercase text-ink-300"
               >
                 Fig. 01
               </span>
 
-              <div className="-translate-y-16">
+              <div className="md:-translate-y-16">
                 <ConvergenceHeroLoader />
               </div>
             </div>

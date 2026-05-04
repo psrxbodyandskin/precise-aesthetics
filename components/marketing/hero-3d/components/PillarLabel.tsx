@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import type { PhaseKey } from "../constants";
 import { loopSeconds, pillarLitMix } from "../motion";
@@ -33,6 +33,12 @@ export function PillarLabel({
   zOffset = 0,
 }: Props) {
   const elRef = useRef<HTMLDivElement>(null);
+  // Pull labels toward the scene origin on small canvases so they stay
+  // inside the frame as pillars rotate. The base XZ position is
+  // multiplied by `radiusScale` so the entire label orbit shrinks on
+  // narrow canvases without changing pillar geometry positions.
+  const canvasWidth = useThree((s) => s.size.width);
+  const radiusScale = canvasWidth < 500 ? 0.75 : 1;
 
   useFrame(({ clock }) => {
     if (!elRef.current) return;
@@ -42,8 +48,10 @@ export function PillarLabel({
     elRef.current.style.transform = `translateY(${(1 - lit) * 8}px)`;
   });
 
-  const labelX = position[0] * (1 - inwardPull) + xOffset;
-  const labelZ = position[2] * (1 - inwardPull) + zOffset;
+  const labelX =
+    (position[0] * (1 - inwardPull) + xOffset) * radiusScale;
+  const labelZ =
+    (position[2] * (1 - inwardPull) + zOffset) * radiusScale;
 
   return (
     <group position={[labelX, position[1] + yOffset, labelZ]}>
