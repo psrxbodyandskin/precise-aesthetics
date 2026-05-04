@@ -1,0 +1,124 @@
+/* P5 — Print stylesheet for /portal/protocols and detail routes.
+ * Loaded only on these routes via `import "./print.css"` in the layout.
+ *
+ * Strategy: hide everything chrome-related, force white background,
+ * tighter type, page-break hygiene on tables and biologic cards.
+ * The .print-hide / .print-only utilities give component authors an
+ * explicit lever without each component needing its own @media print
+ * block. */
+
+/* Utility classes — paired so screen and print are inverses */
+.print-hide {
+  /* default: visible on screen */
+}
+.print-only {
+  display: none;
+}
+
+@media print {
+  /* Reset surface */
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0a0a0a !important;
+  }
+
+  /* Utility flips */
+  .print-hide {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+
+  /* Hide portal chrome (header + future sidebar/footer) */
+  [data-portal-chrome="true"],
+  header[role="banner"],
+  nav[aria-label*="navigation" i] {
+    display: none !important;
+  }
+
+  /* Tighter type for paper */
+  body {
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+  h1 {
+    font-size: 20pt !important;
+    line-height: 1.15 !important;
+    margin-top: 0 !important;
+  }
+  h2 {
+    font-size: 14pt !important;
+    line-height: 1.2 !important;
+    margin-top: 18pt !important;
+  }
+  h3,
+  h4 {
+    font-size: 12pt !important;
+    line-height: 1.25 !important;
+  }
+  p {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Section dividers print as solid hairlines */
+  span[aria-hidden="true"].bg-brand-500\/30,
+  span[aria-hidden="true"].bg-brand-500\/50 {
+    background: #0a0a0a !important;
+  }
+
+  /* Avoid breaking inside critical content */
+  table,
+  thead,
+  tr,
+  ul,
+  ol,
+  li {
+    break-inside: avoid;
+  }
+
+  /* Tables — ensure borders print */
+  table {
+    border-collapse: collapse !important;
+  }
+  th,
+  td {
+    border-color: #0a0a0a !important;
+  }
+
+  /* Biologic control + parameter cards — force grid layout in print
+   * (already enforced via print:grid-cols-3 / print:grid-cols-2 utility
+   * classes, but ensure they survive at print resolution) */
+
+  /* Page setup — Chromium-first, Safari acceptable degradation */
+  @page {
+    margin: 0.75in;
+    size: auto;
+  }
+
+  /* Page header — only Chrome/Edge support generated content here */
+  @page {
+    @top-left {
+      content: "Precise Aesthetics — Protocol Reference";
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-size: 9pt;
+      color: #5a6470;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-size: 9pt;
+      color: #5a6470;
+    }
+  }
+
+  /* Links — show URLs after link text in print, except for the
+   * references section which shows them inline already */
+  a:not([href^="#"]):not(.references-link)::after {
+    /* Disabled by default; reference URLs already render inline.
+     * Re-enable if practitioners ask for printed URLs everywhere. */
+    content: none;
+  }
+}
