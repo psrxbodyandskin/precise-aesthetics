@@ -51,6 +51,7 @@
     "react-email": "^3.0.4",
     "react-hook-form": "^7.74.0",
     "react-intersection-observer": "^10.0.3",
+    "recharts": "^3.8.1",
     "resend": "^4.0.1",
     "sanity": "^3.68.4",
     "sonner": "^1.7.4",

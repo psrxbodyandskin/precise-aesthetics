@@ -797,6 +797,48 @@ export interface Database {
         Args: Record<string, never>;
         Returns: string | null;
       };
+      // P7 — admin dashboard RPCs (defined in 0009_dashboard_rpcs.sql).
+      // All return JSONB; concrete shapes live in lib/admin/dashboard.ts.
+      dashboard_top_line: {
+        Args: {
+          range_start: string;
+          range_end: string;
+          comparison_start: string;
+        };
+        Returns: Json;
+      };
+      dashboard_volume_timeseries: {
+        Args: {
+          range_start: string;
+          range_end: string;
+          bucket: string;
+        };
+        Returns: Json;
+      };
+      dashboard_protocol_stats: {
+        Args: { range_start: string; range_end: string };
+        Returns: Json;
+      };
+      dashboard_protocol_coverage: {
+        Args: { range_start: string; range_end: string };
+        Returns: Json;
+      };
+      dashboard_indication_distribution: {
+        Args: { range_start: string; range_end: string };
+        Returns: Json;
+      };
+      dashboard_fitzpatrick_distribution: {
+        Args: { range_start: string; range_end: string };
+        Returns: Json;
+      };
+      dashboard_adverse_events_summary: {
+        Args: { range_start: string; range_end: string };
+        Returns: Json;
+      };
+      dashboard_recent_treatments: {
+        Args: { limit_count?: number };
+        Returns: Json;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

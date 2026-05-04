@@ -22,15 +22,15 @@ interface AdminSidebarProps {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: LayoutGrid },
-  { href: "/admin/protocols", label: "Protocols", icon: Library },
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/admin/practices", label: "Practices", icon: Users },
   {
     href: "/admin/adverse-events",
     label: "Adverse Events",
     icon: AlertCircle,
     badgeKey: "adverseEventsNew",
   },
-  { href: "/admin/practices", label: "Practices", icon: Users },
+  { href: "/admin/protocols", label: "Protocols", icon: Library },
 ];
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;

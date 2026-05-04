@@ -2,6 +2,7 @@ import "server-only";
 import { getAuthServerClient } from "@/lib/supabase/server-auth";
 import { getServiceClient } from "@/lib/supabase/server";
 import type { TreatmentLogValues } from "@/lib/schemas/treatment";
+import type { TreatmentFilters } from "./filters";
 
 // P6 — Server-only data layer for treatments + photos + adverse events.
 //
@@ -68,6 +69,191 @@ export async function listTreatmentsForPractice(opts: {
     return [];
   }
   return (data ?? []).map(normalizeTreatmentRow);
+}
+
+// ------------------------------------------------------------
+// listFilteredTreatmentsForPractice — drives the P7 filterable list.
+// RLS enforces practice-scoping; app-layer filters refine within.
+//
+// Includes per-row indicators for has-photos and has-adverse-event.
+// We post-filter on those flags (after the SQL fetch) because the
+// counts come back as nested objects from PostgREST and aren't
+// trivial to filter at the query layer without RPCs. The list is
+// paginated server-side first; the post-filter applies to the page
+// slice — practitioner sees up to PAGE_SIZE rows that match. This
+// is acceptable because the indicators usually don't drastically
+// trim the result set; if they do, the UX is "see more on next
+// page" rather than "missing rows."
+// ------------------------------------------------------------
+
+export interface FilteredTreatmentRow extends PortalTreatmentRow {
+  photo_count: number;
+  adverse_event_id: string | null;
+}
+
+const TREATMENTS_PAGE_SIZE = 50;
+
+export async function listFilteredTreatmentsForPractice(
+  filters: TreatmentFilters,
+): Promise<{
+  treatments: FilteredTreatmentRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+}> {
+  const supabase = await getAuthServerClient();
+  const page = Math.max(1, filters.page ?? 1);
+  const pageSize = TREATMENTS_PAGE_SIZE;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  let q = supabase
+    .from("treatments")
+    .select(
+      `
+      id,
+      treatment_date,
+      protocol_id,
+      protocol_version_id,
+      protocol_version_label,
+      indication,
+      patient_fitzpatrick,
+      entered_by_name,
+      session_number,
+      has_followup,
+      created_at,
+      protocol:protocols(title, slug),
+      photos:treatment_photos(id),
+      adverse:treatment_adverse_events(id)
+    `,
+      { count: "exact" },
+    )
+    .order("treatment_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (filters.search && filters.search.trim().length > 0) {
+    const term = filters.search.trim().replace(/[%]/g, "");
+    q = q.or(
+      `notes.ilike.%${term}%,treatment_site.ilike.%${term}%,entered_by_name.ilike.%${term}%`,
+    );
+  }
+  if (filters.dateFrom) q = q.gte("treatment_date", filters.dateFrom);
+  if (filters.dateTo) q = q.lte("treatment_date", filters.dateTo);
+  if (filters.protocolIds && filters.protocolIds.length > 0) {
+    q = q.in("protocol_id", filters.protocolIds);
+  }
+  if (filters.indications && filters.indications.length > 0) {
+    q = q.in("indication", filters.indications);
+  }
+  if (filters.fitzpatrickTypes && filters.fitzpatrickTypes.length > 0) {
+    q = q.in("patient_fitzpatrick", filters.fitzpatrickTypes);
+  }
+
+  q = q.range(start, end);
+
+  const { data, error, count } = await q;
+  if (error) {
+    console.error("[portal/treatments] filtered list error", error);
+    return { treatments: [], total: 0, page, pageSize };
+  }
+
+  let rows = (data ?? []).map(normalizeFilteredTreatmentRow);
+
+  if (filters.hasPhotos) {
+    rows = rows.filter((r) => r.photo_count > 0);
+  }
+  if (filters.hasAdverseEvent) {
+    rows = rows.filter((r) => r.adverse_event_id !== null);
+  }
+
+  return { treatments: rows, total: count ?? 0, page, pageSize };
+}
+
+function normalizeFilteredTreatmentRow(raw: unknown): FilteredTreatmentRow {
+  const r = raw as Record<string, unknown>;
+  const proto = r.protocol;
+  const protocol = Array.isArray(proto)
+    ? ((proto[0] ?? null) as PortalTreatmentRow["protocol"])
+    : ((proto ?? null) as PortalTreatmentRow["protocol"]);
+  const photos = r.photos as Array<{ id: string }> | null | undefined;
+  const adverse = r.adverse;
+  const adverseRow = Array.isArray(adverse)
+    ? ((adverse[0] ?? null) as { id: string } | null)
+    : ((adverse ?? null) as { id: string } | null);
+  return {
+    id: r.id as string,
+    treatment_date: r.treatment_date as string,
+    protocol_id: r.protocol_id as string,
+    protocol_version_id: r.protocol_version_id as string,
+    protocol_version_label: r.protocol_version_label as string,
+    indication: r.indication as string,
+    patient_fitzpatrick: r.patient_fitzpatrick as string,
+    entered_by_name: r.entered_by_name as string,
+    session_number: r.session_number as number,
+    has_followup: r.has_followup as boolean,
+    created_at: r.created_at as string,
+    protocol,
+    photo_count: photos ? photos.length : 0,
+    adverse_event_id: adverseRow ? adverseRow.id : null,
+  };
+}
+
+// ------------------------------------------------------------
+// Distinct values for filter dropdown population — show only the
+// protocols / indications this practice has ACTUALLY logged
+// against, not the full library. Avoids cluttering the filter UI
+// with options that produce zero results.
+// ------------------------------------------------------------
+
+export async function getDistinctProtocolsForPractice(): Promise<
+  Array<{ id: string; title: string; current_version: string | null }>
+> {
+  const supabase = await getAuthServerClient();
+  const { data } = await supabase
+    .from("treatments")
+    .select(
+      `
+      protocol_id,
+      protocol:protocols(id, title, current_version)
+    `,
+    )
+    .order("treatment_date", { ascending: false })
+    .limit(1000);
+
+  if (!data) return [];
+  const seen = new Map<
+    string,
+    { id: string; title: string; current_version: string | null }
+  >();
+  for (const r of data as unknown as Array<{
+    protocol_id: string;
+    protocol:
+      | { id: string; title: string; current_version: string | null }
+      | { id: string; title: string; current_version: string | null }[]
+      | null;
+  }>) {
+    const proto = Array.isArray(r.protocol) ? r.protocol[0] : r.protocol;
+    if (proto && !seen.has(proto.id)) {
+      seen.set(proto.id, proto);
+    }
+  }
+  return Array.from(seen.values()).sort((a, b) =>
+    a.title.localeCompare(b.title),
+  );
+}
+
+export async function getDistinctIndicationsForPractice(): Promise<string[]> {
+  const supabase = await getAuthServerClient();
+  const { data } = await supabase
+    .from("treatments")
+    .select("indication")
+    .limit(1000);
+  if (!data) return [];
+  const set = new Set<string>();
+  for (const r of data as Array<{ indication: string }>) {
+    if (r.indication) set.add(r.indication);
+  }
+  return Array.from(set).sort();
 }
 
 function normalizeTreatmentRow(raw: unknown): PortalTreatmentRow {
