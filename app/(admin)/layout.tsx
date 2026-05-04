@@ -4,11 +4,18 @@ import { unstable_cache } from "next/cache";
 import { AdminSidebar } from "@/components/admin/shared/AdminSidebar";
 import { getCurrentUser } from "@/lib/auth/server";
 import { countNewAdverseEvents } from "@/lib/admin/adverse-events";
+import { getInboxNewCount } from "@/lib/admin/inbox";
 
 const cachedNewAdverseEventsCount = unstable_cache(
   async () => countNewAdverseEvents(),
   ["admin-adverse-events-new-count"],
   { revalidate: 60, tags: ["adverse-events"] },
+);
+
+const cachedNewInboxCount = unstable_cache(
+  async () => getInboxNewCount(),
+  ["admin-inbox-new-count"],
+  { revalidate: 60, tags: ["inbox"] },
 );
 
 // /admin/* route group root layout. Internal team only. Hidden from search
@@ -34,14 +41,19 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     );
   }
 
-  // Fetch the new-adverse-events count once per layout render (60s
-  // cache via unstable_cache). Surfaces as a badge on the sidebar nav
-  // for the Adverse Events item.
-  const newAdverseEventsCount = await cachedNewAdverseEventsCount();
+  // Fetch both badge counts in parallel (60s cached each). Surface as
+  // numeric badges on the Adverse Events and Inbox sidebar items.
+  const [newAdverseEventsCount, newInboxCount] = await Promise.all([
+    cachedNewAdverseEventsCount(),
+    cachedNewInboxCount(),
+  ]);
 
   return (
     <div className="min-h-screen bg-bone-100">
-      <AdminSidebar newAdverseEventsCount={newAdverseEventsCount} />
+      <AdminSidebar
+        newAdverseEventsCount={newAdverseEventsCount}
+        newInboxCount={newInboxCount}
+      />
       <main id="main" className="md:ml-[240px]">
         {children}
       </main>

@@ -2,28 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertCircle, LayoutGrid, Library, Users } from "lucide-react";
+import { AlertCircle, Inbox, LayoutGrid, Library, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Admin sidebar — extended each session as new features land. P2 ships
 // Dashboard + Practices. P4 added Protocols. P6 adds Adverse Events
-// with a "new" badge sourced from the layout.
+// with a "new" badge sourced from the layout. P8 adds Inbox between
+// Practices and Adverse Events, with its own badge for status='new'
+// items across leads + demo requests + contact messages.
 
 interface NavItem {
   href: string;
   label: string;
   icon: typeof LayoutGrid;
-  /** Pulled from a layout-level prop; only Adverse Events uses one for now. */
-  badgeKey?: "adverseEventsNew";
+  /** Pulled from a layout-level prop. */
+  badgeKey?: "adverseEventsNew" | "inboxNew";
 }
 
 interface AdminSidebarProps {
   newAdverseEventsCount?: number;
+  newInboxCount?: number;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/admin/practices", label: "Practices", icon: Users },
+  { href: "/admin/inbox", label: "Inbox", icon: Inbox, badgeKey: "inboxNew" },
   {
     href: "/admin/adverse-events",
     label: "Adverse Events",
@@ -35,11 +39,15 @@ const NAV_ITEMS: NavItem[] = [
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
 
-export function AdminSidebar({ newAdverseEventsCount = 0 }: AdminSidebarProps) {
+export function AdminSidebar({
+  newAdverseEventsCount = 0,
+  newInboxCount = 0,
+}: AdminSidebarProps) {
   const pathname = usePathname();
 
   function badgeFor(key: NavItem["badgeKey"]): number {
     if (key === "adverseEventsNew") return newAdverseEventsCount;
+    if (key === "inboxNew") return newInboxCount;
     return 0;
   }
 

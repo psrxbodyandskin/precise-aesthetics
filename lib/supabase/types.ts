@@ -27,6 +27,13 @@ export interface Database {
           utm_campaign: string | null;
           interest: string[];
           created_at: string;
+          // P8 — inbox status workflow
+          status: "new" | "contacted" | "qualified" | "closed";
+          status_changed_at: string | null;
+          status_changed_by: string | null;
+          admin_notes: string | null;
+          enrichment_data: Json | null;
+          enriched_at: string | null;
         };
         Insert: {
           id?: string;
@@ -41,6 +48,12 @@ export interface Database {
           utm_campaign?: string | null;
           interest?: string[];
           created_at?: string;
+          status?: "new" | "contacted" | "qualified" | "closed";
+          status_changed_at?: string | null;
+          status_changed_by?: string | null;
+          admin_notes?: string | null;
+          enrichment_data?: Json | null;
+          enriched_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["leads"]["Insert"]>;
         Relationships: [];
@@ -61,10 +74,17 @@ export interface Database {
           primary_interest: string[] | null;
           timeline: string | null;
           cal_booking_id: string | null;
-          status: string;
+          // P8 narrows status to 4-value workflow (legacy 6-value mapped in 0010).
+          status: "new" | "contacted" | "qualified" | "closed";
           notes: string | null;
           created_at: string;
           updated_at: string;
+          // P8 — inbox status workflow
+          status_changed_at: string | null;
+          status_changed_by: string | null;
+          admin_notes: string | null;
+          enrichment_data: Json | null;
+          enriched_at: string | null;
         };
         Insert: {
           id?: string;
@@ -81,10 +101,15 @@ export interface Database {
           primary_interest?: string[] | null;
           timeline?: string | null;
           cal_booking_id?: string | null;
-          status?: string;
+          status?: "new" | "contacted" | "qualified" | "closed";
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
+          status_changed_at?: string | null;
+          status_changed_by?: string | null;
+          admin_notes?: string | null;
+          enrichment_data?: Json | null;
+          enriched_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["demo_requests"]["Insert"]>;
         Relationships: [];
@@ -498,6 +523,11 @@ export interface Database {
           utm_source: string | null;
           utm_medium: string | null;
           utm_campaign: string | null;
+          // P8 — inbox status workflow (no enrichment for contact messages)
+          status: "new" | "contacted" | "qualified" | "closed";
+          status_changed_at: string | null;
+          status_changed_by: string | null;
+          admin_notes: string | null;
         };
         Insert: {
           id?: string;
@@ -510,6 +540,10 @@ export interface Database {
           utm_source?: string | null;
           utm_medium?: string | null;
           utm_campaign?: string | null;
+          status?: "new" | "contacted" | "qualified" | "closed";
+          status_changed_at?: string | null;
+          status_changed_by?: string | null;
+          admin_notes?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
         Relationships: [];
@@ -838,6 +872,34 @@ export interface Database {
       dashboard_recent_treatments: {
         Args: { limit_count?: number };
         Returns: Json;
+      };
+      // P8 — admin inbox RPCs (defined in 0010_inbox_status.sql).
+      list_inbox_items: {
+        Args: {
+          filter_type?: string;
+          filter_status?: string;
+          search_query?: string | null;
+          result_offset?: number;
+          result_limit?: number;
+        };
+        Returns: Array<{
+          type: string;
+          id: string;
+          received_at: string;
+          status: string;
+          status_changed_at: string | null;
+          display_name: string;
+          display_email: string;
+          display_context: string | null;
+        }>;
+      };
+      count_inbox_items_by_type: {
+        Args: { filter_status?: string };
+        Returns: Array<{ type: string; count: number }>;
+      };
+      count_inbox_new_items: {
+        Args: Record<string, never>;
+        Returns: number;
       };
     };
     Enums: Record<string, never>;
