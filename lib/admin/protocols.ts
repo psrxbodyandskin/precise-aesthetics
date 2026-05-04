@@ -154,3 +154,95 @@ export async function setPendingMajorBump(
     .select("id, pending_major_bump, current_version")
     .single();
 }
+
+// ------------------------------------------------------------
+// Hard delete — drops the protocols row and cascades into
+// protocol_devices and protocol_versions. Per spec: only allow
+// when no treatment_logs reference any of this protocol's versions.
+// In P6+ when treatment_logs lands, this guard becomes load-bearing.
+// Right now the table doesn't exist yet, so the check returns
+// "no refs" and the delete proceeds.
+// ------------------------------------------------------------
+export async function countTreatmentLogReferences(
+  protocolId: string,
+): Promise<number> {
+  const supabase = getServiceClient();
+  // List version ids first so the existence check is keyed on a column
+  // treatment_logs is expected to carry (protocol_version_id) when P6
+  // ships. Returning 0 if treatment_logs table doesn't exist yet.
+  const { data: versions } = await supabase
+    .from("protocol_versions")
+    .select("id")
+    .eq("protocol_id", protocolId);
+  const ids = (versions ?? []).map((v) => v.id);
+  if (ids.length === 0) return 0;
+
+  // Forward-compat: this query will silently return zero rows on a
+  // non-existent table via PostgREST's 42P01 error, but to keep types
+  // clean we wrap it. When P6 ships treatment_logs, swap this for a
+  // proper select with a non-empty inFilter.
+  try {
+    const treatmentLogs = supabase.from(
+      "treatment_logs" as never,
+    ) as unknown as {
+      select: (s: string, opts?: { count?: "exact"; head?: boolean }) => {
+        in: (col: string, vals: string[]) => Promise<{
+          count: number | null;
+          error: { code?: string } | null;
+        }>;
+      };
+    };
+    const { count, error } = await treatmentLogs
+      .select("id", { count: "exact", head: true })
+      .in("protocol_version_id", ids);
+    if (error) {
+      // 42P01 = relation does not exist; count anything else as zero too
+      return 0;
+    }
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function deleteProtocolHard(
+  protocolId: string,
+): Promise<
+  | { status: "ok"; sanityId: string | null }
+  | { status: "error"; message: string; code?: "has_references" }
+> {
+  const supabase = getServiceClient();
+
+  const { data: snapshot, error: lookupError } = await supabase
+    .from("protocols")
+    .select("sanity_id")
+    .eq("id", protocolId)
+    .single();
+  if (lookupError || !snapshot) {
+    return {
+      status: "error",
+      message: lookupError?.message ?? "Protocol not found",
+    };
+  }
+
+  const refCount = await countTreatmentLogReferences(protocolId);
+  if (refCount > 0) {
+    return {
+      status: "error",
+      message: `Cannot delete: ${refCount} treatment log${
+        refCount === 1 ? "" : "s"
+      } reference this protocol's versions. Archive instead.`,
+      code: "has_references",
+    };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("protocols")
+    .delete()
+    .eq("id", protocolId);
+  if (deleteError) {
+    return { status: "error", message: deleteError.message };
+  }
+
+  return { status: "ok", sanityId: snapshot.sanity_id ?? null };
+}

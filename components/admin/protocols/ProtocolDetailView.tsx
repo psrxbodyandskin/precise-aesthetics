@@ -81,7 +81,8 @@ type Modal =
   | null
   | "confirm-publish"
   | "confirm-unpublish"
-  | "confirm-archive";
+  | "confirm-archive"
+  | "confirm-destroy";
 
 export function ProtocolDetailView({
   protocol,
@@ -116,6 +117,35 @@ export function ProtocolDetailView({
         toast.error(data.error ?? "Action failed.");
       } else {
         toast.success("Done.");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Network error.");
+    } finally {
+      setActionPending(null);
+      setModal(null);
+    }
+  }
+
+  async function destroyAction() {
+    setActionPending("destroy");
+    try {
+      const res = await fetch(
+        `/api/admin/protocols/${protocol.id}/destroy`,
+        { method: "DELETE" },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        code?: string;
+      };
+      if (!res.ok || !data.ok) {
+        toast.error(data.error ?? "Could not delete.", {
+          duration: data.code === "has_references" ? 12000 : 6000,
+        });
+      } else {
+        toast.success("Protocol deleted permanently.");
+        router.push("/admin/protocols");
         router.refresh();
       }
     } catch {
@@ -252,6 +282,15 @@ export function ProtocolDetailView({
             suppressHydrationWarning
           >
             {actionPending === "resync" ? "Resyncing…" : "Force resync"}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setModal("confirm-destroy")}
+            className="text-red-700 hover:text-red-900"
+            suppressHydrationWarning
+          >
+            Delete
           </Button>
         </div>
       </div>
@@ -501,6 +540,46 @@ export function ProtocolDetailView({
               disabled={actionPending === "archive"}
             >
               {actionPending === "archive" ? "Archiving…" : "Archive"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={modal === "confirm-destroy"}
+        onOpenChange={(o) => !o && setModal(null)}
+      >
+        <DialogContent className="bg-bone-50 border-ink-700/35">
+          <DialogHeader>
+            <DialogTitle className="font-display text-ink-900">
+              Delete this protocol permanently?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 font-body text-body text-ink-700">
+            <p>
+              Drops the protocol row, all device tags, and every version
+              snapshot. The Sanity document is NOT touched — delete it in
+              Studio separately if you want the content gone too.
+            </p>
+            <p className="text-red-700">
+              This cannot be undone. If any treatment log references a
+              version of this protocol, the request fails with a 409 and
+              you&rsquo;ll need to archive instead.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setModal(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={destroyAction}
+              disabled={actionPending === "destroy"}
+              className="bg-red-700 hover:bg-red-800"
+            >
+              {actionPending === "destroy"
+                ? "Deleting…"
+                : "Delete permanently"}
             </Button>
           </DialogFooter>
         </DialogContent>
