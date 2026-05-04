@@ -12,6 +12,7 @@ import { ContactMessageConfirmationEmail } from "@/emails/ContactMessageConfirma
 import { InternalContactNotificationEmail } from "@/emails/InternalContactNotification";
 import { PracticeInviteEmail } from "@/emails/PracticeInvite";
 import { PracticeRecoveryEmail } from "@/emails/PracticeRecovery";
+import { AdverseEventNotificationEmail } from "@/emails/AdverseEventNotification";
 import { SITE } from "@/lib/constants";
 import type { LeadFormValues } from "@/lib/schemas/lead-form";
 import type { DemoRequestValues } from "@/lib/schemas/demo-request";
@@ -132,6 +133,41 @@ export async function sendPracticeRecovery({
     return { ok: true, id: data?.id };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
+interface SendAdverseEventNotificationArgs {
+  adverseEventId: string;
+  practiceName: string;
+  treatmentDate: string;
+  protocolTitle: string;
+  protocolVersionLabel: string;
+  indication: string;
+  patientFitzpatrick: string;
+  enteredByName: string;
+  description: string;
+}
+
+export async function sendAdverseEventNotification(
+  args: SendAdverseEventNotificationArgs,
+): Promise<SendResult> {
+  if (!resend) {
+    return { ok: false, error: "Resend not configured (missing RESEND_API_KEY)" };
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Precise Aesthetics <${RESEND_FROM_EMAIL}>`,
+      to: RESEND_INTERNAL_NOTIFY_EMAIL,
+      subject: `Adverse event reported — ${args.practiceName}`,
+      react: AdverseEventNotificationEmail(args),
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
   }
 }
 

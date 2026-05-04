@@ -2,34 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Library, Users } from "lucide-react";
+import { AlertCircle, LayoutGrid, Library, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Admin sidebar — extended each session as new features land. P2 ships
-// Dashboard + Practices. Future sessions append to NAV_ITEMS rather
-// than restructuring.
-//
-// Editorial register: midnight-800 surface, cream-100 text, brand-300
-// active accent. Sidebar is fixed-width on desktop, hidden under a
-// hamburger on mobile (mobile drawer lands in a future session — for P2,
-// the mobile experience is "scroll the sidebar above content").
+// Dashboard + Practices. P4 added Protocols. P6 adds Adverse Events
+// with a "new" badge sourced from the layout.
 
 interface NavItem {
   href: string;
   label: string;
   icon: typeof LayoutGrid;
+  /** Pulled from a layout-level prop; only Adverse Events uses one for now. */
+  badgeKey?: "adverseEventsNew";
+}
+
+interface AdminSidebarProps {
+  newAdverseEventsCount?: number;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutGrid },
   { href: "/admin/protocols", label: "Protocols", icon: Library },
+  {
+    href: "/admin/adverse-events",
+    label: "Adverse Events",
+    icon: AlertCircle,
+    badgeKey: "adverseEventsNew",
+  },
   { href: "/admin/practices", label: "Practices", icon: Users },
 ];
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
 
-export function AdminSidebar() {
+export function AdminSidebar({ newAdverseEventsCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname();
+
+  function badgeFor(key: NavItem["badgeKey"]): number {
+    if (key === "adverseEventsNew") return newAdverseEventsCount;
+    return 0;
+  }
 
   return (
     <aside
@@ -54,6 +66,7 @@ export function AdminSidebar() {
             pathname === item.href ||
             (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
           const Icon = item.icon;
+          const badge = badgeFor(item.badgeKey);
           return (
             <Link
               key={item.href}
@@ -71,7 +84,16 @@ export function AdminSidebar() {
                 strokeWidth={1.5}
                 aria-hidden="true"
               />
-              <span>{item.label}</span>
+              <span className="flex-1">{item.label}</span>
+              {badge > 0 && (
+                <span
+                  aria-label={`${badge} new`}
+                  className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-300 px-1.5 font-body text-[10px] font-medium text-ink-900"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                >
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

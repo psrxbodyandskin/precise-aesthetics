@@ -514,6 +514,199 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
         Relationships: [];
       };
+      treatments: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          practice_id: string;
+          entered_by_user_id: string | null;
+          entered_by_name: string;
+          treatment_date: string;
+          protocol_id: string;
+          protocol_version_id: string;
+          protocol_version_label: string;
+          protocol_deviation: boolean;
+          protocol_deviation_reason: string | null;
+          patient_anon_id: string | null;
+          patient_age_range:
+            | "under_18"
+            | "18_25"
+            | "26_35"
+            | "36_45"
+            | "46_55"
+            | "56_65"
+            | "over_65";
+          patient_fitzpatrick: "I" | "II" | "III" | "IV" | "V" | "VI";
+          patient_sex: "female" | "male" | "other" | "undisclosed" | null;
+          indication: string;
+          treatment_site: string | null;
+          session_number: number;
+          wavelength_nm: number | null;
+          fluence_j_per_cm2: number | null;
+          pulse_duration_ps: number | null;
+          spot_size_mm: number | null;
+          total_pulses: number | null;
+          treatment_duration_minutes: number | null;
+          prep_kit_used: boolean;
+          recovery_kit_dispensed: boolean;
+          maintenance_kit_recommended: boolean;
+          notes: string | null;
+          has_followup: boolean;
+          followup_completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          practice_id: string;
+          entered_by_user_id?: string | null;
+          entered_by_name: string;
+          treatment_date: string;
+          protocol_id: string;
+          protocol_version_id: string;
+          protocol_version_label: string;
+          protocol_deviation?: boolean;
+          protocol_deviation_reason?: string | null;
+          patient_anon_id?: string | null;
+          patient_age_range:
+            | "under_18"
+            | "18_25"
+            | "26_35"
+            | "36_45"
+            | "46_55"
+            | "56_65"
+            | "over_65";
+          patient_fitzpatrick: "I" | "II" | "III" | "IV" | "V" | "VI";
+          patient_sex?: "female" | "male" | "other" | "undisclosed" | null;
+          indication: string;
+          treatment_site?: string | null;
+          session_number: number;
+          wavelength_nm?: number | null;
+          fluence_j_per_cm2?: number | null;
+          pulse_duration_ps?: number | null;
+          spot_size_mm?: number | null;
+          total_pulses?: number | null;
+          treatment_duration_minutes?: number | null;
+          prep_kit_used?: boolean;
+          recovery_kit_dispensed?: boolean;
+          maintenance_kit_recommended?: boolean;
+          notes?: string | null;
+          has_followup?: boolean;
+          followup_completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["treatments"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "treatments_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treatments_entered_by_user_id_fkey";
+            columns: ["entered_by_user_id"];
+            referencedRelation: "practice_authorized_users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treatments_protocol_id_fkey";
+            columns: ["protocol_id"];
+            referencedRelation: "protocols";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treatments_protocol_version_id_fkey";
+            columns: ["protocol_version_id"];
+            referencedRelation: "protocol_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      treatment_photos: {
+        Row: {
+          id: string;
+          created_at: string;
+          treatment_id: string;
+          practice_id: string;
+          storage_path: string;
+          filename: string;
+          mime_type: string;
+          byte_size: number;
+          capture_phase: "before" | "during" | "after" | "followup" | null;
+          caption: string | null;
+          consent_affirmed: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          treatment_id: string;
+          practice_id: string;
+          storage_path: string;
+          filename: string;
+          mime_type: string;
+          byte_size: number;
+          capture_phase?: "before" | "during" | "after" | "followup" | null;
+          caption?: string | null;
+          consent_affirmed?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["treatment_photos"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "treatment_photos_treatment_id_fkey";
+            columns: ["treatment_id"];
+            referencedRelation: "treatments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treatment_photos_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      treatment_adverse_events: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          treatment_id: string;
+          practice_id: string;
+          description: string;
+          status: "new" | "reviewing" | "addressed";
+          status_changed_at: string | null;
+          status_changed_by: string | null;
+          admin_notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          treatment_id: string;
+          practice_id: string;
+          description: string;
+          status?: "new" | "reviewing" | "addressed";
+          status_changed_at?: string | null;
+          status_changed_by?: string | null;
+          admin_notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["treatment_adverse_events"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "treatment_adverse_events_treatment_id_fkey";
+            columns: ["treatment_id"];
+            referencedRelation: "treatments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treatment_adverse_events_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       treatment_logs: {
         Row: {
           id: string;

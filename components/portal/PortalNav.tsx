@@ -11,7 +11,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/portal/protocols", label: "Protocols" },
-  // P6: { href: "/portal/treatments", label: "Treatments" },
+  { href: "/portal/treatments", label: "Treatments" },
   // P7: { href: "/portal/notifications", label: "Notifications" },
 ];
 
