@@ -1,5 +1,14 @@
 import { defineField, defineType } from "sanity";
 
+// Indication taxonomy used by:
+//   - protocol.ts (every protocol references one indication)
+//   - caseStudy.ts (categorization for marketing content)
+//
+// P4 mapping: Sanity `indication` document type → Supabase
+// `public.indication_categories` table (the table name is kept
+// neutral to avoid future churn). Sync handled by the Sanity
+// webhook in /api/webhooks/sanity/protocol — same endpoint
+// branches on `_type` to handle both indications and protocols.
 export const indication = defineType({
   name: "indication",
   title: "Indication",
@@ -26,14 +35,24 @@ export const indication = defineType({
       title: "Short description",
       type: "text",
       rows: 3,
-      description: "One sentence, ~140 characters. Used internally and may surface in marketing.",
+      description:
+        "One sentence, ~140 characters. Used internally and may surface in marketing.",
       validation: (rule) => rule.max(200),
+    }),
+    defineField({
+      name: "description",
+      title: "Long description",
+      type: "array",
+      of: [{ type: "block" }],
+      description:
+        "Optional longform clinical description for the protocol library detail view.",
     }),
     defineField({
       name: "icon",
       title: "Lucide icon name",
       type: "string",
-      description: "Optional Lucide icon name for UI display (e.g., 'sparkles').",
+      description:
+        "Optional Lucide icon name for UI display (e.g., 'sparkles').",
     }),
     defineField({
       name: "displayOrder",
@@ -41,6 +60,13 @@ export const indication = defineType({
       type: "number",
       description: "Lower numbers sort first.",
       initialValue: 100,
+    }),
+    defineField({
+      name: "sortOrder",
+      title: "Protocol library sort order",
+      type: "number",
+      description:
+        "Used inside the practitioner protocol library to order indication groupings. Lower numbers sort first. Falls back to displayOrder if unset.",
     }),
     defineField({
       name: "isPublic",

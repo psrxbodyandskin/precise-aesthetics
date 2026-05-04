@@ -1,6 +1,19 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { LockIcon } from "@sanity/icons";
 
+// P4 — Protocol document type. Authoring lives here; Supabase
+// `public.protocols` is a queryable mirror written by the Sanity
+// webhook on publish/unpublish events.
+//
+// Status flow: draft → published → archived. The Studio status
+// field is the source of truth for protocol state (sync mirrors
+// it). Practitioners only see `published` rows in the portal,
+// further filtered to devices their practice owns.
+//
+// Treatment logs (P6+) reference specific `protocol_versions`
+// snapshots (immutable). Edit a published protocol → republish
+// in Studio → webhook creates a new version snapshot. Old
+// snapshots stay intact for treatment-log integrity.
 export const protocol = defineType({
   name: "protocol",
   title: "Protocol",
@@ -12,175 +25,227 @@ export const protocol = defineType({
     { name: "core", title: "Core" },
     { name: "clinical", title: "Clinical" },
     { name: "treatment", title: "Treatment" },
+    { name: "biologic", title: "Biologic control" },
     { name: "outcomes", title: "Outcomes" },
     { name: "meta", title: "Meta" },
   ],
   fields: [
+    // ----- Identity -----
     defineField({
       name: "title",
-      title: "Title",
+      title: "Protocol title",
       type: "string",
-      description: 'e.g., "Melasma — Fitzpatrick IV–VI".',
       group: "core",
-      validation: (rule) => rule.required().max(140),
+      description: 'e.g., "Melasma — Fitzpatrick IV–VI".',
+      validation: (rule) => rule.required().max(160),
     }),
     defineField({
       name: "slug",
-      title: "Slug",
+      title: "URL slug",
       type: "slug",
       group: "core",
       options: { source: "title", maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "indication",
-      title: "Indication",
-      type: "reference",
-      to: [{ type: "indication" }],
-      group: "core",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "fitzpatrickRange",
-      title: "Fitzpatrick range",
-      type: "object",
-      group: "clinical",
-      fields: [
-        defineField({
-          name: "min",
-          title: "Min (1–6)",
-          type: "number",
-          validation: (rule) => rule.required().min(1).max(6).integer(),
-        }),
-        defineField({
-          name: "max",
-          title: "Max (1–6)",
-          type: "number",
-          validation: (rule) => rule.required().min(1).max(6).integer(),
-        }),
-      ],
-      validation: (rule) =>
-        rule.custom((value) => {
-          if (!value) return "Fitzpatrick range is required";
-          const v = value as { min?: number; max?: number };
-          if (v.min === undefined || v.max === undefined) return "Both min and max are required";
-          if (v.max < v.min) return "Max must be greater than or equal to min";
-          return true;
-        }),
-    }),
-    defineField({
-      name: "difficulty",
-      title: "Difficulty",
-      type: "string",
-      group: "clinical",
-      options: {
-        list: [
-          { title: "Foundational", value: "foundational" },
-          { title: "Intermediate", value: "intermediate" },
-          { title: "Advanced", value: "advanced" },
-        ],
-        layout: "radio",
-      },
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "estimatedSessions",
-      title: "Estimated sessions",
-      type: "object",
-      group: "clinical",
-      fields: [
-        defineField({ name: "min", title: "Min", type: "number", validation: (r) => r.min(1).integer() }),
-        defineField({ name: "max", title: "Max", type: "number", validation: (r) => r.min(1).integer() }),
-      ],
-    }),
-    defineField({
-      name: "sessionInterval",
-      title: "Session interval",
-      type: "string",
-      group: "clinical",
-      description: 'e.g., "4–6 weeks".',
-    }),
-    defineField({
-      name: "summary",
-      title: "Summary",
+      name: "shortDescription",
+      title: "Short description",
       type: "text",
       rows: 3,
       group: "core",
-      description: "2–3 sentences. Plain text. Shown at the top of the protocol detail page.",
-      validation: (rule) => rule.max(500),
+      description:
+        "Surfaced in protocol library list view. 1-2 sentences. Plain text.",
+      validation: (rule) => rule.max(300),
+    }),
+
+    // ----- Classification -----
+    defineField({
+      name: "indication",
+      title: "Indication",
+      type: "reference",
+      group: "core",
+      to: [{ type: "indication" }],
+      validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "clinicalRationale",
-      title: "Clinical rationale",
+      name: "indicationTags",
+      title: "Specific indications",
+      type: "array",
+      group: "clinical",
+      of: [{ type: "string" }],
+      description:
+        "Optional fine-grained tags within the indication category. Used for protocol library filtering.",
+      options: {
+        list: [
+          { title: "Post-Inflammatory Hyperpigmentation (PIH)", value: "pih" },
+          { title: "Melasma", value: "melasma" },
+          { title: "Lentigines", value: "lentigines" },
+          { title: "Tattoo removal — black ink", value: "tattoo_black" },
+          { title: "Tattoo removal — colored ink", value: "tattoo_color" },
+          { title: "Café-au-lait macules", value: "cafe_au_lait" },
+          { title: "Nevus of Ota", value: "nevus_ota" },
+          { title: "Hori's nevus", value: "hori" },
+          { title: "Becker's nevus", value: "becker" },
+          { title: "Acne scars", value: "acne_scars" },
+          { title: "Fine lines & rhytids", value: "rhytids" },
+          { title: "Skin rejuvenation", value: "rejuvenation" },
+          { title: "General pigment correction", value: "pigment_general" },
+        ],
+      },
+    }),
+    defineField({
+      name: "fitzpatrickTypes",
+      title: "Applicable Fitzpatrick types",
+      type: "array",
+      group: "clinical",
+      of: [{ type: "string" }],
+      options: {
+        list: [
+          { title: "Type I", value: "I" },
+          { title: "Type II", value: "II" },
+          { title: "Type III", value: "III" },
+          { title: "Type IV", value: "IV" },
+          { title: "Type V", value: "V" },
+          { title: "Type VI", value: "VI" },
+        ],
+      },
+      validation: (rule) => rule.min(1),
+    }),
+
+    // ----- Clinical content -----
+    defineField({
+      name: "overview",
+      title: "Clinical overview",
       type: "array",
       group: "clinical",
       of: [defineArrayMember({ type: "block" })],
+      description:
+        "Longform clinical description. Rich text supported. Shown at the top of the protocol detail page.",
     }),
     defineField({
-      name: "parameters",
-      title: "Parameters",
+      name: "parameterEnvelope",
+      title: "Parameter envelope",
       type: "array",
       group: "treatment",
       of: [
         defineArrayMember({
           type: "object",
-          name: "parameter",
+          name: "parameterRow",
           fields: [
             defineField({
-              name: "parameterName",
-              title: "Parameter",
+              name: "wavelength",
+              title: "Wavelength",
               type: "string",
-              description: 'e.g., "Wavelength", "Fluence", "Spot size".',
-              validation: (rule) => rule.required(),
+              description: 'e.g., "1064 nm", "532 nm".',
             }),
             defineField({
-              name: "value",
-              title: "Value",
-              type: "string",
-              validation: (rule) => rule.required(),
+              name: "fluenceMin",
+              title: "Fluence min (J/cm²)",
+              type: "number",
             }),
-            defineField({ name: "notes", title: "Notes", type: "string" }),
+            defineField({
+              name: "fluenceMax",
+              title: "Fluence max (J/cm²)",
+              type: "number",
+            }),
+            defineField({
+              name: "pulseDuration",
+              title: "Pulse duration (ps)",
+              type: "number",
+            }),
+            defineField({
+              name: "spotSize",
+              title: "Spot size (mm)",
+              type: "string",
+              description: 'e.g., "4 mm", "3-5 mm".',
+            }),
+            defineField({
+              name: "fitzpatrickAdjustment",
+              title: "Fitzpatrick-specific notes",
+              type: "text",
+              rows: 2,
+            }),
           ],
           preview: {
-            select: { title: "parameterName", subtitle: "value" },
+            select: { wavelength: "wavelength", fluenceMin: "fluenceMin", fluenceMax: "fluenceMax" },
+            prepare({ wavelength, fluenceMin, fluenceMax }) {
+              const fluence =
+                fluenceMin !== undefined && fluenceMax !== undefined
+                  ? `${fluenceMin}-${fluenceMax} J/cm²`
+                  : "—";
+              return {
+                title: wavelength ?? "Parameter row",
+                subtitle: fluence,
+              };
+            },
           },
         }),
       ],
     }),
     defineField({
-      name: "technique",
-      title: "Technique",
-      type: "array",
+      name: "sessionGuidance",
+      title: "Session guidance",
+      type: "object",
       group: "treatment",
-      of: [defineArrayMember({ type: "block" })],
+      fields: [
+        defineField({
+          name: "expectedSessions",
+          title: "Expected number of sessions",
+          type: "string",
+          description: 'e.g., "4-6", "3 minimum".',
+        }),
+        defineField({
+          name: "spacingWeeks",
+          title: "Recommended spacing (weeks)",
+          type: "string",
+          description: 'e.g., "4-6 weeks", "2 weeks".',
+        }),
+        defineField({
+          name: "notes",
+          title: "Notes",
+          type: "array",
+          of: [defineArrayMember({ type: "block" })],
+        }),
+      ],
+    }),
+
+    // ----- Biologic control -----
+    defineField({
+      name: "prepKitRequired",
+      title: "Prep kit required",
+      type: "boolean",
+      group: "biologic",
+      initialValue: true,
     }),
     defineField({
-      name: "preTreatment",
-      title: "Pre-treatment",
-      type: "array",
-      group: "treatment",
-      of: [defineArrayMember({ type: "block" })],
+      name: "recoveryKitRequired",
+      title: "Recovery kit required",
+      type: "boolean",
+      group: "biologic",
+      initialValue: true,
     }),
     defineField({
-      name: "postTreatment",
-      title: "Post-treatment",
-      type: "array",
-      group: "treatment",
-      of: [defineArrayMember({ type: "block" })],
+      name: "maintenanceKitRecommended",
+      title: "Maintenance kit recommended",
+      type: "boolean",
+      group: "biologic",
+      initialValue: true,
     }),
     defineField({
-      name: "kitRecommendation",
-      title: "Kit recommendation",
-      type: "string",
-      group: "treatment",
-      description: "Optional reference to a biologic control kit.",
+      name: "biologicControlNotes",
+      title: "Biologic control notes",
+      type: "array",
+      group: "biologic",
+      of: [defineArrayMember({ type: "block" })],
     }),
+
+    // ----- Contraindications + outcomes -----
     defineField({
       name: "contraindications",
       title: "Contraindications",
       type: "array",
       group: "clinical",
-      of: [defineArrayMember({ type: "string" })],
+      of: [defineArrayMember({ type: "block" })],
     }),
     defineField({
       name: "expectedOutcomes",
@@ -196,31 +261,39 @@ export const protocol = defineType({
       group: "outcomes",
       of: [defineArrayMember({ type: "block" })],
     }),
+
+    // ----- Supporting content -----
     defineField({
-      name: "relatedProtocols",
-      title: "Related protocols",
+      name: "supportingDocuments",
+      title: "Supporting documents",
       type: "array",
       group: "meta",
-      of: [defineArrayMember({ type: "reference", to: [{ type: "protocol" }] })],
+      of: [
+        defineArrayMember({
+          type: "file",
+          options: { accept: "application/pdf" },
+        }),
+      ],
+      description: "Optional PDF attachments (training, reference sheets).",
     }),
     defineField({
-      name: "clinicalReferences",
+      name: "references",
       title: "Clinical references",
       type: "array",
       group: "meta",
       of: [
         defineArrayMember({
           type: "object",
-          name: "clinicalReference",
+          name: "reference",
           fields: [
             defineField({
               name: "citation",
               title: "Citation",
               type: "text",
-              rows: 2,
+              rows: 3,
               validation: (rule) => rule.required(),
             }),
-            defineField({ name: "url", title: "URL", type: "url" }),
+            defineField({ name: "url", title: "URL (optional)", type: "url" }),
           ],
           preview: { select: { title: "citation" } },
         }),
@@ -228,10 +301,12 @@ export const protocol = defineType({
     }),
     defineField({
       name: "lastReviewed",
-      title: "Last reviewed",
+      title: "Last clinically reviewed",
       type: "date",
       group: "meta",
     }),
+
+    // ----- Status -----
     defineField({
       name: "status",
       title: "Status",
@@ -250,11 +325,15 @@ export const protocol = defineType({
     }),
   ],
   preview: {
-    select: { title: "title", indication: "indication.title", status: "status" },
+    select: {
+      title: "title",
+      indication: "indication.title",
+      status: "status",
+    },
     prepare({ title, indication, status }) {
       return {
-        title,
-        subtitle: `🔒 ${indication ?? "—"} · ${status}`,
+        title: title ?? "(untitled)",
+        subtitle: `🔒 ${indication ?? "—"} · ${status ?? "draft"}`,
       };
     },
   },

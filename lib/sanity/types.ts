@@ -21,75 +21,102 @@ export interface SanityImage {
 // =============================================================================
 // indication
 // =============================================================================
+// P4 mapping: Sanity `indication` document type → Supabase
+// `public.indication_categories` table. Sync handled by the webhook
+// in /api/webhooks/sanity/protocol on publish events.
 export interface Indication {
   _id: string;
   _type: "indication";
+  _rev?: string;
   _createdAt: string;
   _updatedAt: string;
   title: string;
   slug: SanitySlug;
   shortDescription?: string;
+  description?: PortableTextBlock[];
   icon?: string;
   displayOrder?: number;
+  sortOrder?: number;
   isPublic: boolean;
 }
 
 // =============================================================================
 // protocol  (GATED — never returned by public queries)
 // =============================================================================
-export type ProtocolDifficulty = "foundational" | "intermediate" | "advanced";
+// P4 schema. Replaces an earlier stub. Authoring lives in Sanity;
+// Supabase mirror at public.protocols + protocol_versions.
 export type ProtocolStatus = "draft" | "published" | "archived";
+export type FitzpatrickType = "I" | "II" | "III" | "IV" | "V" | "VI";
 
-export interface ProtocolParameter {
+export interface ProtocolParameterRow {
   _key: string;
-  _type: "parameter";
-  parameterName: string;
-  value: string;
-  notes?: string;
+  _type: "parameterRow";
+  wavelength?: string;
+  fluenceMin?: number;
+  fluenceMax?: number;
+  pulseDuration?: number;
+  spotSize?: string;
+  fitzpatrickAdjustment?: string;
+}
+
+export interface ProtocolSessionGuidance {
+  expectedSessions?: string;
+  spacingWeeks?: string;
+  notes?: PortableTextBlock[];
 }
 
 export interface ProtocolReference {
   _key: string;
-  _type: "clinicalReference";
+  _type: "reference";
   citation: string;
   url?: string;
 }
 
-export interface FitzpatrickRange {
-  min: number;
-  max: number;
-}
-
-export interface EstimatedSessions {
-  min?: number;
-  max?: number;
+export interface SanityFileAsset {
+  _key?: string;
+  _type: "file";
+  asset: SanityRef;
 }
 
 export interface Protocol {
   _id: string;
   _type: "protocol";
+  _rev?: string;
   _createdAt: string;
   _updatedAt: string;
+
+  // Identity
   title: string;
   slug: SanitySlug;
+  shortDescription?: string;
+
+  // Classification
   indication: SanityRef | Indication;
-  fitzpatrickRange: FitzpatrickRange;
-  difficulty: ProtocolDifficulty;
-  estimatedSessions?: EstimatedSessions;
-  sessionInterval?: string;
-  summary?: string;
-  clinicalRationale?: PortableTextBlock[];
-  parameters?: ProtocolParameter[];
-  technique?: PortableTextBlock[];
-  preTreatment?: PortableTextBlock[];
-  postTreatment?: PortableTextBlock[];
-  kitRecommendation?: string;
-  contraindications?: string[];
+  indicationTags?: string[];
+  fitzpatrickTypes?: FitzpatrickType[];
+
+  // Clinical content
+  overview?: PortableTextBlock[];
+  parameterEnvelope?: ProtocolParameterRow[];
+  sessionGuidance?: ProtocolSessionGuidance;
+
+  // Biologic control
+  prepKitRequired?: boolean;
+  recoveryKitRequired?: boolean;
+  maintenanceKitRecommended?: boolean;
+  biologicControlNotes?: PortableTextBlock[];
+
+  // Outcomes + safety
+  contraindications?: PortableTextBlock[];
   expectedOutcomes?: PortableTextBlock[];
   complications?: PortableTextBlock[];
-  relatedProtocols?: SanityRef[];
-  clinicalReferences?: ProtocolReference[];
+
+  // Supporting content
+  supportingDocuments?: SanityFileAsset[];
+  references?: ProtocolReference[];
   lastReviewed?: string;
+
+  // Status
   status: ProtocolStatus;
 }
 

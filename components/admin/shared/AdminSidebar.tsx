@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Users } from "lucide-react";
+import { LayoutGrid, Library, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Admin sidebar — extended each session as new features land. P2 ships
@@ -22,6 +22,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutGrid },
+  { href: "/admin/protocols", label: "Protocols", icon: Library },
   { href: "/admin/practices", label: "Practices", icon: Users },
 ];
 

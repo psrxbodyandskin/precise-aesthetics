@@ -4,10 +4,13 @@ import type {
   CaseStudy,
   Indication,
   PressItem,
-  Protocol,
   SanityEvent,
   SiteSettings,
 } from "./types";
+
+// Note: protocol queries moved to lib/sanity/protocols.ts in P4 alongside
+// the new Sanity schema. The portal-side practitioner viewer (P5) will
+// read from the Supabase mirror via lib/admin/protocols.ts equivalents.
 
 // =============================================================================
 // Tag helpers — used with next: { tags } for fine-grained ISR revalidation
@@ -99,60 +102,6 @@ export async function getPressItems(): Promise<PressItem[]> {
     PRESS_ITEMS_QUERY,
     {},
     { next: { tags: [tags.press] } },
-  );
-}
-
-// =============================================================================
-// Portal queries (gated — call only from authenticated routes)
-// =============================================================================
-
-const PROTOCOL_FIELDS = groq`
-  _id, _type, _createdAt, _updatedAt,
-  title, slug,
-  "indication": indication->{ _id, _type, title, slug, isPublic },
-  fitzpatrickRange, difficulty, estimatedSessions, sessionInterval,
-  summary, clinicalRationale, parameters, technique,
-  preTreatment, postTreatment, kitRecommendation,
-  contraindications, expectedOutcomes, complications,
-  "relatedProtocols": relatedProtocols[]->{ _id, title, slug },
-  clinicalReferences, lastReviewed, status
-`;
-
-const ALL_PUBLISHED_PROTOCOLS_QUERY = groq`*[_type == "protocol" && status == "published"] | order(title asc){
-  ${PROTOCOL_FIELDS}
-}`;
-
-export async function getAllPublishedProtocols(): Promise<Protocol[]> {
-  return sanityClient.fetch<Protocol[]>(
-    ALL_PUBLISHED_PROTOCOLS_QUERY,
-    {},
-    { next: { tags: [tags.protocols] } },
-  );
-}
-
-const PROTOCOL_BY_SLUG_QUERY = groq`*[_type == "protocol" && slug.current == $slug][0]{
-  ${PROTOCOL_FIELDS}
-}`;
-
-export async function getProtocolBySlug(slug: string): Promise<Protocol | null> {
-  return sanityClient.fetch<Protocol | null>(
-    PROTOCOL_BY_SLUG_QUERY,
-    { slug },
-    { next: { tags: [tags.protocols, tags.protocol(slug)] } },
-  );
-}
-
-const PROTOCOLS_BY_INDICATION_QUERY = groq`*[_type == "protocol" && status == "published" && indication->slug.current == $indicationSlug] | order(title asc){
-  ${PROTOCOL_FIELDS}
-}`;
-
-export async function getProtocolsByIndication(
-  indicationSlug: string,
-): Promise<Protocol[]> {
-  return sanityClient.fetch<Protocol[]>(
-    PROTOCOLS_BY_INDICATION_QUERY,
-    { indicationSlug },
-    { next: { tags: [tags.protocols] } },
   );
 }
 

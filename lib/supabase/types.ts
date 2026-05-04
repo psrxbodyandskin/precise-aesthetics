@@ -345,6 +345,147 @@ export interface Database {
           },
         ];
       };
+      indication_categories: {
+        Row: {
+          id: string;
+          sanity_id: string;
+          sanity_rev: string | null;
+          title: string;
+          slug: string;
+          short_description: string | null;
+          sort_order: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sanity_id: string;
+          sanity_rev?: string | null;
+          title: string;
+          slug: string;
+          short_description?: string | null;
+          sort_order?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["indication_categories"]["Insert"]>;
+        Relationships: [];
+      };
+      protocols: {
+        Row: {
+          id: string;
+          sanity_id: string;
+          sanity_rev: string | null;
+          title: string;
+          slug: string;
+          short_description: string | null;
+          indication_category_id: string | null;
+          indication_tags: string[];
+          fitzpatrick_types: string[];
+          status: "draft" | "published" | "archived";
+          current_version: string | null;
+          pending_major_bump: boolean;
+          last_published_at: string | null;
+          last_published_by: string | null;
+          last_synced_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sanity_id: string;
+          sanity_rev?: string | null;
+          title: string;
+          slug: string;
+          short_description?: string | null;
+          indication_category_id?: string | null;
+          indication_tags?: string[];
+          fitzpatrick_types?: string[];
+          status?: "draft" | "published" | "archived";
+          current_version?: string | null;
+          pending_major_bump?: boolean;
+          last_published_at?: string | null;
+          last_published_by?: string | null;
+          last_synced_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["protocols"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "protocols_indication_category_id_fkey";
+            columns: ["indication_category_id"];
+            referencedRelation: "indication_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      protocol_devices: {
+        Row: {
+          id: string;
+          protocol_id: string;
+          device_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          protocol_id: string;
+          device_id: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["protocol_devices"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "protocol_devices_protocol_id_fkey";
+            columns: ["protocol_id"];
+            referencedRelation: "protocols";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "protocol_devices_device_id_fkey";
+            columns: ["device_id"];
+            referencedRelation: "devices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      protocol_versions: {
+        Row: {
+          id: string;
+          protocol_id: string;
+          version: string;
+          title: string;
+          short_description: string | null;
+          indication_category_sanity_id: string | null;
+          indication_tags: string[];
+          fitzpatrick_types: string[];
+          sanity_snapshot: Json;
+          published_at: string;
+          published_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          protocol_id: string;
+          version: string;
+          title: string;
+          short_description?: string | null;
+          indication_category_sanity_id?: string | null;
+          indication_tags?: string[];
+          fitzpatrick_types?: string[];
+          sanity_snapshot: Json;
+          published_at?: string;
+          published_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["protocol_versions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "protocol_versions_protocol_id_fkey";
+            columns: ["protocol_id"];
+            referencedRelation: "protocols";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contact_messages: {
         Row: {
           id: string;
