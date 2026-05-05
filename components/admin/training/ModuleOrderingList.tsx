@@ -19,7 +19,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { GripVertical, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -189,6 +190,14 @@ function SortableRow({
           {isRequired ? " · Required" : " · Optional"}
         </p>
       </div>
+      <Link
+        href={`/admin/training/modules/${module.id}`}
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-ink-700/15 bg-bone-50 px-3 font-body text-caption text-ink-700 transition-colors duration-[150ms] hover:border-ink-700/35 hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
+        aria-label={`Edit ${module.title}`}
+      >
+        <Pencil className="size-3.5" strokeWidth={1.5} aria-hidden="true" />
+        Edit
+      </Link>
       <Button
         type="button"
         variant="secondary"

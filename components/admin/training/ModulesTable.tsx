@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { TrainingModuleRow } from "@/lib/admin/training";
 import { TrainingStatusChip } from "./TrainingStatusChip";
@@ -10,6 +13,7 @@ interface ModulesTableProps {
 const HEADER_TRACKING = { letterSpacing: "0.18em" } as const;
 
 export function ModulesTable({ modules }: ModulesTableProps) {
+  const router = useRouter();
   if (modules.length === 0) {
     return (
       <div className="rounded-md border border-ink-700/15 bg-bone-50 px-6 py-10 text-center">
@@ -39,7 +43,8 @@ export function ModulesTable({ modules }: ModulesTableProps) {
             {modules.map((m) => (
               <tr
                 key={m.id}
-                className="border-b border-ink-700/5 last:border-b-0 transition-colors duration-[150ms] hover:bg-bone-100"
+                onClick={() => router.push(`/admin/training/modules/${m.id}`)}
+                className="cursor-pointer border-b border-ink-700/5 last:border-b-0 transition-colors duration-[150ms] hover:bg-bone-100"
               >
                 <Td>
                   <Link
