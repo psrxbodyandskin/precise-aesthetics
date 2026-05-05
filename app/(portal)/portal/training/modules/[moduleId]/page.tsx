@@ -8,10 +8,10 @@ import {
   getModuleForPractice,
   signTrainingObjectUrl,
 } from "@/lib/portal/training";
+import { listAuthorizedUsersForPractice } from "@/lib/portal/treatments";
 import { PortalShell } from "@/components/portal/PortalShell";
-import { VideoPlayer } from "@/components/portal/training/VideoPlayer";
 import { ModuleMaterials } from "@/components/portal/training/ModuleMaterials";
-import { ModuleCompletionPanel } from "@/components/portal/training/ModuleCompletionPanel";
+import { ModulePlayerClient } from "@/components/portal/training/ModulePlayerClient";
 
 export const metadata: Metadata = {
   title: "Training module — Precise Aesthetics",
@@ -35,11 +35,14 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
 
   const { moduleId } = await params;
 
-  const detail = await getModuleForPractice({
-    moduleId,
-    practiceId: practice.id,
-    practiceUserId: null,
-  });
+  const [detail, authorizedUsers] = await Promise.all([
+    getModuleForPractice({
+      moduleId,
+      practiceId: practice.id,
+      practiceUserId: null,
+    }),
+    listAuthorizedUsersForPractice(),
+  ]);
   if (!detail) notFound();
 
   // Sign URLs (server-rendered; refresh page if expired)
@@ -65,17 +68,12 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
     })),
   );
 
-  // Resolve practice_authorized_users.id for the current auth user
-  // (matches treatment-logging entered_by_user_id pattern). Falls back
-  // to null if no roster row — completion buttons will toast a warning.
-  // Skipping inline lookup for v1; ack/cert components handle null
-  // gracefully and surface a clear toast. The user picker (P6 pattern)
-  // is the canonical attribution surface.
-  const practiceUserId: string | null = null;
+  // P9 fix: practice_user_id resolves through TrainingUserPicker
+  // (P6 entered-by pattern) inside ModulePlayerClient. The picker
+  // persists per-session in localStorage keyed on practice_id.
   void user;
 
   const watchPercent = detail.progress?.watch_percentage ?? 0;
-  const watchUnlocked = watchPercent >= detail.module.required_watch_percentage;
 
   return (
     <PortalShell practiceName={practice.name}>
@@ -120,37 +118,20 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
           )}
         </header>
 
-        {/* Video */}
-        <section className="mt-8">
-          {videoUrl ? (
-            <VideoPlayer
-              videoUrl={videoUrl}
-              moduleId={detail.module.id}
-              practiceUserId={practiceUserId ?? ""}
-              initialPositionSeconds={detail.progress?.last_position_seconds ?? 0}
-              initialWatchPercentage={watchPercent}
-              durationSeconds={detail.module.video_duration_seconds}
-              requiredWatchPercentage={detail.module.required_watch_percentage}
-              onWatchComplete={() => {}}
-            />
-          ) : (
-            <div className="rounded-md border border-dashed border-ink-700/20 bg-bone-50 p-8 text-center">
-              <p className="font-body text-caption text-ink-500">
-                Video not yet uploaded.
-              </p>
-            </div>
-          )}
-        </section>
-
-        {/* Completion */}
-        <div className="mt-8">
-          <ModuleCompletionPanel
+        {/* Picker + video + completion (client wrapper) */}
+        <div className="mt-10">
+          <ModulePlayerClient
+            practiceId={practice.id}
+            authorizedUsers={authorizedUsers}
+            videoUrl={videoUrl}
             moduleId={detail.module.id}
-            practiceUserId={practiceUserId}
-            watchPercentage={watchPercent}
+            initialPositionSeconds={
+              detail.progress?.last_position_seconds ?? 0
+            }
+            initialWatchPercentage={watchPercent}
+            durationSeconds={detail.module.video_duration_seconds}
             requiredWatchPercentage={detail.module.required_watch_percentage}
             isComplete={Boolean(detail.progress?.is_complete)}
-            watchUnlocked={watchUnlocked}
           />
         </div>
 

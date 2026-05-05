@@ -35,7 +35,7 @@ export function ModulesProgressList({
 
   function certify() {
     if (!practiceUserId) {
-      toast.error("Sign in as a practice user to complete certification.");
+      toast.error("Pick who's certifying above to finalize.");
       return;
     }
     startTransition(async () => {

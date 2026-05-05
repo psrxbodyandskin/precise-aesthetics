@@ -5,8 +5,9 @@ import { notFound, redirect } from "next/navigation";
 import { requirePractice } from "@/lib/auth/server";
 import { getPracticeForAuthUser } from "@/lib/portal/setup";
 import { getCurriculumForPractice } from "@/lib/portal/training";
+import { listAuthorizedUsersForPractice } from "@/lib/portal/treatments";
 import { PortalShell } from "@/components/portal/PortalShell";
-import { ModulesProgressList } from "@/components/portal/training/ModulesProgressList";
+import { CurriculumModulesClient } from "@/components/portal/training/CurriculumModulesClient";
 
 export const metadata: Metadata = {
   title: "Curriculum — Precise Aesthetics",
@@ -32,11 +33,14 @@ export default async function PortalCurriculumPage({
 
   const { curriculumId } = await params;
 
-  const detail = await getCurriculumForPractice({
-    curriculumId,
-    practiceId: practice.id,
-    practiceUserId: null,
-  });
+  const [detail, authorizedUsers] = await Promise.all([
+    getCurriculumForPractice({
+      curriculumId,
+      practiceId: practice.id,
+      practiceUserId: null,
+    }),
+    listAuthorizedUsersForPractice(),
+  ]);
   if (!detail) notFound();
 
   const requiredCount = detail.modules.filter((m) => m.is_required).length;
@@ -107,7 +111,11 @@ export default async function PortalCurriculumPage({
         </header>
 
         <div className="mt-12">
-          <ModulesProgressList detail={detail} practiceUserId={null} />
+          <CurriculumModulesClient
+            detail={detail}
+            practiceId={practice.id}
+            authorizedUsers={authorizedUsers}
+          />
         </div>
       </article>
     </PortalShell>

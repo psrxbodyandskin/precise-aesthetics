@@ -33,7 +33,7 @@ export function ModuleCompletionPanel({
 
   function complete() {
     if (!practiceUserId) {
-      toast.error("Sign in as a practice user to complete this module.");
+      toast.error("Pick who's training above to complete this module.");
       return;
     }
     if (!acknowledged) {
