@@ -271,6 +271,8 @@ export interface PortalModuleDetail {
   materials: ModuleMaterialRow[];
   progress: ModuleProgressRow | null;
   curriculum: { id: string; title: string; device_id: string } | null;
+  /** Next module by sort_order in the same curriculum, if any. */
+  nextModuleId: string | null;
 }
 
 export async function getModuleForPractice(args: {
@@ -338,11 +340,28 @@ export async function getModuleForPractice(args: {
     progress = (data as ModuleProgressRow | null) ?? null;
   }
 
+  // Next module within the parent curriculum (by sort_order).
+  let nextModuleId: string | null = null;
+  if (parentCurriculum) {
+    const { data: ordered } = await supabase
+      .from("curriculum_modules")
+      .select("module_id, sort_order")
+      .eq("curriculum_id", parentCurriculum.id)
+      .order("sort_order", { ascending: true });
+    if (ordered && ordered.length > 0) {
+      const idx = ordered.findIndex((r) => r.module_id === args.moduleId);
+      if (idx >= 0 && idx + 1 < ordered.length) {
+        nextModuleId = ordered[idx + 1]!.module_id;
+      }
+    }
+  }
+
   return {
     module: moduleRow as TrainingModuleRow,
     materials: (materials ?? []) as ModuleMaterialRow[],
     progress,
     curriculum: parentCurriculum,
+    nextModuleId,
   };
 }
 

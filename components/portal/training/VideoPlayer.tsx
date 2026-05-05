@@ -20,6 +20,9 @@ interface VideoPlayerProps {
   durationSeconds: number | null;
   requiredWatchPercentage: number;
   onWatchComplete: () => void;
+  /** Fires whenever the watch percentage advances. Lets the parent
+   *  reflect live progress in the completion panel without round-tripping. */
+  onProgressUpdate?: (watchPercentage: number) => void;
 }
 
 // P9 — Custom HTML5 video player with server-trusted progress.
@@ -39,6 +42,7 @@ export function VideoPlayer({
   durationSeconds,
   requiredWatchPercentage,
   onWatchComplete,
+  onProgressUpdate,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -116,7 +120,10 @@ export function VideoPlayer({
         100,
         Math.max(percent, Math.round((maxPositionRef.current / total) * 100)),
       );
-      if (newPercent !== percent) setPercent(newPercent);
+      if (newPercent !== percent) {
+        setPercent(newPercent);
+        onProgressUpdate?.(newPercent);
+      }
 
       // Save every 10s
       if (
@@ -142,6 +149,7 @@ export function VideoPlayer({
     duration,
     requiredWatchPercentage,
     onWatchComplete,
+    onProgressUpdate,
     saveProgress,
   ]);
 

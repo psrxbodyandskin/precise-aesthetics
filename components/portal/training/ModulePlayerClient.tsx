@@ -23,6 +23,10 @@ interface ModulePlayerClientProps {
   durationSeconds: number | null;
   requiredWatchPercentage: number;
   isComplete: boolean;
+
+  // Post-completion navigation
+  curriculumId: string | null;
+  nextModuleId: string | null;
 }
 
 const STORAGE_KEY_PREFIX = "pa.training.activeUser";
@@ -42,10 +46,18 @@ export function ModulePlayerClient({
   durationSeconds,
   requiredWatchPercentage,
   isComplete,
+  curriculumId,
+  nextModuleId,
 }: ModulePlayerClientProps) {
   const storageKey = `${STORAGE_KEY_PREFIX}.${practiceId}`;
   const [activeUserId, setActiveUserId] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
+  // Live watch percentage — updated by VideoPlayer's onProgressUpdate
+  // so the completion panel reflects progress in real time without
+  // waiting for a server round-trip.
+  const [liveWatchPercentage, setLiveWatchPercentage] = useState<number>(
+    initialWatchPercentage,
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -63,7 +75,7 @@ export function ModulePlayerClient({
     }
   }
 
-  const watchUnlocked = initialWatchPercentage >= requiredWatchPercentage;
+  const watchUnlocked = liveWatchPercentage >= requiredWatchPercentage;
 
   return (
     <div className="space-y-8">
@@ -101,6 +113,7 @@ export function ModulePlayerClient({
           durationSeconds={durationSeconds}
           requiredWatchPercentage={requiredWatchPercentage}
           onWatchComplete={() => {}}
+          onProgressUpdate={(pct) => setLiveWatchPercentage(pct)}
         />
       )}
 
@@ -108,10 +121,12 @@ export function ModulePlayerClient({
       <ModuleCompletionPanel
         moduleId={moduleId}
         practiceUserId={activeUserId || null}
-        watchPercentage={initialWatchPercentage}
+        watchPercentage={liveWatchPercentage}
         requiredWatchPercentage={requiredWatchPercentage}
         isComplete={isComplete}
         watchUnlocked={watchUnlocked}
+        curriculumId={curriculumId}
+        nextModuleId={nextModuleId}
       />
     </div>
   );

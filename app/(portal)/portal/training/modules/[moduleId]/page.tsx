@@ -132,6 +132,8 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
             durationSeconds={detail.module.video_duration_seconds}
             requiredWatchPercentage={detail.module.required_watch_percentage}
             isComplete={Boolean(detail.progress?.is_complete)}
+            curriculumId={detail.curriculum?.id ?? null}
+            nextModuleId={detail.nextModuleId}
           />
         </div>
 

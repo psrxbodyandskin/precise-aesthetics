@@ -65,7 +65,12 @@ export function TrainingUserPicker({
         >
           <SelectValue placeholder="Choose a user" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent
+          position="popper"
+          sideOffset={4}
+          align="start"
+          className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+        >
           {options.length === 0 && (
             <SelectItem value="__none__" disabled>
               No authorized users on this practice

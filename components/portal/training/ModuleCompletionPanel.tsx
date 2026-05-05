@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,10 @@ interface ModuleCompletionPanelProps {
   requiredWatchPercentage: number;
   isComplete: boolean;
   watchUnlocked: boolean;
+  /** Parent curriculum id — back-link target. */
+  curriculumId: string | null;
+  /** Next module in the curriculum sort order, if any. */
+  nextModuleId: string | null;
 }
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
@@ -26,6 +31,8 @@ export function ModuleCompletionPanel({
   requiredWatchPercentage,
   isComplete,
   watchUnlocked,
+  curriculumId,
+  nextModuleId,
 }: ModuleCompletionPanelProps) {
   const router = useRouter();
   const [acknowledged, setAcknowledged] = useState(false);
@@ -62,6 +69,7 @@ export function ModuleCompletionPanel({
     });
   }
 
+  // ----- Already complete: show next-step navigation -----
   if (isComplete) {
     return (
       <div className="rounded-md border border-brand-500/40 bg-brand-300/10 p-5">
@@ -69,7 +77,7 @@ export function ModuleCompletionPanel({
           <span className="inline-flex size-8 items-center justify-center rounded-full bg-brand-500 text-cream-50">
             <Check className="size-4" strokeWidth={2} aria-hidden="true" />
           </span>
-          <div>
+          <div className="flex-1">
             <p
               className="font-body text-overline font-medium uppercase text-brand-700"
               style={EYEBROW_TRACKING}
@@ -77,49 +85,83 @@ export function ModuleCompletionPanel({
               Complete
             </p>
             <p className="mt-1 font-body text-small text-ink-900">
-              You have completed this module.
+              You&apos;ve finished this module.
             </p>
           </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {nextModuleId && (
+            <Link
+              href={`/portal/training/modules/${nextModuleId}`}
+              className="inline-flex h-10 items-center gap-1.5 rounded-sm bg-midnight-800 px-4 font-body text-small font-medium text-cream-50 transition-colors duration-[150ms] hover:bg-midnight-700 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
+            >
+              Next module
+              <ArrowRight
+                className="size-3.5"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            </Link>
+          )}
+          {curriculumId && (
+            <Link
+              href={`/portal/training/${curriculumId}`}
+              className="inline-flex h-10 items-center gap-1.5 rounded-sm border border-ink-700/20 bg-bone-50 px-4 font-body text-small font-medium text-ink-700 transition-colors duration-[150ms] hover:border-ink-700/35 hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
+            >
+              <ArrowLeft
+                className="size-3.5"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+              Back to curriculum
+            </Link>
+          )}
         </div>
       </div>
     );
   }
 
+  // ----- Not yet at required watch percentage -----
   if (!watchUnlocked) {
+    const progressTowardUnlock = Math.min(
+      100,
+      Math.round((watchPercentage / requiredWatchPercentage) * 100),
+    );
     return (
       <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5">
-        <p
-          className="font-body text-overline font-medium uppercase text-ink-500"
-          style={EYEBROW_TRACKING}
-        >
-          Completion
-        </p>
-        <p
-          className="mt-2 font-body text-small text-ink-700"
-          style={{ lineHeight: 1.55 }}
-        >
-          Watch at least {requiredWatchPercentage}% of the video to enable
-          completion. ({watchPercentage}% so far.)
-        </p>
+        <div className="flex items-baseline justify-between gap-3">
+          <p
+            className="font-body text-overline font-medium uppercase text-ink-500"
+            style={EYEBROW_TRACKING}
+          >
+            Completion
+          </p>
+          <p
+            className="font-body text-caption text-ink-700"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {watchPercentage}% watched · unlocks at {requiredWatchPercentage}%
+          </p>
+        </div>
         <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-bone-200">
           <div
             className="h-full bg-brand-500 transition-all duration-300"
-            style={{
-              width: `${Math.min(100, (watchPercentage / requiredWatchPercentage) * 100)}%`,
-            }}
+            style={{ width: `${progressTowardUnlock}%` }}
           />
         </div>
       </div>
     );
   }
 
+  // ----- Watch threshold met, awaiting acknowledgment -----
   return (
-    <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5">
+    <div className="rounded-md border border-brand-500/30 bg-bone-50 p-5">
       <p
-        className="font-body text-overline font-medium uppercase text-ink-500"
+        className="font-body text-overline font-medium uppercase text-brand-700"
         style={EYEBROW_TRACKING}
       >
-        Completion
+        Ready to complete
       </p>
       <label className="mt-3 flex items-start gap-3 font-body text-small text-ink-900">
         <Checkbox
