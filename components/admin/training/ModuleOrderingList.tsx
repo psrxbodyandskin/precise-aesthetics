@@ -181,15 +181,18 @@ function SortableRow({
       >
         {String(index + 1).padStart(2, "0")}
       </span>
-      <div className="flex-1 min-w-0">
-        <p className="font-body text-small font-medium text-ink-900 truncate">
+      <Link
+        href={`/admin/training/modules/${module.id}`}
+        className="flex-1 min-w-0 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
+      >
+        <p className="font-body text-small font-medium text-ink-900 truncate hover:text-brand-700">
           {module.title}
         </p>
         <p className="font-body text-caption text-ink-500 truncate">
           /{module.slug}
           {isRequired ? " · Required" : " · Optional"}
         </p>
-      </div>
+      </Link>
       <Link
         href={`/admin/training/modules/${module.id}`}
         className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-ink-700/15 bg-bone-50 px-3 font-body text-caption text-ink-700 transition-colors duration-[150ms] hover:border-ink-700/35 hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
