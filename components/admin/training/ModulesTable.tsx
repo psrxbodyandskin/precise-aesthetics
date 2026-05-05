@@ -43,12 +43,12 @@ export function ModulesTable({ modules }: ModulesTableProps) {
             {modules.map((m) => (
               <tr
                 key={m.id}
-                onClick={() => router.push(`/admin/training/modules/${m.id}`)}
+                onClick={() => router.push(`/admin/training/modules/${m.id}/preview`)}
                 className="cursor-pointer border-b border-ink-700/5 last:border-b-0 transition-colors duration-[150ms] hover:bg-bone-100"
               >
                 <Td>
                   <Link
-                    href={`/admin/training/modules/${m.id}`}
+                    href={`/admin/training/modules/${m.id}/preview`}
                     className="block hover:text-brand-700"
                   >
                     <span className="block font-body text-small font-medium text-ink-900">
@@ -80,7 +80,7 @@ export function ModulesTable({ modules }: ModulesTableProps) {
         {modules.map((m) => (
           <li key={m.id}>
             <Link
-              href={`/admin/training/modules/${m.id}`}
+              href={`/admin/training/modules/${m.id}/preview`}
               className="block px-4 py-4 transition-colors duration-[150ms] hover:bg-bone-100"
             >
               <div className="mb-1 flex items-center justify-between gap-3">

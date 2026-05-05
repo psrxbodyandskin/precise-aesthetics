@@ -182,7 +182,7 @@ function SortableRow({
         {String(index + 1).padStart(2, "0")}
       </span>
       <Link
-        href={`/admin/training/modules/${module.id}`}
+        href={`/admin/training/modules/${module.id}/preview`}
         className="flex-1 min-w-0 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
       >
         <p className="font-body text-small font-medium text-ink-900 truncate hover:text-brand-700">
