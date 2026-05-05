@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertCircle, Inbox, LayoutGrid, Library, Users } from "lucide-react";
+import {
+  AlertCircle,
+  GraduationCap,
+  Inbox,
+  LayoutGrid,
+  Library,
+  Users,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Admin sidebar — extended each session as new features land. P2 ships
@@ -35,6 +42,7 @@ const NAV_ITEMS: NavItem[] = [
     badgeKey: "adverseEventsNew",
   },
   { href: "/admin/protocols", label: "Protocols", icon: Library },
+  { href: "/admin/training", label: "Training", icon: GraduationCap },
 ];
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
