@@ -1057,6 +1057,142 @@ export interface Database {
           },
         ];
       };
+      // P10 — notifications
+      notifications: {
+        Row: {
+          id: string;
+          created_at: string;
+          recipient_type: "practice" | "admin";
+          practice_id: string | null;
+          admin_user_id: string | null;
+          practice_user_id: string | null;
+          category: string;
+          title: string;
+          body: string | null;
+          link_path: string | null;
+          metadata: Json | null;
+          read_at: string | null;
+          event_id: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          recipient_type: "practice" | "admin";
+          practice_id?: string | null;
+          admin_user_id?: string | null;
+          practice_user_id?: string | null;
+          category: string;
+          title: string;
+          body?: string | null;
+          link_path?: string | null;
+          metadata?: Json | null;
+          read_at?: string | null;
+          event_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "notifications_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_admin_user_id_fkey";
+            columns: ["admin_user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_practice_user_id_fkey";
+            columns: ["practice_user_id"];
+            referencedRelation: "practice_authorized_users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          user_type: "practice" | "admin";
+          practice_id: string | null;
+          admin_user_id: string | null;
+          preferences: Json;
+          quiet_hours_start: string | null;
+          quiet_hours_end: string | null;
+          quiet_hours_timezone: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          user_type: "practice" | "admin";
+          practice_id?: string | null;
+          admin_user_id?: string | null;
+          preferences?: Json;
+          quiet_hours_start?: string | null;
+          quiet_hours_end?: string | null;
+          quiet_hours_timezone?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["notification_preferences"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_preferences_admin_user_id_fkey";
+            columns: ["admin_user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_dispatch_log: {
+        Row: {
+          id: string;
+          created_at: string;
+          notification_id: string | null;
+          channel: "in_app" | "email";
+          status:
+            | "sent"
+            | "failed"
+            | "skipped_preference"
+            | "skipped_quiet_hours";
+          resend_message_id: string | null;
+          error_message: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          notification_id?: string | null;
+          channel: "in_app" | "email";
+          status:
+            | "sent"
+            | "failed"
+            | "skipped_preference"
+            | "skipped_quiet_hours";
+          resend_message_id?: string | null;
+          error_message?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["notification_dispatch_log"]["Insert"]
+        >;
+        Relationships: [
+          {
+            foreignKeyName: "notification_dispatch_log_notification_id_fkey";
+            columns: ["notification_id"];
+            referencedRelation: "notifications";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1163,6 +1299,15 @@ export interface Database {
       is_user_certified_for_device: {
         Args: { p_practice_user_id: string; p_device_id: string };
         Returns: boolean;
+      };
+      // P10 — notifications.
+      get_unread_notification_count: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      mark_all_notifications_read: {
+        Args: Record<string, never>;
+        Returns: void;
       };
     };
     Enums: Record<string, never>;

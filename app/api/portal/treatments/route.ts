@@ -12,11 +12,11 @@ import {
 import { listAuthorizedUsersForPractice } from "@/lib/portal/treatments";
 import { logAudit } from "@/lib/admin/audit";
 import { getClientIp } from "@/lib/rate-limit";
-import { sendAdverseEventNotification } from "@/lib/resend/send";
 import {
   certifiedDeviceIdsForUser,
   protocolDeviceIds,
 } from "@/lib/portal/training";
+import { dispatchToAdmins } from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 
@@ -236,33 +236,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ---- Send adverse event email + log ----
+  // ---- Adverse event notification (P10 dispatch) ----
+  // Cut over from direct sendAdverseEventNotification() call to
+  // the unified dispatch system. Same email template, same
+  // recipients (all admins), now also lands in the in-app
+  // notification center + dispatch_log.
   if (values.adverseReaction && result.adverseEventId) {
-    // Fetch protocol title for the email
     const { data: protocolRow } = await supabase
       .from("protocols")
       .select("title")
       .eq("id", values.protocolId)
       .single();
-    const sendResult = await sendAdverseEventNotification({
-      adverseEventId: result.adverseEventId,
-      practiceName: practice.name,
-      treatmentDate: values.treatmentDate,
-      protocolTitle: protocolRow?.title ?? "Unknown protocol",
-      protocolVersionLabel: versionResult.versionLabel,
-      indication: values.indication,
-      patientFitzpatrick: values.patientFitzpatrick,
-      enteredByName: matchedUser.full_name,
-      description: values.adverseReactionDescription ?? "",
+    void dispatchToAdmins({
+      category: "adverse_event.new",
+      eventId: `adverse_event.new.${result.adverseEventId}`,
+      title: `Adverse event reported — ${practice.name}`,
+      body: values.adverseReactionDescription ?? "(no description)",
+      linkPath: `/admin/adverse-events/${result.adverseEventId}`,
+      metadata: {
+        adverse_event_id: result.adverseEventId,
+        practice_name: practice.name,
+        treatment_date: values.treatmentDate,
+        protocol_title: protocolRow?.title ?? "Unknown protocol",
+        protocol_version_label: versionResult.versionLabel,
+        indication: values.indication,
+        patient_fitzpatrick: values.patientFitzpatrick,
+        entered_by_name: matchedUser.full_name,
+        description: values.adverseReactionDescription ?? "",
+      },
     });
-    if (!sendResult.ok) {
-      console.error(
-        "[treatments] adverse event email failed",
-        sendResult.error,
-      );
-      // Don't fail the request — the treatment + adverse event row exist;
-      // admin will see it in the panel even if the email didn't go.
-    }
   }
 
   await logAudit({

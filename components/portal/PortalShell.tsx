@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Logo } from "@/components/marketing/Logo";
+import { NotificationBell } from "@/components/shared/notifications/NotificationBell";
 import { PortalNav } from "./PortalNav";
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
@@ -38,13 +39,14 @@ export function PortalShell({ practiceName, children }: PortalShellProps) {
               priority
             />
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 md:gap-6">
               <p
                 className="hidden font-body text-overline font-medium uppercase text-ink-700 md:block"
                 style={EYEBROW_TRACKING}
               >
                 {practiceName}
               </p>
+              <NotificationBell surface="portal" />
               <form action="/api/auth/logout?surface=portal" method="post">
                 <button
                   type="submit"

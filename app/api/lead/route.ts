@@ -8,6 +8,7 @@ import {
 import { captureServer } from "@/lib/analytics/posthog-server";
 import { EVENTS } from "@/lib/analytics/events";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { dispatchToAdmins } from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 
@@ -82,6 +83,25 @@ export async function POST(req: Request) {
       submittedAt,
     }),
   ]);
+
+  // P10 — fan out admin notification (in-app only per category;
+  // email skipped at the eligibility layer).
+  if (result.id) {
+    void dispatchToAdmins({
+      category: "inbox.new_lead",
+      eventId: `inbox.new_lead.${result.id}`,
+      title: `New homepage lead: ${values.email}`,
+      body: values.firstName
+        ? `${values.firstName}${values.lastName ? ` ${values.lastName}` : ""} signed up via the homepage capture.`
+        : `${values.email} signed up via the homepage capture.`,
+      linkPath: `/admin/inbox/lead/${result.id}`,
+      metadata: {
+        email: values.email,
+        first_name: values.firstName ?? null,
+        utm_source: values.utm?.source ?? null,
+      },
+    });
+  }
 
   // Stage 4: analytics
   await captureServer(values.email, EVENTS.LEAD_FORM_SUCCEEDED, {

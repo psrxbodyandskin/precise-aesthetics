@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { demoRequestSchema } from "@/lib/schemas/demo-request";
 import { insertDemoRequest } from "@/lib/supabase/demo-requests";
+import { dispatchToAdmins } from "@/lib/notifications/dispatch";
 import {
   sendDemoConfirmation,
   sendInternalDemoNotification,
@@ -67,6 +68,23 @@ export async function POST(req: Request) {
     sendDemoConfirmation({ to: values.email, firstName: values.firstName }),
     sendInternalDemoNotification({ values, submittedAt }),
   ]);
+
+  // P10 — fan out admin notification (in-app + email per spec).
+  if (result.id) {
+    void dispatchToAdmins({
+      category: "inbox.new_demo_request",
+      eventId: `inbox.new_demo_request.${result.id}`,
+      title: `Demo request: ${values.firstName} ${values.lastName} (${values.practiceName})`,
+      body: `${values.role} at ${values.practiceName}${values.state ? ` (${values.state})` : ""} requested a demo.`,
+      linkPath: `/admin/inbox/demo/${result.id}`,
+      metadata: {
+        email: values.email,
+        practice_name: values.practiceName,
+        role: values.role,
+        state: values.state ?? null,
+      },
+    });
+  }
 
   return NextResponse.json({
     ok: true,

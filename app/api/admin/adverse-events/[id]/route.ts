@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin/adverse-events";
 import { logAudit } from "@/lib/admin/audit";
 import { getClientIp } from "@/lib/rate-limit";
+import { dispatchToPractice } from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 
@@ -84,6 +85,28 @@ export async function PATCH(
     },
     ipAddress: getClientIp(req.headers),
   });
+
+  // P10 — notify the reporting practice when status flips.
+  // Mandatory category, idempotency keyed on (id, status) so a
+  // single status flip dispatches once even if PATCH is retried.
+  const adverseRow = data as { practice_id?: string | null; status?: string };
+  if (parsed.data.status && adverseRow.practice_id) {
+    const newStatus = parsed.data.status;
+    void dispatchToPractice(adverseRow.practice_id, {
+      category: "adverse_event.status_updated",
+      eventId: `adverse_event.status_updated.${id}.${newStatus}`,
+      title: `Adverse event marked ${newStatus.replace("_", " ")}`,
+      body:
+        newStatus === "addressed"
+          ? "Clinical staff finished reviewing your report."
+          : `Status moved to ${newStatus}.`,
+      linkPath: `/portal/treatments`,
+      metadata: {
+        adverse_event_id: id,
+        new_status: newStatus,
+      },
+    });
+  }
 
   return NextResponse.json({ ok: true, adverse: data });
 }

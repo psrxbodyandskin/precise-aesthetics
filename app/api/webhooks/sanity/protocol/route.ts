@@ -5,6 +5,12 @@ import {
   syncIndicationFromSanity,
   syncProtocolFromSanity,
 } from "@/lib/admin/protocols-sync";
+import { getServiceClient } from "@/lib/supabase/server";
+import {
+  dispatchToPractice,
+  listPracticesForDeviceOwnership,
+  listPracticesForProtocolUsage,
+} from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -102,11 +108,105 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // P10 — fan-out notifications on protocol publish.
+  // Two categories, partitioned by "has the practice used this
+  // protocol before?":
+  //   - protocol.updated_for_used_protocol (mandatory) → every
+  //     practice with at least one treatment row referencing it.
+  //   - protocol.new_for_owned_device (mutable) → every practice
+  //     that owns one of the protocol's devices but has NOT used
+  //     this protocol yet.
+  //
+  // Synchronous fan-out is fine at 1-10 practices (single-digit
+  // ms total). Threshold to migrate to a background job:
+  // ~100 practices total — at that scale this loop adds latency
+  // to webhook acks and Sanity may retry on slow responses.
+  if (event.type === "protocol" && result.action === "synced") {
+    try {
+      await dispatchProtocolPublishNotifications(event.id);
+    } catch (err) {
+      // Notification fan-out is best-effort. Don't fail the
+      // webhook ack — the sync itself succeeded.
+      console.error(
+        "[webhook/sanity/protocol] notification fan-out failed",
+        err,
+      );
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     action: result.action,
     reason: result.reason,
   });
+}
+
+async function dispatchProtocolPublishNotifications(
+  sanityProtocolId: string,
+): Promise<void> {
+  const supabase = getServiceClient();
+
+  // Look up the freshly-synced protocol row + device tags.
+  const { data: protocolRow } = await supabase
+    .from("protocols")
+    .select("id, title, current_version")
+    .eq("sanity_id", sanityProtocolId)
+    .single();
+  if (!protocolRow) return;
+  const protocolId = protocolRow.id as string;
+  const versionLabel = (protocolRow.current_version as string) ?? "current";
+
+  const { data: protoDeviceRows } = await supabase
+    .from("protocol_devices")
+    .select("device_id")
+    .eq("protocol_id", protocolId);
+  const deviceIds = ((protoDeviceRows ?? []) as Array<{ device_id: string }>)
+    .map((r) => r.device_id);
+
+  // Set 1: practices that have logged ≥1 treatment with this
+  // protocol → mandatory notification.
+  const usedBy = await listPracticesForProtocolUsage(protocolId);
+  const usedSet = new Set(usedBy);
+
+  // Set 2: practices that own any of the protocol's devices.
+  const ownerIdsArrays = await Promise.all(
+    deviceIds.map((d) => listPracticesForDeviceOwnership(d)),
+  );
+  const owners = new Set<string>();
+  for (const arr of ownerIdsArrays) for (const id of arr) owners.add(id);
+
+  // Used practices → mandatory category, version-keyed event_id.
+  for (const practiceId of usedBy) {
+    await dispatchToPractice(practiceId, {
+      category: "protocol.updated_for_used_protocol",
+      eventId: `protocol.updated.${protocolId}.${versionLabel}.practice.${practiceId}`,
+      title: `Protocol updated: ${protocolRow.title}`,
+      body: `A protocol your practice has used was republished as v${versionLabel}.`,
+      linkPath: `/portal/protocols`,
+      metadata: {
+        protocol_id: protocolId,
+        version_label: versionLabel,
+      },
+    });
+  }
+
+  // Owners minus users → mutable "new for your device" category.
+  // Event id intentionally lacks version so the FIRST time a
+  // practice gets this protocol notifies them; subsequent
+  // republishes for the same practice dedupe at the unique key.
+  for (const practiceId of owners) {
+    if (usedSet.has(practiceId)) continue;
+    await dispatchToPractice(practiceId, {
+      category: "protocol.new_for_owned_device",
+      eventId: `protocol.new.${protocolId}.practice.${practiceId}`,
+      title: `New protocol available: ${protocolRow.title}`,
+      body: "A protocol for one of your devices was published.",
+      linkPath: `/portal/protocols`,
+      metadata: {
+        protocol_id: protocolId,
+      },
+    });
+  }
 }
 
 // ------------------------------------------------------------

@@ -6,6 +6,7 @@ import {
   sendInternalContactNotification,
 } from "@/lib/resend/send";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { dispatchToAdmins } from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 
@@ -71,6 +72,22 @@ export async function POST(req: Request) {
     }),
     sendInternalContactNotification({ values, submittedAt }),
   ]);
+
+  // P10 — fan out admin notification (in-app + email per spec).
+  if (result.id) {
+    void dispatchToAdmins({
+      category: "inbox.new_contact_message",
+      eventId: `inbox.new_contact_message.${result.id}`,
+      title: `Contact: ${values.subject}`,
+      body: `${values.fullName}${values.organization ? ` (${values.organization})` : ""} sent a message: "${values.subject}"`,
+      linkPath: `/admin/inbox/contact/${result.id}`,
+      metadata: {
+        email: values.email,
+        full_name: values.fullName,
+        subject: values.subject,
+      },
+    });
+  }
 
   return NextResponse.json({
     ok: true,

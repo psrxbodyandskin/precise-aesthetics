@@ -10,6 +10,7 @@ import {
   TRAINING_AUDIT_TARGET_TYPES,
 } from "@/lib/schemas/training";
 import { getClientIp } from "@/lib/rate-limit";
+import { dispatchToAdmins } from "@/lib/notifications/dispatch";
 
 export const runtime = "nodejs";
 
@@ -69,6 +70,23 @@ export async function POST(
       certified_by_user_id: parsed.data.certifiedByUserId,
     },
     ipAddress: getClientIp(req.headers),
+  });
+
+  // P10 — admin notification when a practitioner certifies.
+  // Mutable category (admins can mute via preferences). Event id
+  // keyed on cert row id so re-clicking certify is a no-op.
+  void dispatchToAdmins({
+    category: "training.certification_completed",
+    eventId: `training.certification_completed.${result.certification.id}`,
+    title: `Certification completed at ${practice.name}`,
+    body: "A practitioner finished training and self-certified.",
+    linkPath: `/admin/practices/${practice.id}`,
+    metadata: {
+      practice_id: practice.id,
+      practice_user_id: parsed.data.certifiedByUserId,
+      device_id: result.certification.device_id,
+      curriculum_id: curriculumId,
+    },
   });
 
   return NextResponse.json({ ok: true, certification: result.certification });

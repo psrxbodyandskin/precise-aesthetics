@@ -11,6 +11,7 @@ import {
   LogOut,
   Users,
 } from "lucide-react";
+import { NotificationBell } from "@/components/shared/notifications/NotificationBell";
 import { cn } from "@/lib/utils";
 
 // Admin sidebar — extended each session as new features land. P2 ships
@@ -65,16 +66,19 @@ export function AdminSidebar({
       aria-label="Admin navigation"
       className="flex w-full flex-col border-b border-cream-50/10 bg-midnight-800 px-6 py-6 md:fixed md:top-0 md:left-0 md:h-screen md:w-[240px] md:border-b-0 md:border-r md:py-10"
     >
-      <div className="mb-8">
-        <p
-          className="font-body text-[11px] font-medium uppercase text-cream-300"
-          style={EYEBROW_TRACKING}
-        >
-          § Admin
-        </p>
-        <p className="mt-2 font-display text-[18px] leading-tight text-cream-50">
-          Precise Aesthetics
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-3">
+        <div>
+          <p
+            className="font-body text-[11px] font-medium uppercase text-cream-300"
+            style={EYEBROW_TRACKING}
+          >
+            § Admin
+          </p>
+          <p className="mt-2 font-display text-[18px] leading-tight text-cream-50">
+            Precise Aesthetics
+          </p>
+        </div>
+        <NotificationBell surface="admin" />
       </div>
 
       <nav className="flex flex-1 flex-row gap-1 md:flex-col">
