@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Logo } from "@/components/marketing/Logo";
 import { PortalNav } from "./PortalNav";
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
@@ -31,21 +30,13 @@ export function PortalShell({ practiceName, children }: PortalShellProps) {
         <div className="mx-auto max-w-[1200px] px-6 md:px-12">
           {/* Identity row */}
           <div className="flex items-center justify-between gap-6 py-5">
-            <Link
+            <Logo
+              variant="horizontal"
+              tone="navy"
+              width={240}
               href="/portal"
-              className="flex items-center gap-3 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm"
-              aria-label="Precise Aesthetics — portal home"
-            >
-              <Image
-                src="/brand/precise-aesthetics-brand-identity/assets/logos/precise-aesthetics-horizontal-navy@2x.png"
-                alt=""
-                aria-hidden="true"
-                width={160}
-                height={40}
-                priority
-                className="h-7 w-auto"
-              />
-            </Link>
+              priority
+            />
 
             <div className="flex items-center gap-6">
               <p

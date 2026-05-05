@@ -39,7 +39,6 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
     getModuleForPractice({
       moduleId,
       practiceId: practice.id,
-      practiceUserId: null,
     }),
     listAuthorizedUsersForPractice(),
   ]);
@@ -71,9 +70,9 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
   // P9 fix: practice_user_id resolves through TrainingUserPicker
   // (P6 entered-by pattern) inside ModulePlayerClient. The picker
   // persists per-session in localStorage keyed on practice_id.
+  // ModulePlayerClient picks the right progress row from
+  // detail.progressByUser based on the active picker user.
   void user;
-
-  const watchPercent = detail.progress?.watch_percentage ?? 0;
 
   return (
     <PortalShell practiceName={practice.name}>
@@ -125,13 +124,9 @@ export default async function PortalModulePage({ params }: ModulePageProps) {
             authorizedUsers={authorizedUsers}
             videoUrl={videoUrl}
             moduleId={detail.module.id}
-            initialPositionSeconds={
-              detail.progress?.last_position_seconds ?? 0
-            }
-            initialWatchPercentage={watchPercent}
+            progressByUser={detail.progressByUser}
             durationSeconds={detail.module.video_duration_seconds}
             requiredWatchPercentage={detail.module.required_watch_percentage}
-            isComplete={Boolean(detail.progress?.is_complete)}
             curriculumId={detail.curriculum?.id ?? null}
             nextModuleId={detail.nextModuleId}
           />

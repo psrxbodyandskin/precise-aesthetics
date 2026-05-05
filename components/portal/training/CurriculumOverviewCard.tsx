@@ -4,14 +4,30 @@ import { ArrowRight, Award, GraduationCap, ScrollText } from "lucide-react";
 import { CertificationStatusBadge } from "@/components/admin/training/CertificationStatusBadge";
 import type { PortalCurriculumOverview } from "@/lib/portal/training";
 
+// Client picks the active practice_authorized_users.id from the
+// picker and threads it through here so "View certificate" can
+// route to the per-user certificate URL.
 interface CurriculumOverviewCardProps {
-  overview: PortalCurriculumOverview;
+  overview: Pick<
+    PortalCurriculumOverview,
+    "device_id" | "device_display_name" | "device_slug" | "curriculum"
+  > & {
+    certification:
+      | import("@/lib/portal/training").PracticeCertificationRow
+      | null;
+    module_count: number;
+    total_duration_seconds: number;
+    modules_completed: number;
+    modules_required: number;
+  };
+  practiceUserId: string | null;
 }
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
 
 export function CurriculumOverviewCard({
   overview,
+  practiceUserId,
 }: CurriculumOverviewCardProps) {
   const { curriculum, certification, modules_completed, modules_required } =
     overview;
@@ -137,9 +153,9 @@ export function CurriculumOverviewCard({
           />
         </Link>
 
-        {isCertified && (
+        {isCertified && practiceUserId && (
           <Link
-            href={`/portal/certificates/${overview.device_id}`}
+            href={`/portal/certificates/${overview.device_id}/${practiceUserId}`}
             className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-ink-700/20 bg-bone-50 px-3 font-body text-small font-medium text-ink-700 transition-colors duration-[150ms] hover:border-ink-700/35 hover:text-ink-900 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
           >
             <Award className="size-3.5" strokeWidth={1.5} aria-hidden="true" />

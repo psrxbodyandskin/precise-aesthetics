@@ -408,18 +408,27 @@ export async function getCurriculumCertStats(
     .select("practice_id", { count: "exact", head: true })
     .eq("device_id", deviceId);
 
-  // Count cert rows by status for this device.
+  // P9.1 — certs are now per-user. Roll up to "practices with at
+  // least one certified user / at least one in-progress user" for
+  // the curriculum overview stats.
   const { data: certs } = await supabase
     .from("practice_certifications")
-    .select("status")
+    .select("practice_id, status")
     .eq("device_id", deviceId);
 
-  let certified = 0;
-  let inProgress = 0;
-  for (const c of certs ?? []) {
-    if (c.status === "certified") certified++;
-    else if (c.status === "in_progress") inProgress++;
+  const certifiedPractices = new Set<string>();
+  const inProgressPractices = new Set<string>();
+  for (const c of (certs ?? []) as Array<{ practice_id: string; status: string }>) {
+    if (c.status === "certified") certifiedPractices.add(c.practice_id);
+    else if (c.status === "in_progress")
+      inProgressPractices.add(c.practice_id);
   }
+  // A practice that has both 'certified' + 'in_progress' rows
+  // (different users) counts as certified.
+  for (const id of certifiedPractices) inProgressPractices.delete(id);
+
+  const certified = certifiedPractices.size;
+  const inProgress = inProgressPractices.size;
   const total = ownCount ?? 0;
   const notStarted = Math.max(0, total - certified - inProgress);
 
@@ -431,22 +440,33 @@ export async function getCurriculumCertStats(
   };
 }
 
-// Practice detail extension: fetch certifications + module progress
-// summary for a given practice, scoped to their owned devices.
-export async function getCertificationsForPractice(practiceId: string): Promise<
-  Array<{
-    device_id: string;
-    device_display_name: string;
-    device_slug: string;
-    certification: PracticeCertificationRow | null;
-  }>
-> {
+// Practice detail extension: per-device-per-user matrix of
+// certifications. P9.1 — certs are now per-user, so each device
+// can have multiple certs (one per certified user). The panel
+// below renders one row per (device, user) pair where a cert
+// exists, plus a "no certifications yet" state per device.
+export interface DeviceCertSummary {
+  device_id: string;
+  device_display_name: string;
+  device_slug: string;
+  certifications: Array<{
+    cert: PracticeCertificationRow;
+    user: {
+      id: string;
+      full_name: string;
+      role_label: string | null;
+      is_active: boolean;
+    } | null;
+  }>;
+}
+
+export async function getCertificationsForPractice(
+  practiceId: string,
+): Promise<DeviceCertSummary[]> {
   const supabase = getServiceClient();
   const { data: deviceRows } = await supabase
     .from("practice_devices")
-    .select(
-      "device_id, device:devices(id, display_name, slug)",
-    )
+    .select("device_id, device:devices(id, display_name, slug)")
     .eq("practice_id", practiceId);
 
   const { data: certs } = await supabase
@@ -454,24 +474,68 @@ export async function getCertificationsForPractice(practiceId: string): Promise<
     .select("*")
     .eq("practice_id", practiceId);
 
-  const certByDevice = new Map<string, PracticeCertificationRow>();
+  // Resolve practice user names referenced by the cert rows
+  const userIds = Array.from(
+    new Set(
+      ((certs ?? []) as PracticeCertificationRow[])
+        .map((c) => c.practice_user_id)
+        .filter(Boolean),
+    ),
+  );
+  const usersById = new Map<
+    string,
+    {
+      id: string;
+      full_name: string;
+      role_label: string | null;
+      is_active: boolean;
+    }
+  >();
+  if (userIds.length > 0) {
+    const { data: users } = await supabase
+      .from("practice_authorized_users")
+      .select("id, full_name, role_label, is_active")
+      .in("id", userIds);
+    for (const u of (users ?? []) as Array<{
+      id: string;
+      full_name: string;
+      role_label: string | null;
+      is_active: boolean;
+    }>) {
+      usersById.set(u.id, u);
+    }
+  }
+
+  // Group certs by device
+  const certsByDevice = new Map<string, PracticeCertificationRow[]>();
   for (const c of (certs ?? []) as PracticeCertificationRow[]) {
-    certByDevice.set(c.device_id, c);
+    const list = certsByDevice.get(c.device_id) ?? [];
+    list.push(c);
+    certsByDevice.set(c.device_id, list);
   }
 
   return (deviceRows ?? []).map((row) => {
     const dev = Array.isArray(row.device) ? row.device[0] : row.device;
+    const list = certsByDevice.get(row.device_id) ?? [];
     return {
       device_id: row.device_id,
       device_display_name: dev?.display_name ?? "Device",
       device_slug: dev?.slug ?? "",
-      certification: certByDevice.get(row.device_id) ?? null,
+      certifications: list.map((cert) => ({
+        cert,
+        user: usersById.get(cert.practice_user_id) ?? null,
+      })),
     };
   });
 }
 
+// P9.1 — setRecertFlag now scopes per-user. Caller must pass the
+// practice_authorized_users.id of the cert holder. (The route
+// signature is /admin/practices/[id]/certifications/[deviceId]/
+// users/[userId]/recert.)
 export async function setRecertFlag(args: {
   practiceId: string;
+  practiceUserId: string;
   deviceId: string;
   recertRequired: boolean;
   recertReason: string | null;
@@ -484,7 +548,195 @@ export async function setRecertFlag(args: {
       recert_reason: args.recertRequired ? args.recertReason : null,
     })
     .eq("practice_id", args.practiceId)
+    .eq("practice_user_id", args.practiceUserId)
     .eq("device_id", args.deviceId);
   if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+// ------------------------------------------------------------
+// Training progress per practice user (admin practice detail)
+// ------------------------------------------------------------
+// Per-curriculum, per-user breakdown: who's certified, who's in
+// progress, who hasn't started. Drives the "Training progress"
+// panel on /admin/practices/[id].
+
+export interface AdminTrainingUserStatus {
+  user: {
+    id: string;
+    full_name: string;
+    role_label: string | null;
+    is_active: boolean;
+  };
+  required_complete: number;
+  required_total: number;
+  /** Status derived from completion + certification ledger. */
+  status: "certified" | "complete" | "in_progress" | "not_started";
+}
+
+export interface AdminTrainingCurriculumProgress {
+  curriculum: TrainingCurriculumRow;
+  device: { id: string; display_name: string; slug: string };
+  certification: PracticeCertificationRow | null;
+  users: AdminTrainingUserStatus[];
+}
+
+export async function getTrainingProgressForPractice(
+  practiceId: string,
+): Promise<AdminTrainingCurriculumProgress[]> {
+  const supabase = getServiceClient();
+
+  // 1. Practice's owned devices
+  const { data: deviceRows } = await supabase
+    .from("practice_devices")
+    .select("device_id, device:devices(id, display_name, slug)")
+    .eq("practice_id", practiceId);
+  const deviceIds = (deviceRows ?? []).map((r) => r.device_id);
+  if (deviceIds.length === 0) return [];
+
+  // 2. Curricula for those devices (any status — admins see drafts too)
+  const { data: curricula } = await supabase
+    .from("training_curricula")
+    .select("*")
+    .in("device_id", deviceIds);
+  const curriculaList = (curricula ?? []) as TrainingCurriculumRow[];
+  if (curriculaList.length === 0) return [];
+
+  // 3. Required modules per curriculum
+  const curriculumIds = curriculaList.map((c) => c.id);
+  const { data: cmRows } = await supabase
+    .from("curriculum_modules")
+    .select("curriculum_id, module_id, is_required")
+    .in("curriculum_id", curriculumIds);
+  const requiredByCurriculum = new Map<string, Set<string>>();
+  for (const r of cmRows ?? []) {
+    if (!r.is_required) continue;
+    const set = requiredByCurriculum.get(r.curriculum_id) ?? new Set<string>();
+    set.add(r.module_id);
+    requiredByCurriculum.set(r.curriculum_id, set);
+  }
+
+  // 4. Authorized users on the practice
+  const { data: users } = await supabase
+    .from("practice_authorized_users")
+    .select("id, full_name, role_label, is_active")
+    .eq("practice_id", practiceId)
+    .order("sort_order", { ascending: true })
+    .order("full_name", { ascending: true });
+  const userList = (users ?? []) as Array<{
+    id: string;
+    full_name: string;
+    role_label: string | null;
+    is_active: boolean;
+  }>;
+
+  // 5. Module progress for the whole practice (filter by required
+  //    module_ids in code below)
+  const { data: progressRows } = await supabase
+    .from("module_progress")
+    .select("practice_user_id, module_id, is_complete, watch_percentage")
+    .eq("practice_id", practiceId);
+  const completedByUser = new Map<string, Set<string>>();
+  const startedByUser = new Map<string, Set<string>>();
+  for (const r of (progressRows ?? []) as Array<{
+    practice_user_id: string | null;
+    module_id: string;
+    is_complete: boolean;
+    watch_percentage: number;
+  }>) {
+    if (!r.practice_user_id) continue;
+    if (r.is_complete) {
+      const set = completedByUser.get(r.practice_user_id) ?? new Set<string>();
+      set.add(r.module_id);
+      completedByUser.set(r.practice_user_id, set);
+    } else if (r.watch_percentage > 0) {
+      const set = startedByUser.get(r.practice_user_id) ?? new Set<string>();
+      set.add(r.module_id);
+      startedByUser.set(r.practice_user_id, set);
+    }
+  }
+
+  // 6. Certifications for this practice's devices, keyed by
+  //    (device_id, practice_user_id) — per-user under P9.1.
+  const { data: certRows } = await supabase
+    .from("practice_certifications")
+    .select("*")
+    .eq("practice_id", practiceId)
+    .in("device_id", deviceIds);
+  const certByDeviceAndUser = new Map<string, PracticeCertificationRow>();
+  for (const c of (certRows ?? []) as PracticeCertificationRow[]) {
+    certByDeviceAndUser.set(`${c.device_id}::${c.practice_user_id}`, c);
+  }
+
+  // 7. Build the result
+  const deviceById = new Map<
+    string,
+    { id: string; display_name: string; slug: string }
+  >();
+  for (const row of deviceRows ?? []) {
+    const dev = Array.isArray(row.device) ? row.device[0] : row.device;
+    if (dev) deviceById.set(row.device_id, dev);
+  }
+
+  return curriculaList.map((curriculum) => {
+    const required = requiredByCurriculum.get(curriculum.id) ?? new Set<string>();
+    const requiredTotal = required.size;
+
+    const userStatuses: AdminTrainingUserStatus[] = userList.map((user) => {
+      const completedSet = completedByUser.get(user.id) ?? new Set<string>();
+      const startedSet = startedByUser.get(user.id) ?? new Set<string>();
+      let completedCount = 0;
+      let inProgressCount = 0;
+      for (const mid of required) {
+        if (completedSet.has(mid)) completedCount++;
+        else if (startedSet.has(mid)) inProgressCount++;
+      }
+
+      // Per-user cert lookup
+      const userCert =
+        certByDeviceAndUser.get(`${curriculum.device_id}::${user.id}`) ?? null;
+      const userCertified =
+        userCert?.status === "certified" &&
+        (!userCert.expires_at ||
+          new Date(userCert.expires_at).getTime() > Date.now());
+
+      let status: AdminTrainingUserStatus["status"];
+      if (userCertified) {
+        status = "certified";
+      } else if (
+        requiredTotal > 0 &&
+        completedCount === requiredTotal
+      ) {
+        status = "complete";
+      } else if (completedCount > 0 || inProgressCount > 0) {
+        status = "in_progress";
+      } else {
+        status = "not_started";
+      }
+      return {
+        user,
+        required_complete: completedCount,
+        required_total: requiredTotal,
+        status,
+      };
+    });
+
+    // "Lead cert" — first certified user's cert if any (used for
+    // the device-level summary chip in the panel header).
+    const leadCert =
+      userList
+        .map((u) => certByDeviceAndUser.get(`${curriculum.device_id}::${u.id}`))
+        .find((c) => c?.status === "certified") ?? null;
+
+    return {
+      curriculum,
+      device: deviceById.get(curriculum.device_id) ?? {
+        id: curriculum.device_id,
+        display_name: "Device",
+        slug: "",
+      },
+      certification: leadCert ?? null,
+      users: userStatuses,
+    };
+  });
 }

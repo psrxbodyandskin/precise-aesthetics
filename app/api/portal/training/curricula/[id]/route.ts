@@ -22,7 +22,6 @@ export async function GET(
   const detail = await getCurriculumForPractice({
     curriculumId: id,
     practiceId: practice.id,
-    practiceUserId: null,
   });
   if (!detail) {
     return NextResponse.json(

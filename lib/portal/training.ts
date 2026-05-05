@@ -28,141 +28,148 @@ export type PracticeCertificationRow =
   Database["public"]["Tables"]["practice_certifications"]["Row"];
 
 // ------------------------------------------------------------
-// listCurriculaForPractice
+// listCurriculaForPractice — P9.1 reshape
 // ------------------------------------------------------------
-// Returns one row per device the practice owns, joined with the
-// curriculum (if published) for that device + the practice's
-// certification status. Drives /portal/training overview.
+// Returns raw data for /portal/training overview cards. With per-
+// user gating, "have I watched this?" + "am I certified?" are
+// per-active-user. The client wrapper picks the active user from
+// localStorage and computes per-user stats from these maps.
 // ------------------------------------------------------------
 export interface PortalCurriculumOverview {
   device_id: string;
   device_display_name: string;
   device_slug: string;
   curriculum: TrainingCurriculumRow | null;
-  certification: PracticeCertificationRow | null;
-  module_count: number;
-  total_duration_seconds: number;
-  modules_completed: number;
-  modules_required: number;
+  /** Modules in the curriculum, in sort order. */
+  modules: Array<{
+    id: string;
+    is_required: boolean;
+    video_duration_seconds: number | null;
+  }>;
+  /** module_id → user_id → progress row. */
+  progressByModuleAndUser: Record<string, Record<string, ModuleProgressRow>>;
+  /** user_id → certification row for this device. */
+  certificationsByUser: Record<string, PracticeCertificationRow>;
 }
 
 export async function listCurriculaForPractice(
   practiceId: string,
-  practiceUserId: string | null,
 ): Promise<PortalCurriculumOverview[]> {
   const supabase = getServiceClient();
 
-  // 1. Practice's owned devices
   const { data: deviceRows } = await supabase
     .from("practice_devices")
     .select("device_id, device:devices(id, display_name, slug)")
     .eq("practice_id", practiceId);
-
   if (!deviceRows || deviceRows.length === 0) return [];
 
   const deviceIds = deviceRows.map((r) => r.device_id);
 
-  // 2. Curricula for those devices (published only)
   const { data: curricula } = await supabase
     .from("training_curricula")
     .select("*")
     .in("device_id", deviceIds)
     .eq("status", "published");
+  const curriculaList = (curricula ?? []) as TrainingCurriculumRow[];
 
-  // 3. Certifications
   const { data: certs } = await supabase
     .from("practice_certifications")
     .select("*")
     .eq("practice_id", practiceId)
     .in("device_id", deviceIds);
 
-  // 4. Module + duration counts per curriculum
-  const curriculumIds = (curricula ?? []).map((c) => c.id);
+  const curriculumIds = curriculaList.map((c) => c.id);
   const { data: cmRows } = curriculumIds.length
     ? await supabase
         .from("curriculum_modules")
         .select(
-          "curriculum_id, is_required, module:training_modules(id, video_duration_seconds)",
+          "curriculum_id, is_required, sort_order, module:training_modules(id, video_duration_seconds)",
         )
         .in("curriculum_id", curriculumIds)
+        .order("sort_order", { ascending: true })
     : { data: [] };
 
-  // 5. Practice user's progress for those modules
   const allModuleIds: string[] = [];
   for (const r of cmRows ?? []) {
     const mod = Array.isArray(r.module) ? r.module[0] : r.module;
     if (mod?.id) allModuleIds.push(mod.id);
   }
-  const uniqueModuleIds = Array.from(new Set(allModuleIds));
 
-  let progressByModule = new Map<string, ModuleProgressRow>();
-  if (uniqueModuleIds.length > 0) {
-    let q = supabase
+  // module_id → user_id → progress
+  const progressByModuleAndUser = new Map<
+    string,
+    Record<string, ModuleProgressRow>
+  >();
+  if (allModuleIds.length > 0) {
+    const { data } = await supabase
       .from("module_progress")
       .select("*")
       .eq("practice_id", practiceId)
-      .in("module_id", uniqueModuleIds);
-    if (practiceUserId) q = q.eq("practice_user_id", practiceUserId);
-    const { data: progressRows } = await q;
-    progressByModule = new Map(
-      ((progressRows ?? []) as ModuleProgressRow[]).map((p) => [p.module_id, p]),
-    );
+      .in("module_id", allModuleIds);
+    for (const p of (data ?? []) as ModuleProgressRow[]) {
+      if (!p.practice_user_id) continue;
+      const existing = progressByModuleAndUser.get(p.module_id) ?? {};
+      existing[p.practice_user_id] = p;
+      progressByModuleAndUser.set(p.module_id, existing);
+    }
   }
 
   const curriculumByDevice = new Map<string, TrainingCurriculumRow>();
-  for (const c of (curricula ?? []) as TrainingCurriculumRow[]) {
-    curriculumByDevice.set(c.device_id, c);
-  }
-  const certByDevice = new Map<string, PracticeCertificationRow>();
+  for (const c of curriculaList) curriculumByDevice.set(c.device_id, c);
+
+  // device_id → user_id → cert
+  const certsByDeviceAndUser = new Map<
+    string,
+    Record<string, PracticeCertificationRow>
+  >();
   for (const c of (certs ?? []) as PracticeCertificationRow[]) {
-    certByDevice.set(c.device_id, c);
+    const existing = certsByDeviceAndUser.get(c.device_id) ?? {};
+    if (c.practice_user_id) existing[c.practice_user_id] = c;
+    certsByDeviceAndUser.set(c.device_id, existing);
   }
 
-  // Build per-curriculum stats
-  const statsByCurriculum = new Map<
+  // Modules per curriculum (ordered)
+  const modulesByCurriculum = new Map<
     string,
-    { count: number; duration: number; required: number; completed: number }
+    Array<{ id: string; is_required: boolean; video_duration_seconds: number | null }>
   >();
   for (const r of cmRows ?? []) {
     const mod = Array.isArray(r.module) ? r.module[0] : r.module;
-    if (!mod) continue;
-    const stats = statsByCurriculum.get(r.curriculum_id) ?? {
-      count: 0,
-      duration: 0,
-      required: 0,
-      completed: 0,
-    };
-    stats.count++;
-    stats.duration += mod.video_duration_seconds ?? 0;
-    if (r.is_required) {
-      stats.required++;
-      const prog = progressByModule.get(mod.id);
-      if (prog?.is_complete) stats.completed++;
-    }
-    statsByCurriculum.set(r.curriculum_id, stats);
+    if (!mod?.id) continue;
+    const list = modulesByCurriculum.get(r.curriculum_id) ?? [];
+    list.push({
+      id: mod.id,
+      is_required: r.is_required,
+      video_duration_seconds: mod.video_duration_seconds ?? null,
+    });
+    modulesByCurriculum.set(r.curriculum_id, list);
   }
 
   return deviceRows.map((row) => {
     const dev = Array.isArray(row.device) ? row.device[0] : row.device;
     const curriculum = curriculumByDevice.get(row.device_id) ?? null;
-    const stats = curriculum
-      ? statsByCurriculum.get(curriculum.id) ?? {
-          count: 0,
-          duration: 0,
-          required: 0,
-          completed: 0,
-        }
-      : { count: 0, duration: 0, required: 0, completed: 0 };
+    const modules = curriculum
+      ? modulesByCurriculum.get(curriculum.id) ?? []
+      : [];
+
+    // Trim progress to only the modules in this curriculum.
+    const progressByModuleAndUserForThis: Record<
+      string,
+      Record<string, ModuleProgressRow>
+    > = {};
+    for (const m of modules) {
+      const entry = progressByModuleAndUser.get(m.id);
+      if (entry) progressByModuleAndUserForThis[m.id] = entry;
+    }
+
     return {
       device_id: row.device_id,
       device_display_name: dev?.display_name ?? "Device",
       device_slug: dev?.slug ?? "",
       curriculum,
-      certification: certByDevice.get(row.device_id) ?? null,
-      module_count: stats.count,
-      total_duration_seconds: stats.duration,
-      modules_completed: stats.completed,
-      modules_required: stats.required,
+      modules,
+      progressByModuleAndUser: progressByModuleAndUserForThis,
+      certificationsByUser: certsByDeviceAndUser.get(row.device_id) ?? {},
     };
   });
 }
@@ -178,15 +185,17 @@ export interface PortalCurriculumDetail {
     sort_order: number;
     is_required: boolean;
     module: TrainingModuleRow;
-    progress: ModuleProgressRow | null;
+    /** Progress rows for this module across every practice user.
+     *  The active picker user picks the right one client-side. */
+    progressByUser: Record<string, ModuleProgressRow>;
   }>;
-  certification: PracticeCertificationRow | null;
+  /** Per-user certifications for this curriculum's device. */
+  certificationsByUser: Record<string, PracticeCertificationRow>;
 }
 
 export async function getCurriculumForPractice(args: {
   curriculumId: string;
   practiceId: string;
-  practiceUserId: string | null;
 }): Promise<PortalCurriculumDetail | null> {
   const supabase = getServiceClient();
 
@@ -223,26 +232,37 @@ export async function getCurriculumForPractice(args: {
     if (mod?.id) moduleIds.push(mod.id);
   }
 
-  let progressByModule = new Map<string, ModuleProgressRow>();
+  // Map: module_id → user_id → progress row
+  const progressByModuleAndUser = new Map<
+    string,
+    Record<string, ModuleProgressRow>
+  >();
   if (moduleIds.length > 0) {
-    let q = supabase
+    const { data } = await supabase
       .from("module_progress")
       .select("*")
       .eq("practice_id", args.practiceId)
       .in("module_id", moduleIds);
-    if (args.practiceUserId) q = q.eq("practice_user_id", args.practiceUserId);
-    const { data } = await q;
-    progressByModule = new Map(
-      ((data ?? []) as ModuleProgressRow[]).map((p) => [p.module_id, p]),
-    );
+    for (const p of (data ?? []) as ModuleProgressRow[]) {
+      if (!p.practice_user_id) continue;
+      const existing = progressByModuleAndUser.get(p.module_id) ?? {};
+      existing[p.practice_user_id] = p;
+      progressByModuleAndUser.set(p.module_id, existing);
+    }
   }
 
-  const { data: cert } = await supabase
+  // P9.1 — fetch ALL certs for this practice+device. Multiple
+  // users on the practice can each hold their own cert; client
+  // resolves the active picker user's cert.
+  const { data: certs } = await supabase
     .from("practice_certifications")
     .select("*")
     .eq("practice_id", args.practiceId)
-    .eq("device_id", curriculumRow.device_id)
-    .maybeSingle();
+    .eq("device_id", curriculumRow.device_id);
+  const certificationsByUser: Record<string, PracticeCertificationRow> = {};
+  for (const c of (certs ?? []) as PracticeCertificationRow[]) {
+    if (c.practice_user_id) certificationsByUser[c.practice_user_id] = c;
+  }
 
   return {
     curriculum: curriculumRow,
@@ -256,10 +276,10 @@ export async function getCurriculumForPractice(args: {
         sort_order: r.sort_order,
         is_required: r.is_required,
         module: mod as TrainingModuleRow,
-        progress: progressByModule.get(mod?.id ?? "") ?? null,
+        progressByUser: progressByModuleAndUser.get(mod?.id ?? "") ?? {},
       };
     }),
-    certification: (cert as PracticeCertificationRow | null) ?? null,
+    certificationsByUser,
   };
 }
 
@@ -269,7 +289,11 @@ export async function getCurriculumForPractice(args: {
 export interface PortalModuleDetail {
   module: TrainingModuleRow;
   materials: ModuleMaterialRow[];
-  progress: ModuleProgressRow | null;
+  /** All progress rows for this module, keyed by practice_user_id.
+   *  The client picks the right one based on the active picker user
+   *  (we can't filter on the server because the picker hydrates
+   *  from localStorage after SSR). */
+  progressByUser: Record<string, ModuleProgressRow>;
   curriculum: { id: string; title: string; device_id: string } | null;
   /** Next module by sort_order in the same curriculum, if any. */
   nextModuleId: string | null;
@@ -278,7 +302,6 @@ export interface PortalModuleDetail {
 export async function getModuleForPractice(args: {
   moduleId: string;
   practiceId: string;
-  practiceUserId: string | null;
 }): Promise<PortalModuleDetail | null> {
   const supabase = getServiceClient();
 
@@ -328,16 +351,18 @@ export async function getModuleForPractice(args: {
     .eq("module_id", args.moduleId)
     .order("sort_order", { ascending: true });
 
-  let progress: ModuleProgressRow | null = null;
-  if (args.practiceUserId) {
-    const { data } = await supabase
-      .from("module_progress")
-      .select("*")
-      .eq("practice_id", args.practiceId)
-      .eq("practice_user_id", args.practiceUserId)
-      .eq("module_id", args.moduleId)
-      .maybeSingle();
-    progress = (data as ModuleProgressRow | null) ?? null;
+  // Fetch progress rows for every practice_user on this module.
+  // Client-side picker decides which row to show based on activeUserId.
+  const { data: progressRows } = await supabase
+    .from("module_progress")
+    .select("*")
+    .eq("practice_id", args.practiceId)
+    .eq("module_id", args.moduleId);
+  const progressByUser: Record<string, ModuleProgressRow> = {};
+  for (const row of (progressRows ?? []) as ModuleProgressRow[]) {
+    if (row.practice_user_id) {
+      progressByUser[row.practice_user_id] = row;
+    }
   }
 
   // Next module within the parent curriculum (by sort_order).
@@ -359,7 +384,7 @@ export async function getModuleForPractice(args: {
   return {
     module: moduleRow as TrainingModuleRow,
     materials: (materials ?? []) as ModuleMaterialRow[],
-    progress,
+    progressByUser,
     curriculum: parentCurriculum,
     nextModuleId,
   };
@@ -522,13 +547,14 @@ export async function certifyCurriculum(args: {
     };
   }
 
-  // Any practice user counts toward completion (Q8 + portal flow:
-  // certification is per-practice, not per-user; the certified_by
-  // is whoever clicks the button).
+  // P9.1 — per-user gating. Only THIS user's completed modules
+  // count. Other users on the practice can't carry someone over
+  // the certify threshold.
   const { data: completed } = await supabase
     .from("module_progress")
     .select("module_id")
     .eq("practice_id", args.practiceId)
+    .eq("practice_user_id", args.practiceUserId)
     .eq("is_complete", true)
     .in("module_id", requiredIds);
   const completedSet = new Set(
@@ -538,18 +564,19 @@ export async function certifyCurriculum(args: {
     if (!completedSet.has(id)) {
       return {
         ok: false,
-        error: "Not all required modules are complete.",
+        error: "Not all required modules are complete for this user.",
       };
     }
   }
 
   const nowIso = new Date().toISOString();
-  // Upsert (might already exist as 'in_progress')
+  // Upsert (might already exist as 'in_progress' for this user)
   const { data, error } = await supabase
     .from("practice_certifications")
     .upsert(
       {
         practice_id: args.practiceId,
+        practice_user_id: args.practiceUserId,
         device_id: curriculum.device_id,
         curriculum_id: args.curriculumId,
         status: "certified",
@@ -558,7 +585,7 @@ export async function certifyCurriculum(args: {
         recert_required: false,
         recert_reason: null,
       },
-      { onConflict: "practice_id,device_id" },
+      { onConflict: "practice_id,practice_user_id,device_id" },
     )
     .select("*")
     .single();
@@ -572,17 +599,17 @@ export async function certifyCurriculum(args: {
 }
 
 // ------------------------------------------------------------
-// Certification gate — used by both UI filter and POST treatment route
+// Certification gate — per-user (P9.1)
 // ------------------------------------------------------------
-export async function isPracticeCertifiedForDevice(
-  practiceId: string,
+export async function isUserCertifiedForDevice(
+  practiceUserId: string,
   deviceId: string,
 ): Promise<boolean> {
   const supabase = getServiceClient();
   const { data, error } = await supabase.rpc(
-    "is_practice_certified_for_device",
+    "is_user_certified_for_device",
     {
-      p_practice_id: practiceId,
+      p_practice_user_id: practiceUserId,
       p_device_id: deviceId,
     },
   );
@@ -602,14 +629,17 @@ export async function protocolDeviceIds(protocolId: string): Promise<string[]> {
   return ((data ?? []) as Array<{ device_id: string }>).map((r) => r.device_id);
 }
 
-export async function certifiedDeviceIdsForPractice(
-  practiceId: string,
+// P9.1 — list of devices a specific practice user is certified for.
+// Replaces certifiedDeviceIdsForPractice. Used by the treatment
+// form to filter the entered_by dropdown + the protocol selector.
+export async function certifiedDeviceIdsForUser(
+  practiceUserId: string,
 ): Promise<string[]> {
   const supabase = getServiceClient();
   const { data } = await supabase
     .from("practice_certifications")
     .select("device_id, status, expires_at")
-    .eq("practice_id", practiceId)
+    .eq("practice_user_id", practiceUserId)
     .eq("status", "certified");
   const now = Date.now();
   return ((data ?? []) as Array<{
@@ -619,6 +649,61 @@ export async function certifiedDeviceIdsForPractice(
   }>)
     .filter((c) => !c.expires_at || new Date(c.expires_at).getTime() > now)
     .map((c) => c.device_id);
+}
+
+// Practice-wide union: any device any user on the practice is
+// certified for. Used by the /portal/treatments/new gate (the
+// page renders the form if at least one user can log; per-user
+// gating happens on the entered_by dropdown).
+export async function anyCertifiedDeviceIdsForPractice(
+  practiceId: string,
+): Promise<string[]> {
+  const supabase = getServiceClient();
+  const { data } = await supabase
+    .from("practice_certifications")
+    .select("device_id, status, expires_at")
+    .eq("practice_id", practiceId)
+    .eq("status", "certified");
+  const now = Date.now();
+  return Array.from(
+    new Set(
+      ((data ?? []) as Array<{
+        device_id: string;
+        status: string;
+        expires_at: string | null;
+      }>)
+        .filter((c) => !c.expires_at || new Date(c.expires_at).getTime() > now)
+        .map((c) => c.device_id),
+    ),
+  );
+}
+
+// Map: practice_user_id → Set<device_id> of devices they're
+// certified for. Used by the treatment form to filter entered_by
+// to users who can log THIS protocol's devices.
+export async function certifiedDeviceIdsByUserForPractice(
+  practiceId: string,
+): Promise<Map<string, Set<string>>> {
+  const supabase = getServiceClient();
+  const { data } = await supabase
+    .from("practice_certifications")
+    .select("practice_user_id, device_id, status, expires_at")
+    .eq("practice_id", practiceId)
+    .eq("status", "certified");
+  const now = Date.now();
+  const map = new Map<string, Set<string>>();
+  for (const c of (data ?? []) as Array<{
+    practice_user_id: string;
+    device_id: string;
+    status: string;
+    expires_at: string | null;
+  }>) {
+    if (c.expires_at && new Date(c.expires_at).getTime() <= now) continue;
+    const set = map.get(c.practice_user_id) ?? new Set<string>();
+    set.add(c.device_id);
+    map.set(c.practice_user_id, set);
+  }
+  return map;
 }
 
 // ------------------------------------------------------------
@@ -659,6 +744,7 @@ export interface CertificateData {
 export async function getCertificateData(args: {
   practiceId: string;
   deviceId: string;
+  practiceUserId: string;
 }): Promise<CertificateData | null> {
   const supabase = getServiceClient();
 
@@ -667,6 +753,7 @@ export async function getCertificateData(args: {
     .select("*")
     .eq("practice_id", args.practiceId)
     .eq("device_id", args.deviceId)
+    .eq("practice_user_id", args.practiceUserId)
     .single();
   if (!cert || cert.status !== "certified") return null;
 

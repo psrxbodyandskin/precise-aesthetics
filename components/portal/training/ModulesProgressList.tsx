@@ -24,14 +24,29 @@ export function ModulesProgressList({
   const requiredModules = detail.modules.filter((m) => m.is_required);
   const optionalModules = detail.modules.filter((m) => !m.is_required);
 
-  const allRequiredComplete =
-    requiredModules.length > 0 &&
-    requiredModules.every((m) => m.progress?.is_complete);
+  // Resolve the active user's progress on each module from the
+  // per-user map. Falls back to null while picker is unselected.
+  const progressFor = (m: (typeof detail.modules)[number]) =>
+    practiceUserId ? (m.progressByUser[practiceUserId] ?? null) : null;
 
+  // P9.1 — cert button gates on the ACTIVE user's own completion
+  // (matches the server-side certifyCurriculum gate). Picker user
+  // must personally have every required module marked complete.
+  const allRequiredCompleteForUser =
+    practiceUserId !== null &&
+    requiredModules.length > 0 &&
+    requiredModules.every(
+      (m) => m.progressByUser[practiceUserId]?.is_complete === true,
+    );
+
+  // Per-user certification lookup
+  const userCert = practiceUserId
+    ? (detail.certificationsByUser[practiceUserId] ?? null)
+    : null;
   const isCertified =
-    detail.certification?.status === "certified" &&
-    (!detail.certification.expires_at ||
-      new Date(detail.certification.expires_at).getTime() > Date.now());
+    userCert?.status === "certified" &&
+    (!userCert.expires_at ||
+      new Date(userCert.expires_at).getTime() > Date.now());
 
   function certify() {
     if (!practiceUserId) {
@@ -64,7 +79,7 @@ export function ModulesProgressList({
     <div className="space-y-8">
       {/* Certification CTA — surfaces only when all required modules done
           and not yet certified (or recert needed) */}
-      {allRequiredComplete && !isCertified && (
+      {allRequiredCompleteForUser && !isCertified && (
         <div className="rounded-md border border-brand-500/40 bg-brand-300/10 p-5">
           <div className="flex items-start gap-3">
             <Award
@@ -116,7 +131,7 @@ export function ModulesProgressList({
                 key={m.curriculum_module_id}
                 index={i}
                 module={m.module}
-                progress={m.progress}
+                progress={progressFor(m)}
                 isRequired={m.is_required}
               />
             ))}
@@ -144,7 +159,7 @@ export function ModulesProgressList({
                 key={m.curriculum_module_id}
                 index={requiredModules.length + i}
                 module={m.module}
-                progress={m.progress}
+                progress={progressFor(m)}
                 isRequired={m.is_required}
               />
             ))}

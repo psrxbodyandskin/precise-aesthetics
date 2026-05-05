@@ -31,7 +31,6 @@ export async function GET(
   const detail = await getModuleForPractice({
     moduleId: id,
     practiceId: practice.id,
-    practiceUserId: null,
   });
   if (!detail) {
     return NextResponse.json(
@@ -66,7 +65,8 @@ export async function GET(
     module: detail.module,
     curriculum: detail.curriculum,
     materials: materialsWithUrls,
-    progress: detail.progress,
+    progressByUser: detail.progressByUser,
+    nextModuleId: detail.nextModuleId,
     videoUrl,
   });
 }

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { TrainingUserPicker } from "./TrainingUserPicker";
 import { VideoPlayer } from "./VideoPlayer";
 import { ModuleCompletionPanel } from "./ModuleCompletionPanel";
+import type { ModuleProgressRow } from "@/lib/portal/training";
 
 interface UserOption {
   id: string;
@@ -18,13 +19,12 @@ interface ModulePlayerClientProps {
 
   videoUrl: string | null;
   moduleId: string;
-  initialPositionSeconds: number;
-  initialWatchPercentage: number;
+  /** Progress rows keyed by practice_user_id. Picker picks the
+   *  right one client-side (server can't know who's active). */
+  progressByUser: Record<string, ModuleProgressRow>;
   durationSeconds: number | null;
   requiredWatchPercentage: number;
-  isComplete: boolean;
 
-  // Post-completion navigation
   curriculumId: string | null;
   nextModuleId: string | null;
 }
@@ -32,32 +32,22 @@ interface ModulePlayerClientProps {
 const STORAGE_KEY_PREFIX = "pa.training.activeUser";
 
 // Picker holds the active practice_authorized_users.id — drives
-// progress saves (every 10s) and the acknowledgment/complete action.
-// Without a selection, the video doesn't render (progress save would
-// 400 with "practiceUserId required"); a clear callout asks the user
-// to identify themselves first.
+// progress saves (every 10s), the acknowledge action, and the
+// "have I watched this?" indicator.
 export function ModulePlayerClient({
   practiceId,
   authorizedUsers,
   videoUrl,
   moduleId,
-  initialPositionSeconds,
-  initialWatchPercentage,
+  progressByUser,
   durationSeconds,
   requiredWatchPercentage,
-  isComplete,
   curriculumId,
   nextModuleId,
 }: ModulePlayerClientProps) {
   const storageKey = `${STORAGE_KEY_PREFIX}.${practiceId}`;
   const [activeUserId, setActiveUserId] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
-  // Live watch percentage — updated by VideoPlayer's onProgressUpdate
-  // so the completion panel reflects progress in real time without
-  // waiting for a server round-trip.
-  const [liveWatchPercentage, setLiveWatchPercentage] = useState<number>(
-    initialWatchPercentage,
-  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -75,6 +65,24 @@ export function ModulePlayerClient({
     }
   }
 
+  // Resolve the active user's progress row from the map.
+  const userProgress = activeUserId ? progressByUser[activeUserId] ?? null : null;
+  const initialWatchPercentage = userProgress?.watch_percentage ?? 0;
+  const initialPositionSeconds = userProgress?.last_position_seconds ?? 0;
+  const isComplete = Boolean(userProgress?.is_complete);
+
+  // Live watch percentage — VideoPlayer pushes updates so the
+  // completion panel reflects in real time without waiting for SSR.
+  const [liveWatchPercentage, setLiveWatchPercentage] =
+    useState<number>(initialWatchPercentage);
+
+  // When the active user changes, reseed the live watch % to that
+  // user's stored progress (otherwise switching users would leak
+  // the previous user's progress into the panel).
+  useEffect(() => {
+    setLiveWatchPercentage(initialWatchPercentage);
+  }, [initialWatchPercentage]);
+
   const watchUnlocked = liveWatchPercentage >= requiredWatchPercentage;
 
   return (
@@ -89,8 +97,7 @@ export function ModulePlayerClient({
         />
       </div>
 
-      {/* Video — only render once we know who's watching, otherwise
-          progress saves can't attribute and we get a noisy 400 loop. */}
+      {/* Video */}
       {!hydrated ? null : !activeUserId ? (
         <div className="rounded-md border border-dashed border-ink-700/20 bg-bone-50 p-8 text-center">
           <p className="font-body text-ink-700">
@@ -105,6 +112,8 @@ export function ModulePlayerClient({
         </div>
       ) : (
         <VideoPlayer
+          // Re-mount on user-switch so internal refs reset.
+          key={activeUserId}
           videoUrl={videoUrl}
           moduleId={moduleId}
           practiceUserId={activeUserId}
@@ -117,7 +126,6 @@ export function ModulePlayerClient({
         />
       )}
 
-      {/* Completion panel — only operable once a user is picked */}
       <ModuleCompletionPanel
         moduleId={moduleId}
         practiceUserId={activeUserId || null}

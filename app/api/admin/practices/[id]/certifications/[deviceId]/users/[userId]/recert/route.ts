@@ -12,19 +12,26 @@ import { getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-// PATCH /api/admin/practices/[id]/certifications/[deviceId]/recert
+// PATCH /api/admin/practices/[id]/certifications/[deviceId]/users/[userId]/recert
 //
-// Flips the recert_required flag on the practice's certification
-// for this device. P9 ships flag-only — no automated triggers,
-// no revocation. Banner surfaces in /portal/training; admin closes
-// the loop later via certification.recert_resolved when the practice
-// re-completes the curriculum.
+// P9.1 — recert flag scopes per-user. Admin sets recert_required
+// for a specific user's cert on a specific device. Banner
+// surfaces in /portal/training for that user; doesn't revoke
+// the cert.
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string; deviceId: string }> },
+  {
+    params,
+  }: {
+    params: Promise<{ id: string; deviceId: string; userId: string }>;
+  },
 ) {
   const admin = await requireAdmin();
-  const { id: practiceId, deviceId } = await params;
+  const {
+    id: practiceId,
+    deviceId,
+    userId: practiceUserId,
+  } = await params;
 
   let json: unknown;
   try {
@@ -45,6 +52,7 @@ export async function PATCH(
 
   const result = await setRecertFlag({
     practiceId,
+    practiceUserId,
     deviceId,
     recertRequired: parsed.data.recertRequired,
     recertReason: parsed.data.recertReason || null,
@@ -66,6 +74,7 @@ export async function PATCH(
     targetId: practiceId,
     metadata: {
       device_id: deviceId,
+      practice_user_id: practiceUserId,
       recert_required: parsed.data.recertRequired,
       reason: parsed.data.recertReason || null,
     },

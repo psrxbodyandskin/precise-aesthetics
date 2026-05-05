@@ -14,7 +14,7 @@ import { logAudit } from "@/lib/admin/audit";
 import { getClientIp } from "@/lib/rate-limit";
 import { sendAdverseEventNotification } from "@/lib/resend/send";
 import {
-  certifiedDeviceIdsForPractice,
+  certifiedDeviceIdsForUser,
   protocolDeviceIds,
 } from "@/lib/portal/training";
 
@@ -93,13 +93,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // P9 — certification gate. The protocol's applicable_devices must
-  // overlap with the practice's set of currently-certified devices.
-  // RPC `is_practice_certified_for_device` is the single source of
-  // truth (also used by /portal/training and /portal/treatments/new).
-  const [protoDeviceIds, certedDeviceIds] = await Promise.all([
+  // Validate entered_by_user_id belongs to this practice's roster
+  // and snapshot the name for denormalization.
+  const authorizedUsers = await listAuthorizedUsersForPractice();
+  const matchedUser = authorizedUsers.find(
+    (u) => u.id === values.enteredByUserId,
+  );
+  if (!matchedUser) {
+    return NextResponse.json(
+      { ok: false, error: "Selected user is not on your practice roster." },
+      { status: 400 },
+    );
+  }
+
+  // P9.1 — per-user certification gate. The entered_by user must
+  // be certified for at least one of the protocol's applicable
+  // devices. Cert is per-user, not practice-wide, so a logger who
+  // hasn't trained themselves can't push a row through even if a
+  // colleague is certified.
+  const [protoDeviceIds, userCertedDeviceIds] = await Promise.all([
     protocolDeviceIds(values.protocolId),
-    certifiedDeviceIdsForPractice(practice.id),
+    certifiedDeviceIdsForUser(values.enteredByUserId),
   ]);
   if (protoDeviceIds.length === 0) {
     return NextResponse.json(
@@ -112,30 +126,16 @@ export async function POST(req: NextRequest) {
     );
   }
   const intersection = protoDeviceIds.filter((id) =>
-    certedDeviceIds.includes(id),
+    userCertedDeviceIds.includes(id),
   );
   if (intersection.length === 0) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Your practice is not certified for any of this protocol's devices. Complete training first.",
+        error: `${matchedUser.full_name} is not certified for any of this protocol's devices. Complete training first.`,
         code: "NOT_CERTIFIED",
       },
       { status: 403 },
-    );
-  }
-
-  // Validate entered_by_user_id belongs to this practice's roster
-  // and snapshot the name for denormalization.
-  const authorizedUsers = await listAuthorizedUsersForPractice();
-  const matchedUser = authorizedUsers.find(
-    (u) => u.id === values.enteredByUserId,
-  );
-  if (!matchedUser) {
-    return NextResponse.json(
-      { ok: false, error: "Selected user is not on your practice roster." },
-      { status: 400 },
     );
   }
 

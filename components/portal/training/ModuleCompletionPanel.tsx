@@ -65,7 +65,14 @@ export function ModuleCompletionPanel({
         return;
       }
       toast.success("Module complete.");
-      router.refresh();
+      // Auto-navigate: next module if there is one, otherwise back
+      // to the main training page (where the cert CTA surfaces if
+      // all required modules are now done).
+      if (nextModuleId) {
+        router.push(`/portal/training/modules/${nextModuleId}`);
+      } else {
+        router.push("/portal/training");
+      }
     });
   }
 

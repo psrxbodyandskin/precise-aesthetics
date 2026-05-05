@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -46,6 +46,11 @@ interface ProtocolOption {
 interface TreatmentLogFormProps {
   authorizedUsers: AuthorizedUserOption[];
   protocols: ProtocolOption[];
+  /** protocol_id → applicable device_ids (used to filter
+   *  entered_by to certified users). */
+  protocolDeviceIds: Record<string, string[]>;
+  /** practice_user_id → device_ids the user is certified for. */
+  userCertifiedDeviceIds: Record<string, string[]>;
 }
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
@@ -62,6 +67,8 @@ const REQUIRED_FIELD_COUNT = 9;
 export function TreatmentLogForm({
   authorizedUsers: initialAuthorizedUsers,
   protocols,
+  protocolDeviceIds,
+  userCertifiedDeviceIds,
 }: TreatmentLogFormProps) {
   const router = useRouter();
   const [authorizedUsers, setAuthorizedUsers] = useState(initialAuthorizedUsers);
@@ -116,6 +123,42 @@ export function TreatmentLogForm({
     }
     return opts;
   }, [selectedProtocol]);
+
+  // P9.1 — eligible-to-log users.
+  //   - Before a protocol is picked: users with ANY cert
+  //     (anything they've trained on). Untrained users are
+  //     disabled from the start so the form never gives a false
+  //     impression that someone can log.
+  //   - After a protocol is picked: users certified for THIS
+  //     protocol's device(s) specifically.
+  const certifiedUserIds = useMemo<Set<string>>(() => {
+    const set = new Set<string>();
+    if (!protocolId) {
+      for (const u of authorizedUsers) {
+        if ((userCertifiedDeviceIds[u.id] ?? []).length > 0) {
+          set.add(u.id);
+        }
+      }
+      return set;
+    }
+    const protocolDevices = protocolDeviceIds[protocolId] ?? [];
+    if (protocolDevices.length === 0) return set;
+    for (const u of authorizedUsers) {
+      const userDevs = userCertifiedDeviceIds[u.id] ?? [];
+      if (userDevs.some((d) => protocolDevices.includes(d))) {
+        set.add(u.id);
+      }
+    }
+    return set;
+  }, [protocolId, authorizedUsers, protocolDeviceIds, userCertifiedDeviceIds]);
+
+  // Clear entered_by if the current selection becomes ineligible
+  // (e.g. switched protocols, or the active user has no cert).
+  useEffect(() => {
+    if (enteredByUserId && !certifiedUserIds.has(enteredByUserId)) {
+      setEnteredByUserId("");
+    }
+  }, [certifiedUserIds, enteredByUserId]);
 
   // Auto-select indication if only one option
   const handleProtocolChange = (id: string, version: string | null) => {
@@ -290,17 +333,27 @@ export function TreatmentLogForm({
                     No users yet — add one
                   </SelectItem>
                 )}
-                {authorizedUsers.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.full_name}
-                    {u.role_label ? ` — ${u.role_label}` : ""}
-                  </SelectItem>
-                ))}
+                {authorizedUsers.map((u) => {
+                  const eligible = certifiedUserIds.has(u.id);
+                  return (
+                    <SelectItem
+                      key={u.id}
+                      value={u.id}
+                      disabled={!eligible}
+                    >
+                      {u.full_name}
+                      {u.role_label ? ` — ${u.role_label}` : ""}
+                      {!eligible && " · Not certified"}
+                    </SelectItem>
+                  );
+                })}
                 <SelectItem value="__add__">+ Add a new user</SelectItem>
               </SelectContent>
             </Select>
             <p className="font-body text-caption text-ink-500" style={{ lineHeight: 1.55 }}>
-              The list is managed by your practice. Add new users as needed.
+              {protocolId
+                ? "Only users certified for this protocol's device(s) can log this treatment. Others stay disabled until they complete training."
+                : "Only users certified for at least one device are selectable. Pick a protocol below to narrow further. New users added here can log only after they complete training."}
             </p>
           </div>
         </Section>

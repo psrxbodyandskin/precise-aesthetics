@@ -37,19 +37,13 @@ export default async function PortalCurriculumPage({
     getCurriculumForPractice({
       curriculumId,
       practiceId: practice.id,
-      practiceUserId: null,
     }),
     listAuthorizedUsersForPractice(),
   ]);
   if (!detail) notFound();
 
-  const requiredCount = detail.modules.filter((m) => m.is_required).length;
-  const completedCount = detail.modules.filter(
-    (m) => m.is_required && m.progress?.is_complete,
-  ).length;
-  const progressPercent = requiredCount
-    ? Math.round((completedCount / requiredCount) * 100)
-    : 0;
+  // Per-user progress (header + module list) is rendered inside the
+  // client wrapper so it can follow the picker selection.
 
   return (
     <PortalShell practiceName={practice.name}>
@@ -92,22 +86,6 @@ export default async function PortalCurriculumPage({
               {detail.curriculum.description}
             </p>
           )}
-
-          {/* Progress */}
-          <div className="mt-6 max-w-md space-y-2">
-            <div className="flex items-center justify-between font-body text-caption text-ink-500">
-              <span>Progress</span>
-              <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                {completedCount} of {requiredCount} required modules
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-bone-200">
-              <div
-                className="h-full bg-brand-500 transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
         </header>
 
         <div className="mt-12">

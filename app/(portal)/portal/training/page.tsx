@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { requirePractice } from "@/lib/auth/server";
 import { getPracticeForAuthUser } from "@/lib/portal/setup";
 import { listCurriculaForPractice } from "@/lib/portal/training";
+import { listAuthorizedUsersForPractice } from "@/lib/portal/treatments";
 import { PortalShell } from "@/components/portal/PortalShell";
-import { CurriculumOverviewCard } from "@/components/portal/training/CurriculumOverviewCard";
+import { CurriculaOverviewClient } from "@/components/portal/training/CurriculaOverviewClient";
 
 export const metadata: Metadata = {
   title: "Training — Precise Aesthetics",
@@ -24,7 +25,10 @@ export default async function PortalTrainingPage() {
     redirect("/portal/login?error=account_inactive");
   }
 
-  const overviews = await listCurriculaForPractice(practice.id, null);
+  const [overviews, authorizedUsers] = await Promise.all([
+    listCurriculaForPractice(practice.id),
+    listAuthorizedUsersForPractice(),
+  ]);
 
   return (
     <PortalShell practiceName={practice.name}>
@@ -55,28 +59,17 @@ export default async function PortalTrainingPage() {
             className="mt-4 max-w-[58ch] font-body text-ink-700"
             style={{ fontSize: "1rem", lineHeight: 1.65 }}
           >
-            Complete training to unlock treatment logging for your devices.
+            Each practitioner has their own training and certification.
+            Complete the modules to unlock treatment logging for your devices.
           </p>
         </header>
 
         <section className="mt-12">
-          {overviews.length === 0 ? (
-            <div className="rounded-md border border-dashed border-ink-700/20 bg-bone-50 p-10 text-center">
-              <p className="font-body text-ink-700">
-                No devices on file for your practice.
-              </p>
-              <p className="mt-2 font-body text-caption text-ink-500">
-                Contact us to get a device provisioned. Training will appear
-                here once your device is active.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {overviews.map((o) => (
-                <CurriculumOverviewCard key={o.device_id} overview={o} />
-              ))}
-            </div>
-          )}
+          <CurriculaOverviewClient
+            practiceId={practice.id}
+            authorizedUsers={authorizedUsers}
+            overviews={overviews}
+          />
         </section>
       </article>
     </PortalShell>

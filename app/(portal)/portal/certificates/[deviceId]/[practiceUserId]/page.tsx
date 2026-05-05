@@ -14,8 +14,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// P9.1 — certificate is per-user. URL: /portal/certificates/
+// {deviceId}/{practiceUserId}. The certificate data lookup
+// also scopes by the practice (resolved from the auth session)
+// so a user can't enumerate other practices' certs.
 interface CertificatePageProps {
-  params: Promise<{ deviceId: string }>;
+  params: Promise<{ deviceId: string; practiceUserId: string }>;
 }
 
 export default async function CertificatePage({ params }: CertificatePageProps) {
@@ -27,10 +31,11 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
     redirect("/portal/login?error=account_inactive");
   }
 
-  const { deviceId } = await params;
+  const { deviceId, practiceUserId } = await params;
   const data = await getCertificateData({
     practiceId: practice.id,
     deviceId,
+    practiceUserId,
   });
   if (!data) notFound();
 

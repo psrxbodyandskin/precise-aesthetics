@@ -14,20 +14,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CertificationStatusBadge } from "./CertificationStatusBadge";
-import type { PracticeCertificationRow } from "@/lib/admin/training";
+import type { DeviceCertSummary } from "@/lib/admin/training";
 
 interface PracticeCertificationsPanelProps {
   practiceId: string;
-  rows: Array<{
-    device_id: string;
-    device_display_name: string;
-    device_slug: string;
-    certification: PracticeCertificationRow | null;
-  }>;
+  rows: DeviceCertSummary[];
 }
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
 
+// P9.1 — per-user certifications. Each device renders a section
+// listing every certified user on the practice, plus their recert
+// status + a per-user recert toggle.
 export function PracticeCertificationsPanel({
   practiceId,
   rows,
@@ -43,35 +41,90 @@ export function PracticeCertificationsPanel({
   }
 
   return (
-    <div className="space-y-3">
-      {rows.map((row) => (
-        <CertRow key={row.device_id} practiceId={practiceId} row={row} />
+    <div className="space-y-6">
+      {rows.map((device) => (
+        <DeviceSection key={device.device_id} device={device} practiceId={practiceId} />
       ))}
+    </div>
+  );
+}
+
+function DeviceSection({
+  device,
+  practiceId,
+}: {
+  device: DeviceCertSummary;
+  practiceId: string;
+}) {
+  return (
+    <div className="rounded-md border border-ink-700/15 bg-bone-50">
+      <div className="border-b border-ink-700/10 px-5 py-4">
+        <p
+          className="font-body text-overline font-medium uppercase text-ink-500"
+          style={EYEBROW_TRACKING}
+        >
+          {device.device_display_name}
+        </p>
+        <p className="mt-1 font-body text-caption text-ink-500">
+          {device.certifications.length === 0
+            ? "No certifications yet."
+            : `${device.certifications.length} certified ${
+                device.certifications.length === 1 ? "user" : "users"
+              }`}
+        </p>
+      </div>
+
+      {device.certifications.length === 0 ? (
+        <p className="px-5 py-4 font-body text-caption text-ink-500">
+          No one on this practice is certified for this device yet.
+        </p>
+      ) : (
+        <ul className="divide-y divide-ink-700/10">
+          {device.certifications.map(({ cert, user }) => (
+            <CertRow
+              key={cert.id}
+              practiceId={practiceId}
+              deviceId={device.device_id}
+              cert={cert}
+              userName={user?.full_name ?? "Unknown user"}
+              userRole={user?.role_label ?? null}
+              userActive={user?.is_active ?? true}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
 function CertRow({
   practiceId,
-  row,
+  deviceId,
+  cert,
+  userName,
+  userRole,
+  userActive,
 }: {
   practiceId: string;
-  row: PracticeCertificationsPanelProps["rows"][number];
+  deviceId: string;
+  cert: DeviceCertSummary["certifications"][number]["cert"];
+  userName: string;
+  userRole: string | null;
+  userActive: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const cert = row.certification;
-  const isRecertOn = cert?.recert_required ?? false;
-  const status = cert?.status ?? "not_started";
+  const isRecertOn = cert.recert_required;
+  const status = cert.status;
 
   async function setRecert(required: boolean) {
     setBusy(true);
     try {
       const res = await fetch(
-        `/api/admin/practices/${practiceId}/certifications/${row.device_id}/recert`,
+        `/api/admin/practices/${practiceId}/certifications/${deviceId}/users/${cert.practice_user_id}/recert`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -89,7 +142,9 @@ function CertRow({
         toast.error(data.error ?? "Could not update recert flag.");
         return;
       }
-      toast.success(required ? "Re-certification required." : "Re-cert flag cleared.");
+      toast.success(
+        required ? "Re-certification required." : "Re-cert flag cleared.",
+      );
       setOpen(false);
       setReason("");
       router.refresh();
@@ -99,20 +154,25 @@ function CertRow({
   }
 
   return (
-    <div className="rounded-md border border-ink-700/15 bg-bone-50 px-5 py-4">
+    <li className="px-5 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p
-            className="font-body text-overline font-medium uppercase text-ink-500"
-            style={EYEBROW_TRACKING}
-          >
-            {row.device_display_name}
+        <div className="min-w-0 flex-1">
+          <p className="font-body text-small font-medium text-ink-900 truncate">
+            {userName}
+            {!userActive && (
+              <span className="ml-2 font-body text-caption italic text-ink-500">
+                (inactive)
+              </span>
+            )}
           </p>
+          {userRole && (
+            <p className="font-body text-caption text-ink-500 truncate">
+              {userRole}
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <CertificationStatusBadge
-              status={status as "not_started" | typeof status}
-            />
-            {cert?.certified_at && (
+            <CertificationStatusBadge status={status} />
+            {cert.certified_at && (
               <span
                 className="font-body text-caption text-ink-500"
                 style={{ fontVariantNumeric: "tabular-nums" }}
@@ -134,7 +194,7 @@ function CertRow({
               type="button"
               variant="secondary"
               size="sm"
-              disabled={!cert || busy}
+              disabled={busy}
             >
               {isRecertOn ? "Manage recert" : "Require re-certification"}
             </Button>
@@ -144,7 +204,7 @@ function CertRow({
               <DialogTitle>
                 {isRecertOn
                   ? "Clear re-cert requirement"
-                  : "Require re-certification"}
+                  : `Require re-certification for ${userName}`}
               </DialogTitle>
             </DialogHeader>
             {!isRecertOn && (
@@ -167,8 +227,8 @@ function CertRow({
             )}
             <p className="font-body text-caption text-ink-500">
               {isRecertOn
-                ? "Cleared once the practice re-completes the curriculum. Audit-logged."
-                : "Surfaces a banner in the practice's portal but doesn't revoke the existing certification. Audit-logged."}
+                ? "Cleared once the user re-completes the curriculum. Audit-logged."
+                : "Surfaces a banner in the user's portal but doesn't revoke the existing certification. Audit-logged."}
             </p>
             <div className="flex gap-2">
               <Button
@@ -194,6 +254,6 @@ function CertRow({
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </li>
   );
 }

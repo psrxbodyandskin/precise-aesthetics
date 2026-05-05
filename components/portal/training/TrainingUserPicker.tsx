@@ -69,7 +69,7 @@ export function TrainingUserPicker({
           position="popper"
           sideOffset={4}
           align="start"
-          className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
+          className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] bg-bone-50 border-ink-700/20 shadow-lg"
         >
           {options.length === 0 && (
             <SelectItem value="__none__" disabled>

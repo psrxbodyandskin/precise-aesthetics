@@ -15,6 +15,6 @@ export async function GET() {
       { status: 404 },
     );
   }
-  const curricula = await listCurriculaForPractice(practice.id, null);
+  const curricula = await listCurriculaForPractice(practice.id);
   return NextResponse.json({ ok: true, curricula });
 }

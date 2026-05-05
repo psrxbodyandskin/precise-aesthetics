@@ -999,10 +999,16 @@ export interface Database {
           created_at: string;
           updated_at: string;
           practice_id: string;
+          // P9.1 — per-user cert (was practice-wide). Holder of
+          // the certification.
+          practice_user_id: string;
           device_id: string;
           curriculum_id: string;
           status: "in_progress" | "certified" | "expired" | "revoked";
           certified_at: string | null;
+          // Whoever clicked the "complete certification" button.
+          // Equal to practice_user_id for self-cert (current
+          // pattern); reserved for future admin-granted certs.
           certified_by_user_id: string | null;
           expires_at: string | null;
           recert_required: boolean;
@@ -1013,6 +1019,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           practice_id: string;
+          practice_user_id: string;
           device_id: string;
           curriculum_id: string;
           status?: "in_progress" | "certified" | "expired" | "revoked";
@@ -1028,6 +1035,12 @@ export interface Database {
             foreignKeyName: "practice_certifications_practice_id_fkey";
             columns: ["practice_id"];
             referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_certifications_practice_user_id_fkey";
+            columns: ["practice_user_id"];
+            referencedRelation: "practice_authorized_users";
             referencedColumns: ["id"];
           },
           {
@@ -1145,9 +1158,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: number;
       };
-      // P9 — training/certification gate (defined in 0011_training.sql).
-      is_practice_certified_for_device: {
-        Args: { p_practice_id: string; p_device_id: string };
+      // P9.1 — per-user training/certification gate (replaces
+      // is_practice_certified_for_device in 0012_per_user_certifications.sql).
+      is_user_certified_for_device: {
+        Args: { p_practice_user_id: string; p_device_id: string };
         Returns: boolean;
       };
     };

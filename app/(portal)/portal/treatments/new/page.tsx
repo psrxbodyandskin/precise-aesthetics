@@ -8,7 +8,10 @@ import {
   listAuthorizedUsersForPractice,
   listVisibleProtocolsForPractice,
 } from "@/lib/portal/treatments";
-import { certifiedDeviceIdsForPractice } from "@/lib/portal/training";
+import {
+  anyCertifiedDeviceIdsForPractice,
+  certifiedDeviceIdsByUserForPractice,
+} from "@/lib/portal/training";
 import { getServiceClient } from "@/lib/supabase/server";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { TreatmentLogForm } from "@/components/portal/treatments/TreatmentLogForm";
@@ -30,19 +33,19 @@ export default async function NewTreatmentPage() {
   if (practice.status === "suspended" || practice.status === "archived")
     redirect("/portal/login?error=account_inactive");
 
-  const [authorizedUsers, protocolsRaw, certedDeviceIds] = await Promise.all([
-    listAuthorizedUsersForPractice(),
-    listVisibleProtocolsForPractice(),
-    certifiedDeviceIdsForPractice(practice.id),
-  ]);
+  const [authorizedUsers, protocolsRaw, anyPracticeCertedIds, certedByUser] =
+    await Promise.all([
+      listAuthorizedUsersForPractice(),
+      listVisibleProtocolsForPractice(),
+      anyCertifiedDeviceIdsForPractice(practice.id),
+      certifiedDeviceIdsByUserForPractice(practice.id),
+    ]);
 
-  // P9 — certification gate. If the practice is certified for zero
-  // devices, render the blocked state instead of the form. The
-  // server-side enforcement at POST /api/portal/treatments is the
-  // ultimate gate; this UI gate just spares users a useless form.
-  if (certedDeviceIds.length === 0) {
-    // Look up names of devices the practice owns so we can name them
-    // in the gate message.
+  // P9.1 — gate: if NO user on the practice is certified for any
+  // device, render the blocked state. (Per-user gating still applies
+  // on the form via entered_by filtering — this page-level gate just
+  // spares the form when no one can log.)
+  if (anyPracticeCertedIds.length === 0) {
     const supabase = getServiceClient();
     const { data: deviceRows } = await supabase
       .from("practice_devices")
@@ -63,7 +66,9 @@ export default async function NewTreatmentPage() {
     );
   }
 
-  // Filter protocols to those with at least one certified applicable device
+  // Filter protocols to those with at least one device that ANY user
+  // on the practice is certified for. (Per-user filtering on the
+  // entered_by dropdown happens in the form when a protocol is picked.)
   const supabase = getServiceClient();
   const protocolIds = protocolsRaw.map((p) => p.id);
   const { data: protoDeviceRows } = protocolIds.length
@@ -72,10 +77,14 @@ export default async function NewTreatmentPage() {
         .select("protocol_id, device_id")
         .in("protocol_id", protocolIds)
     : { data: [] };
-  const certifiedSet = new Set(certedDeviceIds);
+  const anyCertifiedSet = new Set(anyPracticeCertedIds);
   const allowedProtocolIds = new Set<string>();
+  // Build protocol_id → device_ids map for the form to use too.
+  const protocolDeviceMap: Record<string, string[]> = {};
   for (const r of protoDeviceRows ?? []) {
-    if (certifiedSet.has(r.device_id)) allowedProtocolIds.add(r.protocol_id);
+    if (!protocolDeviceMap[r.protocol_id]) protocolDeviceMap[r.protocol_id] = [];
+    protocolDeviceMap[r.protocol_id]!.push(r.device_id);
+    if (anyCertifiedSet.has(r.device_id)) allowedProtocolIds.add(r.protocol_id);
   }
 
   // Normalize protocol shape (PostgREST relational join can be array)
@@ -94,6 +103,13 @@ export default async function NewTreatmentPage() {
         indication_category: indication,
       };
     });
+
+  // user_id → array of certified device_ids (serializable for the
+  // client form). Only includes users with at least one cert.
+  const userCertifiedDeviceIds: Record<string, string[]> = {};
+  for (const [userId, deviceSet] of certedByUser.entries()) {
+    userCertifiedDeviceIds[userId] = Array.from(deviceSet);
+  }
 
   return (
     <PortalShell practiceName={practice.name}>
@@ -145,6 +161,8 @@ export default async function NewTreatmentPage() {
               role_label: u.role_label,
             }))}
             protocols={protocols}
+            protocolDeviceIds={protocolDeviceMap}
+            userCertifiedDeviceIds={userCertifiedDeviceIds}
           />
         </div>
       </article>
