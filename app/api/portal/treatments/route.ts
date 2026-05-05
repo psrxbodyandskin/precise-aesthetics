@@ -13,6 +13,10 @@ import { listAuthorizedUsersForPractice } from "@/lib/portal/treatments";
 import { logAudit } from "@/lib/admin/audit";
 import { getClientIp } from "@/lib/rate-limit";
 import { sendAdverseEventNotification } from "@/lib/resend/send";
+import {
+  certifiedDeviceIdsForPractice,
+  protocolDeviceIds,
+} from "@/lib/portal/training";
 
 export const runtime = "nodejs";
 
@@ -86,6 +90,39 @@ export async function POST(req: NextRequest) {
           "Could not resolve the current protocol version. Refresh and try again.",
       },
       { status: 400 },
+    );
+  }
+
+  // P9 — certification gate. The protocol's applicable_devices must
+  // overlap with the practice's set of currently-certified devices.
+  // RPC `is_practice_certified_for_device` is the single source of
+  // truth (also used by /portal/training and /portal/treatments/new).
+  const [protoDeviceIds, certedDeviceIds] = await Promise.all([
+    protocolDeviceIds(values.protocolId),
+    certifiedDeviceIdsForPractice(practice.id),
+  ]);
+  if (protoDeviceIds.length === 0) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "This protocol is not associated with any device. Contact admin.",
+      },
+      { status: 400 },
+    );
+  }
+  const intersection = protoDeviceIds.filter((id) =>
+    certedDeviceIds.includes(id),
+  );
+  if (intersection.length === 0) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Your practice is not certified for any of this protocol's devices. Complete training first.",
+        code: "NOT_CERTIFIED",
+      },
+      { status: 403 },
     );
   }
 

@@ -800,6 +800,250 @@ export interface Database {
           },
         ];
       };
+      // P9 — training library + certification
+      training_modules: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          title: string;
+          slug: string;
+          description: string | null;
+          video_storage_path: string | null;
+          video_duration_seconds: number | null;
+          video_thumbnail_path: string | null;
+          required_watch_percentage: number;
+          status: "draft" | "published" | "archived";
+          published_at: string | null;
+          created_by: string | null;
+          last_updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          title: string;
+          slug: string;
+          description?: string | null;
+          video_storage_path?: string | null;
+          video_duration_seconds?: number | null;
+          video_thumbnail_path?: string | null;
+          required_watch_percentage?: number;
+          status?: "draft" | "published" | "archived";
+          published_at?: string | null;
+          created_by?: string | null;
+          last_updated_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["training_modules"]["Insert"]>;
+        Relationships: [];
+      };
+      training_curricula: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          device_id: string;
+          title: string;
+          description: string | null;
+          status: "draft" | "published" | "archived";
+          published_at: string | null;
+          created_by: string | null;
+          last_updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          device_id: string;
+          title: string;
+          description?: string | null;
+          status?: "draft" | "published" | "archived";
+          published_at?: string | null;
+          created_by?: string | null;
+          last_updated_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["training_curricula"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "training_curricula_device_id_fkey";
+            columns: ["device_id"];
+            referencedRelation: "devices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      curriculum_modules: {
+        Row: {
+          id: string;
+          created_at: string;
+          curriculum_id: string;
+          module_id: string;
+          sort_order: number;
+          is_required: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          curriculum_id: string;
+          module_id: string;
+          sort_order: number;
+          is_required?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["curriculum_modules"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_modules_curriculum_id_fkey";
+            columns: ["curriculum_id"];
+            referencedRelation: "training_curricula";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "curriculum_modules_module_id_fkey";
+            columns: ["module_id"];
+            referencedRelation: "training_modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      module_materials: {
+        Row: {
+          id: string;
+          created_at: string;
+          module_id: string;
+          title: string;
+          storage_path: string;
+          filename: string;
+          mime_type: string;
+          byte_size: number;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          module_id: string;
+          title: string;
+          storage_path: string;
+          filename: string;
+          mime_type: string;
+          byte_size: number;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["module_materials"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "module_materials_module_id_fkey";
+            columns: ["module_id"];
+            referencedRelation: "training_modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      module_progress: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          practice_id: string;
+          practice_user_id: string | null;
+          module_id: string;
+          watch_percentage: number;
+          last_position_seconds: number;
+          watch_started_at: string | null;
+          watch_completed_at: string | null;
+          acknowledged: boolean;
+          acknowledged_at: string | null;
+          is_complete: boolean;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          practice_id: string;
+          practice_user_id?: string | null;
+          module_id: string;
+          watch_percentage?: number;
+          last_position_seconds?: number;
+          watch_started_at?: string | null;
+          watch_completed_at?: string | null;
+          acknowledged?: boolean;
+          acknowledged_at?: string | null;
+          is_complete?: boolean;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["module_progress"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "module_progress_practice_user_id_fkey";
+            columns: ["practice_user_id"];
+            referencedRelation: "practice_authorized_users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "module_progress_module_id_fkey";
+            columns: ["module_id"];
+            referencedRelation: "training_modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      practice_certifications: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          practice_id: string;
+          device_id: string;
+          curriculum_id: string;
+          status: "in_progress" | "certified" | "expired" | "revoked";
+          certified_at: string | null;
+          certified_by_user_id: string | null;
+          expires_at: string | null;
+          recert_required: boolean;
+          recert_reason: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          practice_id: string;
+          device_id: string;
+          curriculum_id: string;
+          status?: "in_progress" | "certified" | "expired" | "revoked";
+          certified_at?: string | null;
+          certified_by_user_id?: string | null;
+          expires_at?: string | null;
+          recert_required?: boolean;
+          recert_reason?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["practice_certifications"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "practice_certifications_practice_id_fkey";
+            columns: ["practice_id"];
+            referencedRelation: "practices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_certifications_device_id_fkey";
+            columns: ["device_id"];
+            referencedRelation: "devices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_certifications_curriculum_id_fkey";
+            columns: ["curriculum_id"];
+            referencedRelation: "training_curricula";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -900,6 +1144,11 @@ export interface Database {
       count_inbox_new_items: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      // P9 — training/certification gate (defined in 0011_training.sql).
+      is_practice_certified_for_device: {
+        Args: { p_practice_id: string; p_device_id: string };
+        Returns: boolean;
       };
     };
     Enums: Record<string, never>;

@@ -12,7 +12,8 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/portal/protocols", label: "Protocols" },
   { href: "/portal/treatments", label: "Treatments" },
-  // P7: { href: "/portal/notifications", label: "Notifications" },
+  { href: "/portal/training", label: "Training" },
+  // P10: { href: "/portal/notifications", label: "Notifications" },
 ];
 
 // Portal primary nav. Single-row horizontal list under the identity
