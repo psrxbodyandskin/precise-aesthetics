@@ -8,6 +8,7 @@ import {
   Inbox,
   LayoutGrid,
   Library,
+  LogOut,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -76,7 +77,7 @@ export function AdminSidebar({
         </p>
       </div>
 
-      <nav className="flex flex-row gap-1 md:flex-col">
+      <nav className="flex flex-1 flex-row gap-1 md:flex-col">
         {NAV_ITEMS.map((item) => {
           const active =
             pathname === item.href ||
@@ -114,6 +115,25 @@ export function AdminSidebar({
           );
         })}
       </nav>
+
+      {/* Sign out — pinned bottom on desktop, inline on mobile */}
+      <form
+        action="/api/auth/logout?surface=admin"
+        method="POST"
+        className="mt-4 md:mt-auto md:pt-6 md:border-t md:border-cream-50/10"
+      >
+        <button
+          type="submit"
+          className="inline-flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-small font-medium text-cream-100 transition-colors duration-[150ms] hover:bg-cream-50/5 hover:text-cream-50 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
+        >
+          <LogOut
+            className="size-4 shrink-0"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
+          <span className="flex-1 text-left">Sign out</span>
+        </button>
+      </form>
     </aside>
   );
 }
