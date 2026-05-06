@@ -12,6 +12,7 @@ const AGENT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "communication_drafter", label: "Comm" },
   { value: "query_assistant", label: "Query" },
   { value: "lead_enricher", label: "Enricher" },
+  { value: "help_assistant", label: "Help" },
 ];
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -28,6 +29,19 @@ export function RunsFilterBar() {
 
   const selectedAgents = new Set(params.getAll("agent_type"));
   const selectedStatuses = new Set(params.getAll("status"));
+  const showHelp = params.get("show_help") === "1";
+
+  function toggleShowHelp() {
+    const sp = new URLSearchParams();
+    for (const [k, v] of params.entries()) {
+      if (k !== "show_help" && k !== "page") sp.append(k, v);
+    }
+    if (!showHelp) sp.set("show_help", "1");
+    startTransition(() => {
+      const qs = sp.toString();
+      router.replace(qs ? `/admin/ai/runs?${qs}` : "/admin/ai/runs");
+    });
+  }
 
   function toggleAgent(value: string) {
     const sp = new URLSearchParams();
@@ -69,15 +83,30 @@ export function RunsFilterBar() {
         >
           Agent:
         </span>
-        {AGENT_OPTIONS.map((opt) => (
-          <Pill
-            key={opt.value}
-            active={selectedAgents.has(opt.value)}
-            onSelect={() => toggleAgent(opt.value)}
-          >
-            {opt.label}
-          </Pill>
-        ))}
+        {AGENT_OPTIONS.map((opt) => {
+          // Hide the Help pill unless show_help=1 (it's noise by default).
+          if (opt.value === "help_assistant" && !showHelp) return null;
+          return (
+            <Pill
+              key={opt.value}
+              active={selectedAgents.has(opt.value)}
+              onSelect={() => toggleAgent(opt.value)}
+            >
+              {opt.label}
+            </Pill>
+          );
+        })}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className="font-body text-caption text-ink-500"
+          style={{ letterSpacing: "0.04em" }}
+        >
+          Help conversations:
+        </span>
+        <Pill active={showHelp} onSelect={toggleShowHelp}>
+          {showHelp ? "Showing" : "Hidden"}
+        </Pill>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span

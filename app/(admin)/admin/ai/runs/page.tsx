@@ -19,6 +19,18 @@ const ALLOWED_AGENT_TYPES: readonly AgentType[] = [
   "communication_drafter",
   "query_assistant",
   "lead_enricher",
+  "help_assistant",
+];
+
+// P13 — agent types shown by default. Help chatbot conversations are
+// noisy and instructional; operator opts in via ?show_help=1.
+const DEFAULT_VISIBLE_AGENT_TYPES: readonly AgentType[] = [
+  "pattern_analyst",
+  "protocol_drafter",
+  "practice_health_reviewer",
+  "communication_drafter",
+  "query_assistant",
+  "lead_enricher",
 ];
 
 const ALLOWED_STATUSES = ["pending", "success", "failed", "cancelled"] as const;
@@ -49,8 +61,20 @@ export default async function AdminAiRunsPage({ searchParams }: PageProps) {
     (ALLOWED_STATUSES as readonly string[]).includes(v),
   );
 
+  const showHelp = sp.show_help === "1";
+
+  // If no explicit agent_type filter and show_help is off, default to
+  // hiding help_assistant by passing the visible set. If show_help is
+  // on, pass nothing (show everything).
+  const effectiveAgentTypes =
+    agentTypes.length > 0
+      ? agentTypes
+      : showHelp
+        ? undefined
+        : DEFAULT_VISIBLE_AGENT_TYPES;
+
   const result = await listAgentRuns({
-    agentTypes: agentTypes.length > 0 ? agentTypes : undefined,
+    agentTypes: effectiveAgentTypes ? [...effectiveAgentTypes] : undefined,
     statuses: statuses.length > 0 ? statuses : undefined,
     pageSize: 100,
   });

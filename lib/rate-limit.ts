@@ -65,3 +65,22 @@ export function agentRateLimit(adminUserId: string): RateLimitResult {
     windowMs: AGENT_RATE_LIMIT.windowMs,
   });
 }
+
+// P13 — help chatbot rate limit. Dedicated bucket because per-message
+// cost is much lower than the other agents (Haiku, capped maxTokens).
+// 30 messages per admin per hour gives Roni room to actually use the
+// chatbot operationally without sharing budget with the analytical
+// agents. Same in-memory caveat — soft throttle, P13-deferred Redis
+// migration tracked in KNOWN-GOTCHAS.md.
+export const HELP_CHAT_RATE_LIMIT = {
+  limit: 30,
+  windowMs: 60 * 60 * 1000,
+} as const;
+
+export function helpChatRateLimit(adminUserId: string): RateLimitResult {
+  return rateLimit({
+    key: `help:${adminUserId}`,
+    limit: HELP_CHAT_RATE_LIMIT.limit,
+    windowMs: HELP_CHAT_RATE_LIMIT.windowMs,
+  });
+}

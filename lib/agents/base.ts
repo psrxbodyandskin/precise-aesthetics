@@ -26,7 +26,8 @@ export type AgentType =
   | "practice_health_reviewer"
   | "communication_drafter"
   | "query_assistant"
-  | "lead_enricher";
+  | "lead_enricher"
+  | "help_assistant"; // P13
 
 export interface AgentRunInput {
   agentType: AgentType;

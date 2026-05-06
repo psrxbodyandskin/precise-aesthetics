@@ -28,6 +28,7 @@ const AGENT_LABEL: Record<AgentRunRow["agent_type"], string> = {
   communication_drafter: "Comm drafter",
   query_assistant: "Query assistant",
   lead_enricher: "Lead enricher",
+  help_assistant: "Help",
 };
 
 export function RunsTable({ items }: RunsTableProps) {

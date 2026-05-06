@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { unstable_cache } from "next/cache";
 import { AdminSidebar } from "@/components/admin/shared/AdminSidebar";
+import { HelpChatProvider } from "@/components/admin/help/HelpChatProvider";
 import { getCurrentUser } from "@/lib/auth/server";
 import { countNewAdverseEvents } from "@/lib/admin/adverse-events";
 import { getInboxNewCount } from "@/lib/admin/inbox";
@@ -57,6 +58,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <main id="main" className="md:ml-[240px]">
         {children}
       </main>
+      {/* P13 — help chatbot. Mounts only after the auth gate above
+          confirms the user is an admin. Pre-auth pages (login,
+          reset-password) get nothing. */}
+      <HelpChatProvider />
     </div>
   );
 }

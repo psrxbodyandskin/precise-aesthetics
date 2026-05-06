@@ -5,12 +5,14 @@ import { usePathname } from "next/navigation";
 import {
   AlertCircle,
   BarChart3,
+  Building2,
   GraduationCap,
   History,
   Inbox,
   LayoutGrid,
   Library,
   LogOut,
+  Server,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -57,6 +59,10 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/admin/protocols", label: "Protocols", icon: Library, section: "main" },
   { href: "/admin/training", label: "Training", icon: GraduationCap, section: "main" },
+  // P13 — admin utilities (vendors + stack reference). Help chatbot is
+  // a global floating button mounted in the admin layout, not a sidebar entry.
+  { href: "/admin/vendors", label: "Vendors", icon: Building2, section: "main" },
+  { href: "/admin/stack", label: "Stack", icon: Server, section: "main" },
   // P11 — AI tools section
   { href: "/admin/ai/query", label: "Query", icon: Sparkles, section: "ai" },
   { href: "/admin/ai/runs", label: "Runs", icon: History, section: "ai" },

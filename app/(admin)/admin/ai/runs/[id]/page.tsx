@@ -104,9 +104,14 @@ export default async function AdminAiRunDetailPage({ params }: PageProps) {
             </span>
           )}
         </div>
-        <div className="mt-4">
-          <ReplayButton runId={run.id} />
-        </div>
+        {/* P13 — replay UI hidden for help_assistant rows. Replaying a
+            chatbot turn is semantically nonsensical (it would just rerun
+            the same one-shot reply, not the conversation). */}
+        {run.agent_type !== "help_assistant" && (
+          <div className="mt-4">
+            <ReplayButton runId={run.id} />
+          </div>
+        )}
       </header>
 
       {/* Output (success) or error message (failed) */}

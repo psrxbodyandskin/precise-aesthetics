@@ -1209,7 +1209,8 @@ export interface Database {
             | "practice_health_reviewer"
             | "communication_drafter"
             | "query_assistant"
-            | "lead_enricher";
+            | "lead_enricher"
+            | "help_assistant";
           triggered_by_user_id: string | null;
           trigger_type: "manual" | "auto";
           trigger_context: Json | null;
@@ -1239,7 +1240,8 @@ export interface Database {
             | "practice_health_reviewer"
             | "communication_drafter"
             | "query_assistant"
-            | "lead_enricher";
+            | "lead_enricher"
+            | "help_assistant";
           triggered_by_user_id?: string | null;
           trigger_type: "manual" | "auto";
           trigger_context?: Json | null;
@@ -1278,6 +1280,163 @@ export interface Database {
             foreignKeyName: "agent_runs_replay_of_id_fkey";
             columns: ["replay_of_id"];
             referencedRelation: "agent_runs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      // P13 — vendor directory (admin-only)
+      vendors: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          name: string;
+          category:
+            | "manufacturer"
+            | "software_vendor"
+            | "service_provider"
+            | "logistics"
+            | "professional_services"
+            | "other";
+          description: string | null;
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          whatsapp: string | null;
+          telegram: string | null;
+          signal: string | null;
+          website: string | null;
+          account_id: string | null;
+          notes: string | null;
+          status: "active" | "paused" | "former";
+          created_by: string | null;
+          last_updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          name: string;
+          category:
+            | "manufacturer"
+            | "software_vendor"
+            | "service_provider"
+            | "logistics"
+            | "professional_services"
+            | "other";
+          description?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          whatsapp?: string | null;
+          telegram?: string | null;
+          signal?: string | null;
+          website?: string | null;
+          account_id?: string | null;
+          notes?: string | null;
+          status?: "active" | "paused" | "former";
+          created_by?: string | null;
+          last_updated_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["vendors"]["Insert"]>;
+        Relationships: [];
+      };
+      // P13 — stack reference: services + env var names (NEVER values)
+      stack_services: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          name: string;
+          category:
+            | "hosting"
+            | "database"
+            | "auth"
+            | "email"
+            | "cms"
+            | "ai"
+            | "analytics"
+            | "monitoring"
+            | "storage"
+            | "domain"
+            | "payment"
+            | "other";
+          what_it_does: string;
+          plan_tier: string | null;
+          monthly_cost_estimate_usd: number | null;
+          renewal_date: string | null;
+          login_url: string | null;
+          account_owner_user_id: string | null;
+          credentials_storage_location: string | null;
+          support_contact: string | null;
+          documentation_links: string | null;
+          status: "active" | "paused" | "former";
+          notes: string | null;
+          created_by: string | null;
+          last_updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          name: string;
+          category:
+            | "hosting"
+            | "database"
+            | "auth"
+            | "email"
+            | "cms"
+            | "ai"
+            | "analytics"
+            | "monitoring"
+            | "storage"
+            | "domain"
+            | "payment"
+            | "other";
+          what_it_does: string;
+          plan_tier?: string | null;
+          monthly_cost_estimate_usd?: number | null;
+          renewal_date?: string | null;
+          login_url?: string | null;
+          account_owner_user_id?: string | null;
+          credentials_storage_location?: string | null;
+          support_contact?: string | null;
+          documentation_links?: string | null;
+          status?: "active" | "paused" | "former";
+          notes?: string | null;
+          created_by?: string | null;
+          last_updated_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["stack_services"]["Insert"]>;
+        Relationships: [];
+      };
+      stack_env_vars: {
+        Row: {
+          id: string;
+          created_at: string;
+          service_id: string;
+          var_name: string;
+          description: string | null;
+          set_in_vercel: boolean;
+          set_in_local_env: boolean;
+          is_secret: boolean;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          service_id: string;
+          var_name: string;
+          description?: string | null;
+          set_in_vercel?: boolean;
+          set_in_local_env?: boolean;
+          is_secret?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["stack_env_vars"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "stack_env_vars_service_id_fkey";
+            columns: ["service_id"];
+            referencedRelation: "stack_services";
             referencedColumns: ["id"];
           },
         ];
