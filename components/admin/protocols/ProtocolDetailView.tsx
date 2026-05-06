@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { AdminBreadcrumb } from "@/components/admin/shared/AdminBreadcrumb";
 import { AuditLogTable } from "@/components/admin/practices/AuditLogTable";
+import { DraftProtocolUpdateModal } from "@/components/admin/ai/DraftProtocolUpdateModal";
 import { ProtocolStatusChip } from "./ProtocolStatusChip";
 import { ProtocolContentPreview } from "./ProtocolContentPreview";
 import { DeviceTagPicker } from "./DeviceTagPicker";
@@ -234,6 +235,11 @@ export function ProtocolDetailView({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <DraftProtocolUpdateModal
+            protocolId={protocol.id}
+            protocolTitle={protocol.title}
+            studioUrl={studioUrl}
+          />
           <Button asChild variant="primary" size="sm">
             <a href={studioUrl} target="_blank" rel="noopener noreferrer">
               Edit in Sanity Studio
