@@ -190,6 +190,31 @@ Migrate to Redis-backed (Upstash / Vercel KV) in P13 before scale. The interface
 
 `PORTAL-MASTER-SPEC.md` references P1 (Auth Foundation) and P3 (Setup Wizard + Portal Login) as 12-session steps, but no `spec/SESSION-P1-*.md` or `spec/SESSION-P3-*.md` files exist. Implementation lives in code + the master spec's overview. The P12 audit treats the running code + master spec as the integration check substrate for those phases.
 
+### `audit_log` column names — `actor_user_id` (spec) vs `actor_id` (code), no `practice_id` column
+
+P14 spec (`spec/SESSION-P14-AUDIT-LOG-VIEWER.md`) assumes columns named `actor_user_id`, `actor_type` (with `'admin' | 'practice' | 'system'` values), and `practice_id` on the `audit_log` table. **Actual schema** (created in `0004_rls_framework.sql`):
+
+| Spec said | Code has |
+|---|---|
+| `actor_user_id` | `actor_id` |
+| `actor_type` | `actor_role` |
+| values include `'system'` | NULL = system action |
+| `practice_id` column | (does not exist) |
+| (not mentioned) | `ip_address inet` |
+
+Code is the truth. Spec was wrong. We do NOT alter the table to match the spec.
+
+**Practical impacts:**
+- P14's RPCs (`0017_audit_log_rpcs.sql`) use the real column names.
+- `lib/admin/audit-log.ts` has the same drift note at the top of the file so future sessions don't re-discover this.
+- **Practice filter limitation**: there is no `practice_id` column. The audit log viewer's practice filter matches entries where `target_type = 'practice' AND target_id = filter_practice_id`. This catches entries where the practice IS the target (e.g., `practice.invite`, `practice.activate`) but MISSES entries where a practice is referenced inside `metadata`. The UI surfaces this limitation as a prominent footnote when the practice filter is active. Operators investigating an issue should walk back from the specific target_id (treatment, adverse event, etc.), not from the practice filter.
+- **Actor role NULL = "System"**: service-role actions with no acting user (webhook-triggered audits, scheduled jobs). The UI renders NULL as "System" with a tooltip. The actor filter dropdown has a sentinel `system` option that translates to `actor_role IS NULL` server-side.
+
+If a future session needs richer practice-context filtering, options are:
+1. Add a `practice_id` column to `audit_log` with a backfill strategy. Major schema change; not free.
+2. Use JSONB ops to search metadata. Slow without an index; consider a GIN index on `metadata` if this becomes a real need.
+3. Track as P15+ if compliance asks.
+
 ---
 
 ## Security low findings (deferred)
@@ -208,4 +233,4 @@ P13: build wrappers if app-level limits become necessary.
 
 ---
 
-**Last updated: 2026-05-05 (P12).**
+**Last updated: 2026-05-06 (P14).**

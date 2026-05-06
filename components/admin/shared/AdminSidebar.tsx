@@ -6,6 +6,7 @@ import {
   AlertCircle,
   BarChart3,
   Building2,
+  ClipboardList,
   GraduationCap,
   History,
   Inbox,
@@ -66,6 +67,8 @@ const NAV_ITEMS: NavItem[] = [
   // to /admin/settings/account; active-state lights up for any
   // /admin/settings/* sub-page (account, notifications, stack).
   { href: "/admin/settings", label: "Settings", icon: Settings, section: "main" },
+  // P14 — audit log viewer. Last main entry before AI section divider.
+  { href: "/admin/audit-log", label: "Audit log", icon: ClipboardList, section: "main" },
   // P11 — AI tools section
   { href: "/admin/ai/query", label: "Query", icon: Sparkles, section: "ai" },
   { href: "/admin/ai/runs", label: "Runs", icon: History, section: "ai" },

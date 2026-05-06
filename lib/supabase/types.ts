@@ -1568,6 +1568,59 @@ export interface Database {
         Args: { query_text: string };
         Returns: Json[];
       };
+      // P14 — audit log viewer RPCs (defined in 0017_audit_log_rpcs.sql).
+      list_audit_log_entries: {
+        Args: {
+          filter_actor_id?: string | null;
+          filter_actor_role?: string | null;
+          filter_actor_role_is_null?: boolean;
+          filter_action?: string | null;
+          filter_target_type?: string | null;
+          filter_target_id?: string | null;
+          filter_practice_id?: string | null;
+          filter_date_from?: string | null;
+          filter_date_to?: string | null;
+          search_query?: string | null;
+          result_offset?: number;
+          result_limit?: number;
+        };
+        Returns: Array<{
+          id: string;
+          created_at: string;
+          actor_id: string | null;
+          actor_role: string | null;
+          actor_email: string | null;
+          action: string;
+          target_type: string | null;
+          target_id: string | null;
+          metadata: Json;
+          ip_address: string | null;
+          target_practice_name: string | null;
+        }>;
+      };
+      count_audit_log_entries: {
+        Args: {
+          filter_actor_id?: string | null;
+          filter_actor_role?: string | null;
+          filter_actor_role_is_null?: boolean;
+          filter_action?: string | null;
+          filter_target_type?: string | null;
+          filter_target_id?: string | null;
+          filter_practice_id?: string | null;
+          filter_date_from?: string | null;
+          filter_date_to?: string | null;
+          search_query?: string | null;
+        };
+        Returns: number;
+      };
+      audit_log_distinct_action_verbs: {
+        Args: Record<string, never>;
+        Returns: Array<{ action: string; occurrences: number }>;
+      };
+      audit_log_distinct_target_types: {
+        Args: Record<string, never>;
+        Returns: Array<{ target_type: string; occurrences: number }>;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
