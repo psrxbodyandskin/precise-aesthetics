@@ -523,11 +523,14 @@ export interface Database {
           utm_source: string | null;
           utm_medium: string | null;
           utm_campaign: string | null;
-          // P8 — inbox status workflow (no enrichment for contact messages)
+          // P8 — inbox status workflow
           status: "new" | "contacted" | "qualified" | "closed";
           status_changed_at: string | null;
           status_changed_by: string | null;
           admin_notes: string | null;
+          // P11 — Lead Enricher consistency (added in 0014)
+          enrichment_data: Json | null;
+          enriched_at: string | null;
         };
         Insert: {
           id?: string;
@@ -544,6 +547,8 @@ export interface Database {
           status_changed_at?: string | null;
           status_changed_by?: string | null;
           admin_notes?: string | null;
+          enrichment_data?: Json | null;
+          enriched_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
         Relationships: [];
@@ -1193,6 +1198,90 @@ export interface Database {
           },
         ];
       };
+      // P11 — AI agent runs (admin-only)
+      agent_runs: {
+        Row: {
+          id: string;
+          created_at: string;
+          agent_type:
+            | "pattern_analyst"
+            | "protocol_drafter"
+            | "practice_health_reviewer"
+            | "communication_drafter"
+            | "query_assistant"
+            | "lead_enricher";
+          triggered_by_user_id: string | null;
+          trigger_type: "manual" | "auto";
+          trigger_context: Json | null;
+          model: string;
+          system_prompt: string | null;
+          user_message: string | null;
+          raw_output: string | null;
+          parsed_output: Json | null;
+          input_tokens: number | null;
+          output_tokens: number | null;
+          cost_usd: number | null;
+          status: "pending" | "success" | "failed" | "cancelled";
+          error_message: string | null;
+          latency_ms: number | null;
+          replay_of_id: string | null;
+          approved_at: string | null;
+          approved_by_user_id: string | null;
+          applied_action: string | null;
+          applied_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          agent_type:
+            | "pattern_analyst"
+            | "protocol_drafter"
+            | "practice_health_reviewer"
+            | "communication_drafter"
+            | "query_assistant"
+            | "lead_enricher";
+          triggered_by_user_id?: string | null;
+          trigger_type: "manual" | "auto";
+          trigger_context?: Json | null;
+          model: string;
+          system_prompt?: string | null;
+          user_message?: string | null;
+          raw_output?: string | null;
+          parsed_output?: Json | null;
+          input_tokens?: number | null;
+          output_tokens?: number | null;
+          cost_usd?: number | null;
+          status?: "pending" | "success" | "failed" | "cancelled";
+          error_message?: string | null;
+          latency_ms?: number | null;
+          replay_of_id?: string | null;
+          approved_at?: string | null;
+          approved_by_user_id?: string | null;
+          applied_action?: string | null;
+          applied_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["agent_runs"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_triggered_by_user_id_fkey";
+            columns: ["triggered_by_user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agent_runs_approved_by_user_id_fkey";
+            columns: ["approved_by_user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agent_runs_replay_of_id_fkey";
+            columns: ["replay_of_id"];
+            referencedRelation: "agent_runs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1308,6 +1397,21 @@ export interface Database {
       mark_all_notifications_read: {
         Args: Record<string, never>;
         Returns: void;
+      };
+      // P11 — AI agent observability + Query Assistant SQL exec.
+      agent_cost_summary: {
+        Args: { range_start: string; range_end: string };
+        Returns: Array<{
+          agent_type: string;
+          run_count: number;
+          total_input_tokens: number;
+          total_output_tokens: number;
+          total_cost_usd: number;
+        }>;
+      };
+      execute_readonly_query: {
+        Args: { query_text: string };
+        Returns: Json[];
       };
     };
     Enums: Record<string, never>;

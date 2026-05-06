@@ -17,6 +17,7 @@ import { IndicationDistributionChart } from "@/components/admin/dashboard/Indica
 import { FitzpatrickDistributionChart } from "@/components/admin/dashboard/FitzpatrickDistributionChart";
 import { AdverseEventsPanel } from "@/components/admin/dashboard/AdverseEventsPanel";
 import { RecentTreatmentsList } from "@/components/admin/dashboard/RecentTreatmentsList";
+import { RunAnalysisButton } from "@/components/admin/ai/RunAnalysisButton";
 
 export const metadata: Metadata = {
   title: "Dashboard — Admin",
@@ -77,6 +78,22 @@ export default async function AdminDashboardPage({
           />
         </ChartFrame>
 
+        {/* P11 — pattern analyst on the treatment volume window */}
+        {!noData && (
+          <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5 md:p-6">
+            <RunAnalysisButton
+              endpoint="/api/admin/ai/pattern-analyst"
+              body={{
+                timeRangeStart: data.window.rangeStart,
+                timeRangeEnd: data.window.rangeEnd,
+                focusOnAdverseEvents: false,
+              }}
+              label="Analyze patterns in this period"
+              resultHeading="Pattern analysis"
+            />
+          </div>
+        )}
+
         {/* 3. Protocol performance — table + coverage chart */}
         <div className="grid gap-6 lg:grid-cols-2">
           <ChartFrame
@@ -117,8 +134,40 @@ export default async function AdminDashboardPage({
         {/* 6. Adverse events panel */}
         <AdverseEventsPanel summary={data.adverseEvents} />
 
+        {/* P11 — pattern analyst with adverse-event focus */}
+        {data.adverseEvents.total > 0 && (
+          <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5 md:p-6">
+            <RunAnalysisButton
+              endpoint="/api/admin/ai/pattern-analyst"
+              body={{
+                timeRangeStart: data.window.rangeStart,
+                timeRangeEnd: data.window.rangeEnd,
+                focusOnAdverseEvents: true,
+              }}
+              label="Analyze adverse-event patterns"
+              resultHeading="Adverse event analysis"
+            />
+          </div>
+        )}
+
         {/* 7. Recent treatments timeline */}
         <RecentTreatmentsList treatments={data.recentTreatments} />
+
+        {/* P11 — pattern analyst on the recent-treatment window */}
+        {data.recentTreatments.length > 0 && (
+          <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5 md:p-6">
+            <RunAnalysisButton
+              endpoint="/api/admin/ai/pattern-analyst"
+              body={{
+                timeRangeStart: data.window.rangeStart,
+                timeRangeEnd: data.window.rangeEnd,
+                focusOnAdverseEvents: false,
+              }}
+              label="Analyze recent treatments"
+              resultHeading="Recent-treatment analysis"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

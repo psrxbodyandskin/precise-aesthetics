@@ -16,6 +16,7 @@ import { AdminBreadcrumb } from "@/components/admin/shared/AdminBreadcrumb";
 import { PracticeDetailView } from "@/components/admin/practices/PracticeDetailView";
 import { PracticeCertificationsPanel } from "@/components/admin/training/PracticeCertificationsPanel";
 import { PracticeTrainingProgressPanel } from "@/components/admin/training/PracticeTrainingProgressPanel";
+import { DraftEmailModal } from "@/components/admin/ai/DraftEmailModal";
 
 export const metadata: Metadata = {
   title: "Practice",
@@ -52,6 +53,32 @@ export default async function PracticeDetailPage({
           { label: practiceRes.data.name },
         ]}
       />
+
+      {/* P11 — Draft email to the practice */}
+      <div className="mb-8 flex justify-end">
+        <DraftEmailModal
+          recipientContext={[
+            `Practice: ${practiceRes.data.name}.`,
+            `Primary contact email: ${practiceRes.data.primary_email}.`,
+            practiceRes.data.phone ? `Phone: ${practiceRes.data.phone}.` : null,
+            practiceRes.data.city || practiceRes.data.state
+              ? `Location: ${[practiceRes.data.city, practiceRes.data.state]
+                  .filter(Boolean)
+                  .join(", ")}.`
+              : null,
+            `Status: ${practiceRes.data.status}.`,
+            (devicesRes.data ?? []).length > 0
+              ? `Devices: ${(devicesRes.data ?? [])
+                  .map((d) => d.devices?.display_name ?? "device")
+                  .join(", ")}.`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          recipientEmail={practiceRes.data.primary_email}
+          triggerLabel="Draft email to practice"
+        />
+      </div>
 
       <PracticeDetailView
         practice={practiceRes.data}

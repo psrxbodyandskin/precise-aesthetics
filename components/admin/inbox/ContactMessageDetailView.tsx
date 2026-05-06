@@ -1,6 +1,8 @@
 import type { ContactMessageRow, InboxItemAuditRow } from "@/lib/admin/inbox";
 import { StatusWorkflowControl } from "./StatusWorkflowControl";
 import { AdminNotesField } from "./AdminNotesField";
+import { EnrichmentSection } from "@/components/admin/ai/EnrichmentSection";
+import { DraftEmailModal } from "@/components/admin/ai/DraftEmailModal";
 import { InboxAuditLog } from "./InboxAuditLog";
 import { InboxStatusChip } from "./InboxStatusChip";
 
@@ -56,6 +58,22 @@ export function ContactMessageDetailView({
           >
             Reply via email
           </a>
+        </div>
+        <div className="mt-4">
+          <DraftEmailModal
+            recipientContext={[
+              `Contact message from ${message.full_name} (${message.email}).`,
+              message.organization
+                ? `Organization: ${message.organization}.`
+                : null,
+              `Subject: ${message.subject}.`,
+              `Message: ${message.message}`,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            recipientEmail={message.email}
+            triggerLabel="Draft reply"
+          />
         </div>
       </header>
 
@@ -113,6 +131,15 @@ export function ContactMessageDetailView({
           <Field label="UTM medium" value={message.utm_medium ?? "—"} />
           <Field label="UTM campaign" value={message.utm_campaign ?? "—"} />
         </dl>
+      </Section>
+
+      <Section heading="Enrichment.">
+        <EnrichmentSection
+          leadType="contact"
+          leadId={message.id}
+          data={message.enrichment_data}
+          enrichedAt={message.enriched_at}
+        />
       </Section>
 
       <Section heading="Admin notes.">

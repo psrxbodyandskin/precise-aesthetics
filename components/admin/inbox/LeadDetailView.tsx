@@ -1,7 +1,8 @@
 import type { InboxItemAuditRow, LeadRow } from "@/lib/admin/inbox";
 import { StatusWorkflowControl } from "./StatusWorkflowControl";
 import { AdminNotesField } from "./AdminNotesField";
-import { EnrichmentSection } from "./EnrichmentSection";
+import { EnrichmentSection } from "@/components/admin/ai/EnrichmentSection";
+import { DraftEmailModal } from "@/components/admin/ai/DraftEmailModal";
 import { InboxAuditLog } from "./InboxAuditLog";
 import { InboxStatusChip } from "./InboxStatusChip";
 
@@ -53,6 +54,22 @@ export function LeadDetailView({ lead, audit }: LeadDetailViewProps) {
             Email {lead.email}
           </a>
         </div>
+        <div className="mt-4">
+          <DraftEmailModal
+            recipientContext={[
+              `Lead: ${fullName} (${lead.email}).`,
+              lead.role ? `Role: ${lead.role}.` : null,
+              lead.practice_name ? `Practice: ${lead.practice_name}.` : null,
+              lead.interest && lead.interest.length > 0
+                ? `Interest: ${lead.interest.join(", ")}.`
+                : null,
+              lead.source ? `Source: ${lead.source}.` : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            recipientEmail={lead.email}
+          />
+        </div>
       </header>
 
       <Section heading="Status workflow.">
@@ -98,6 +115,8 @@ export function LeadDetailView({ lead, audit }: LeadDetailViewProps) {
 
       <Section heading="Enrichment.">
         <EnrichmentSection
+          leadType="lead"
+          leadId={lead.id}
           data={lead.enrichment_data}
           enrichedAt={lead.enriched_at}
         />

@@ -9,6 +9,7 @@ import { captureServer } from "@/lib/analytics/posthog-server";
 import { EVENTS } from "@/lib/analytics/events";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { dispatchToAdmins } from "@/lib/notifications/dispatch";
+import { runLeadEnricher } from "@/lib/agents/lead-enricher";
 
 export const runtime = "nodejs";
 
@@ -83,6 +84,18 @@ export async function POST(req: Request) {
       submittedAt,
     }),
   ]);
+
+  // P11 — fire-and-forget Lead Enricher. Idempotency lives in
+  // the enricher (skips if enriched_at is non-null). We don't
+  // await — auto-trigger latency shouldn't bleed into the form
+  // response.
+  if (result.id) {
+    void runLeadEnricher({
+      leadType: "lead",
+      leadId: result.id,
+      triggerType: "auto",
+    });
+  }
 
   // P10 — fan out admin notification (in-app only per category;
   // email skipped at the eligibility layer).

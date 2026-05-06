@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { demoRequestSchema } from "@/lib/schemas/demo-request";
 import { insertDemoRequest } from "@/lib/supabase/demo-requests";
 import { dispatchToAdmins } from "@/lib/notifications/dispatch";
+import { runLeadEnricher } from "@/lib/agents/lead-enricher";
 import {
   sendDemoConfirmation,
   sendInternalDemoNotification,
@@ -68,6 +69,15 @@ export async function POST(req: Request) {
     sendDemoConfirmation({ to: values.email, firstName: values.firstName }),
     sendInternalDemoNotification({ values, submittedAt }),
   ]);
+
+  // P11 — fire-and-forget Lead Enricher.
+  if (result.id) {
+    void runLeadEnricher({
+      leadType: "demo",
+      leadId: result.id,
+      triggerType: "auto",
+    });
+  }
 
   // P10 — fan out admin notification (in-app + email per spec).
   if (result.id) {

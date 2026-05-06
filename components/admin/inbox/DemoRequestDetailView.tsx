@@ -1,7 +1,8 @@
 import type { DemoRequestRow, InboxItemAuditRow } from "@/lib/admin/inbox";
 import { StatusWorkflowControl } from "./StatusWorkflowControl";
 import { AdminNotesField } from "./AdminNotesField";
-import { EnrichmentSection } from "./EnrichmentSection";
+import { EnrichmentSection } from "@/components/admin/ai/EnrichmentSection";
+import { DraftEmailModal } from "@/components/admin/ai/DraftEmailModal";
 import { InboxAuditLog } from "./InboxAuditLog";
 import { InboxStatusChip } from "./InboxStatusChip";
 
@@ -60,6 +61,30 @@ export function DemoRequestDetailView({
           >
             Send follow-up email
           </a>
+        </div>
+        <div className="mt-4">
+          <DraftEmailModal
+            recipientContext={[
+              `Demo request from ${fullName} (${demo.email}).`,
+              `Practice: ${demo.practice_name}${demo.practice_type ? ` (${demo.practice_type})` : ""}.`,
+              demo.role ? `Role: ${demo.role}.` : null,
+              demo.state ? `State: ${demo.state}.` : null,
+              demo.monthly_treatment_volume
+                ? `Monthly volume: ${demo.monthly_treatment_volume}.`
+                : null,
+              demo.current_devices && demo.current_devices.length > 0
+                ? `Current devices: ${demo.current_devices.join(", ")}.`
+                : null,
+              demo.primary_interest && demo.primary_interest.length > 0
+                ? `Primary interest: ${demo.primary_interest.join(", ")}.`
+                : null,
+              demo.timeline ? `Timeline: ${demo.timeline}.` : null,
+              demo.notes ? `Notes: ${demo.notes}` : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            recipientEmail={demo.email}
+          />
         </div>
       </header>
 
@@ -157,6 +182,8 @@ export function DemoRequestDetailView({
 
       <Section heading="Enrichment.">
         <EnrichmentSection
+          leadType="demo"
+          leadId={demo.id}
           data={demo.enrichment_data}
           enrichedAt={demo.enriched_at}
         />

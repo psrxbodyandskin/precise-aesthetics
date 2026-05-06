@@ -7,6 +7,7 @@ import {
 } from "@/lib/resend/send";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { dispatchToAdmins } from "@/lib/notifications/dispatch";
+import { runLeadEnricher } from "@/lib/agents/lead-enricher";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,15 @@ export async function POST(req: Request) {
     }),
     sendInternalContactNotification({ values, submittedAt }),
   ]);
+
+  // P11 — fire-and-forget Lead Enricher.
+  if (result.id) {
+    void runLeadEnricher({
+      leadType: "contact",
+      leadId: result.id,
+      triggerType: "auto",
+    });
+  }
 
   // P10 — fan out admin notification (in-app + email per spec).
   if (result.id) {

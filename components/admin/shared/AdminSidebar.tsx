@@ -4,11 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   AlertCircle,
+  BarChart3,
   GraduationCap,
+  History,
   Inbox,
   LayoutGrid,
   Library,
   LogOut,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notifications/NotificationBell";
@@ -26,6 +29,8 @@ interface NavItem {
   icon: typeof LayoutGrid;
   /** Pulled from a layout-level prop. */
   badgeKey?: "adverseEventsNew" | "inboxNew";
+  /** P11 — group items into sections with a divider between them. */
+  section?: "main" | "ai";
 }
 
 interface AdminSidebarProps {
@@ -34,17 +39,28 @@ interface AdminSidebarProps {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/admin/practices", label: "Practices", icon: Users },
-  { href: "/admin/inbox", label: "Inbox", icon: Inbox, badgeKey: "inboxNew" },
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutGrid, section: "main" },
+  { href: "/admin/practices", label: "Practices", icon: Users, section: "main" },
+  {
+    href: "/admin/inbox",
+    label: "Inbox",
+    icon: Inbox,
+    badgeKey: "inboxNew",
+    section: "main",
+  },
   {
     href: "/admin/adverse-events",
     label: "Adverse Events",
     icon: AlertCircle,
     badgeKey: "adverseEventsNew",
+    section: "main",
   },
-  { href: "/admin/protocols", label: "Protocols", icon: Library },
-  { href: "/admin/training", label: "Training", icon: GraduationCap },
+  { href: "/admin/protocols", label: "Protocols", icon: Library, section: "main" },
+  { href: "/admin/training", label: "Training", icon: GraduationCap, section: "main" },
+  // P11 — AI tools section
+  { href: "/admin/ai/query", label: "Query", icon: Sparkles, section: "ai" },
+  { href: "/admin/ai/runs", label: "Runs", icon: History, section: "ai" },
+  { href: "/admin/ai/cost", label: "Cost", icon: BarChart3, section: "ai" },
 ];
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
@@ -82,40 +98,54 @@ export function AdminSidebar({
       </div>
 
       <nav className="flex flex-1 flex-row gap-1 md:flex-col">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, idx) => {
           const active =
             pathname === item.href ||
             (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
           const Icon = item.icon;
           const badge = badgeFor(item.badgeKey);
+          const prevSection = idx > 0 ? NAV_ITEMS[idx - 1]?.section : undefined;
+          const showAiHeading =
+            item.section === "ai" && prevSection !== "ai";
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "inline-flex items-center gap-3 rounded-sm px-3 py-2.5 text-small font-medium transition-colors duration-[150ms]",
-                active
-                  ? "bg-cream-50/10 text-cream-50"
-                  : "text-cream-100 hover:bg-cream-50/5 hover:text-cream-50",
+            <div key={item.href} className="contents">
+              {showAiHeading && (
+                <div className="hidden md:block mt-4 pt-4 border-t border-cream-50/10">
+                  <p
+                    className="px-3 pb-2 font-body text-[10px] font-medium uppercase text-cream-300"
+                    style={EYEBROW_TRACKING}
+                  >
+                    AI
+                  </p>
+                </div>
               )}
-            >
-              <Icon
-                className="size-4 shrink-0"
-                strokeWidth={1.5}
-                aria-hidden="true"
-              />
-              <span className="flex-1">{item.label}</span>
-              {badge > 0 && (
-                <span
-                  aria-label={`${badge} new`}
-                  className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-300 px-1.5 font-body text-[10px] font-medium text-ink-900"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                >
-                  {badge}
-                </span>
-              )}
-            </Link>
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "inline-flex items-center gap-3 rounded-sm px-3 py-2.5 text-small font-medium transition-colors duration-[150ms]",
+                  active
+                    ? "bg-cream-50/10 text-cream-50"
+                    : "text-cream-100 hover:bg-cream-50/5 hover:text-cream-50",
+                )}
+              >
+                <Icon
+                  className="size-4 shrink-0"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                <span className="flex-1">{item.label}</span>
+                {badge > 0 && (
+                  <span
+                    aria-label={`${badge} new`}
+                    className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-300 px-1.5 font-body text-[10px] font-medium text-ink-900"
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {badge}
+                  </span>
+                )}
+              </Link>
+            </div>
           );
         })}
       </nav>
