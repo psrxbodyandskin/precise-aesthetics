@@ -26,6 +26,23 @@ export const metadata: Metadata = {
 
 const VALID_RANGES: DashboardRange[] = ["7d", "30d", "90d", "12m", "all"];
 
+// Map dashboard range pills to the day-count input that
+// Practice Health Reviewer expects (capped at 365 by the schema).
+function rangeToDays(range: DashboardRange): number {
+  switch (range) {
+    case "7d":
+      return 7;
+    case "30d":
+      return 30;
+    case "90d":
+      return 90;
+    case "12m":
+    case "all":
+    default:
+      return 365;
+  }
+}
+
 interface DashboardPageProps {
   searchParams: Promise<{ range?: string }>;
 }
@@ -153,21 +170,17 @@ export default async function AdminDashboardPage({
         {/* 7. Recent treatments timeline */}
         <RecentTreatmentsList treatments={data.recentTreatments} />
 
-        {/* P11 — pattern analyst on the recent-treatment window */}
-        {data.recentTreatments.length > 0 && (
-          <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5 md:p-6">
-            <RunAnalysisButton
-              endpoint="/api/admin/ai/pattern-analyst"
-              body={{
-                timeRangeStart: data.window.rangeStart,
-                timeRangeEnd: data.window.rangeEnd,
-                focusOnAdverseEvents: false,
-              }}
-              label="Analyze recent treatments"
-              resultHeading="Recent-treatment analysis"
-            />
-          </div>
-        )}
+        {/* P11 — practice health reviewer (per spec section "Recent treatments timeline") */}
+        <div className="rounded-md border border-ink-700/15 bg-bone-50 p-5 md:p-6">
+          <RunAnalysisButton
+            endpoint="/api/admin/ai/practice-health-reviewer"
+            body={{
+              timeRangeDays: rangeToDays(range),
+            }}
+            label="Review practices needing attention"
+            resultHeading="Practice health review"
+          />
+        </div>
       </div>
     </div>
   );
