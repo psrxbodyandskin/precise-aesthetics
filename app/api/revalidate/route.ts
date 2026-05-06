@@ -18,8 +18,13 @@ export async function POST(req: Request) {
         ? body.type
         : null;
 
-  if (docType) revalidateTag(docType);
-  revalidateTag("sanity");
+  // Next 16: revalidateTag now requires a cache profile name as the
+  // second argument. "default" = standard caching tier, equivalent
+  // to the pre-16 single-arg behavior for our use case (Sanity
+  // webhook-triggered freshness; we want the cache invalidated and
+  // re-populated on next request with default TTL).
+  if (docType) revalidateTag(docType, "default");
+  revalidateTag("sanity", "default");
 
   return NextResponse.json({ ok: true, revalidated: docType ?? "sanity" });
 }

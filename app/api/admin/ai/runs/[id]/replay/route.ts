@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/server";
 import { getAgentRun, runAgent, type AgentType } from "@/lib/agents/base";
 import type { AnthropicModel } from "@/lib/anthropic/client";
+import { agentRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
@@ -16,6 +17,20 @@ export async function POST(
 ) {
   const admin = await requireAdmin();
   const { id } = await params;
+
+  // P12 — replay also counts toward the 20/admin/hour cap.
+  const limit = agentRateLimit(admin.id);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Agent rate limit reached. Try again in a few minutes." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(1, Math.ceil((limit.resetAt - Date.now()) / 1000)).toString(),
+        },
+      },
+    );
+  }
 
   const original = await getAgentRun(id);
   if (!original) {

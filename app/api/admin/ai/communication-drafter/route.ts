@@ -3,12 +3,26 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/server";
 import { communicationDrafterSchema } from "@/lib/schemas/agents";
 import { runCommunicationDrafter } from "@/lib/agents/communication-drafter";
+import { agentRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin();
+
+  const limit = agentRateLimit(admin.id);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Agent rate limit reached. Try again in a few minutes." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(1, Math.ceil((limit.resetAt - Date.now()) / 1000)).toString(),
+        },
+      },
+    );
+  }
 
   let json: unknown;
   try {

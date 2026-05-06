@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/server";
 import { patternAnalystSchema } from "@/lib/schemas/agents";
 import { runPatternAnalyst } from "@/lib/agents/pattern-analyst";
+import { agentRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 // Anthropic calls can take 30s+; default 10s timeout would kill them.
@@ -10,6 +11,26 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin();
+
+  // P12 — agent rate limit (20/admin/hour) — caps cost-runaway risk.
+  const limit = agentRateLimit(admin.id);
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Agent rate limit reached. Try again in a few minutes.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(
+            1,
+            Math.ceil((limit.resetAt - Date.now()) / 1000),
+          ).toString(),
+        },
+      },
+    );
+  }
 
   let json: unknown;
   try {

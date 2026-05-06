@@ -50,3 +50,18 @@ export function getClientIp(headers: Headers): string {
   if (real) return real.trim();
   return "unknown";
 }
+
+// P12 — agent endpoint rate limit. 20 invocations per admin user
+// per hour. Caps Anthropic cost-runaway risk if an admin account
+// is compromised or a buggy client loops. In-memory stop-gap;
+// migrate to Redis-backed counter (Upstash / Vercel KV) before
+// scaling. See SECURITY-AUDIT-RESULTS.md for rationale + scope.
+export const AGENT_RATE_LIMIT = { limit: 20, windowMs: 60 * 60 * 1000 } as const;
+
+export function agentRateLimit(adminUserId: string): RateLimitResult {
+  return rateLimit({
+    key: `agent:${adminUserId}`,
+    limit: AGENT_RATE_LIMIT.limit,
+    windowMs: AGENT_RATE_LIMIT.windowMs,
+  });
+}

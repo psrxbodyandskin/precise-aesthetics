@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/server";
 import { leadEnricherSchema } from "@/lib/schemas/agents";
 import { runLeadEnricher } from "@/lib/agents/lead-enricher";
+import { agentRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,6 +14,19 @@ export const maxDuration = 60;
 // admins can force a fresh replay.
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin();
+
+  const limit = agentRateLimit(admin.id);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Agent rate limit reached. Try again in a few minutes." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(1, Math.ceil((limit.resetAt - Date.now()) / 1000)).toString(),
+        },
+      },
+    );
+  }
 
   let json: unknown;
   try {
