@@ -87,6 +87,7 @@ export async function createVendor(
     .insert({
       ...input,
       contact_email: input.contact_email || null,
+      messaging_handles: input.messaging_handles as never,
       created_by: ctx.actorId,
       last_updated_by: ctx.actorId,
     })
@@ -120,6 +121,9 @@ export async function updateVendor(
   };
   if ("contact_email" in input) {
     update.contact_email = input.contact_email || null;
+  }
+  if ("messaging_handles" in input && input.messaging_handles) {
+    update.messaging_handles = input.messaging_handles as never;
   }
 
   const { error } = await supabase.from("vendors").update(update).eq("id", id);

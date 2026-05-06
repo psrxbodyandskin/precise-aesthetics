@@ -15,6 +15,36 @@ export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 export const VENDOR_STATUSES = ["active", "paused", "former"] as const;
 export type VendorStatus = (typeof VENDOR_STATUSES)[number];
 
+// Curated list of messaging platforms shown in the form dropdown.
+// "Other" allows free-text platform names. Order chosen to put the
+// most common B2B-relevant platforms at the top.
+export const MESSAGING_PLATFORMS = [
+  "WhatsApp",
+  "Telegram",
+  "Signal",
+  "iMessage / SMS",
+  "Slack",
+  "Discord",
+  "Microsoft Teams",
+  "LinkedIn",
+  "X / Twitter",
+  "Instagram",
+  "Facebook Messenger",
+  "WeChat",
+  "Line",
+  "Other",
+] as const;
+export type MessagingPlatform = (typeof MESSAGING_PLATFORMS)[number];
+
+export const messagingHandleSchema = z.object({
+  platform: z.enum(MESSAGING_PLATFORMS),
+  handle: z.string().trim().min(1).max(200),
+  // When platform === "Other", the operator can label the platform
+  // free-text (e.g., a niche platform we don't list above).
+  custom_platform: z.string().trim().max(50).optional().nullable(),
+});
+export type MessagingHandle = z.infer<typeof messagingHandleSchema>;
+
 const trimmedString = (max: number) =>
   z.string().trim().max(max).optional().nullable();
 
@@ -25,9 +55,7 @@ export const vendorCreateSchema = z.object({
   contact_name: trimmedString(200),
   contact_email: z.string().trim().email().max(200).optional().nullable().or(z.literal("")),
   contact_phone: trimmedString(50),
-  whatsapp: trimmedString(100),
-  telegram: trimmedString(100),
-  signal: trimmedString(100),
+  messaging_handles: z.array(messagingHandleSchema).max(20).default([]),
   website: trimmedString(500),
   account_id: trimmedString(200),
   notes: trimmedString(8000),

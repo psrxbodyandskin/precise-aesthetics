@@ -137,7 +137,7 @@ Click a vendor to view detail. Each section is editable in-place. Status workflo
 
 ## Stack
 
-Path: /admin/stack
+Path: /admin/settings/stack (under the Settings sidebar section)
 
 The stack reference indexes every system we depend on (Vercel, Supabase, Resend, Sanity, Anthropic, PostHog, Cal.com, Sentry, etc.) — plan tier, monthly cost estimate, renewal date, login URL, account owner, and the env var NAMES per service.
 
@@ -227,7 +227,7 @@ The bell icon in the sidebar shows unread count. Click for recent notifications;
 3. Cost dashboard reflects both runs
 
 ## Add a new vendor or stack service
-1. /admin/vendors → "New vendor", or /admin/stack → "New service"
+1. /admin/vendors → "New vendor", or /admin/settings/stack → "New service"
 2. Fill the form (only name + category + status are required for vendors; name + category + what_it_does + status for stack services)
 3. Submit; redirects to detail view where you can fill in the rest inline
 

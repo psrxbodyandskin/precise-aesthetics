@@ -53,7 +53,7 @@ export function StackServicesList({ services }: StackServicesListProps) {
             {items.map((s) => (
               <li key={s.id}>
                 <Link
-                  href={`/admin/stack/${s.id}`}
+                  href={`/admin/settings/stack/${s.id}`}
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors duration-[150ms] hover:bg-bone-100/60 outline-none focus-visible:[box-shadow:var(--pa-focus-ring)]"
                 >
                   <div className="min-w-0">

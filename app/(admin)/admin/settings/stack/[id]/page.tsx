@@ -45,7 +45,8 @@ export default async function StackServiceDetailPage({ params }: PageProps) {
     <div className="mx-auto max-w-[1000px] px-6 py-12 md:px-12 md:py-16">
       <AdminBreadcrumb
         items={[
-          { label: "Stack", href: "/admin/stack" },
+          { label: "Settings" },
+          { label: "Stack", href: "/admin/settings/stack" },
           { label: service.name },
         ]}
       />

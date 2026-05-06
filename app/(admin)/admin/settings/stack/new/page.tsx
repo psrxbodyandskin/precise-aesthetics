@@ -18,12 +18,13 @@ export default async function NewStackServicePage() {
     <div className="mx-auto max-w-[800px] px-6 py-12 md:px-12 md:py-16">
       <AdminBreadcrumb
         items={[
-          { label: "Stack", href: "/admin/stack" },
+          { label: "Settings" },
+          { label: "Stack", href: "/admin/settings/stack" },
           { label: "New" },
         ]}
       />
       <AdminPageHeader
-        eyebrow="Admin · Stack"
+        eyebrow="Settings · Stack"
         title="New service."
         lead="Add a vendor we depend on. Env vars get added on the detail page after creating."
       />

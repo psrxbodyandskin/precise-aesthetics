@@ -12,7 +12,7 @@ import {
   LayoutGrid,
   Library,
   LogOut,
-  Server,
+  Settings,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -59,10 +59,12 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/admin/protocols", label: "Protocols", icon: Library, section: "main" },
   { href: "/admin/training", label: "Training", icon: GraduationCap, section: "main" },
-  // P13 — admin utilities (vendors + stack reference). Help chatbot is
-  // a global floating button mounted in the admin layout, not a sidebar entry.
+  // P13 — admin utilities. Help chatbot is a global floating button
+  // mounted in the admin layout, not a sidebar entry.
   { href: "/admin/vendors", label: "Vendors", icon: Building2, section: "main" },
-  { href: "/admin/stack", label: "Stack", icon: Server, section: "main" },
+  // P13 — single Settings entry. Lands on the stack reference for now;
+  // when more settings ship, /admin/settings becomes an index.
+  { href: "/admin/settings/stack", label: "Settings", icon: Settings, section: "main" },
   // P11 — AI tools section
   { href: "/admin/ai/query", label: "Query", icon: Sparkles, section: "ai" },
   { href: "/admin/ai/runs", label: "Runs", icon: History, section: "ai" },
@@ -103,7 +105,10 @@ export function AdminSidebar({
         <NotificationBell surface="admin" />
       </div>
 
-      <nav className="flex flex-1 flex-row gap-1 md:flex-col">
+      <nav
+        className="flex flex-1 flex-row gap-1 md:min-h-0 md:flex-col md:overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none" }}
+      >
         {NAV_ITEMS.map((item, idx) => {
           const active =
             pathname === item.href ||

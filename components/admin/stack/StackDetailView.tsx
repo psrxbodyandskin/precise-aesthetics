@@ -54,7 +54,7 @@ export function StackDetailView({
       }
       toast.success("Service archived.");
       setArchiveOpen(false);
-      router.push("/admin/stack");
+      router.push("/admin/settings/stack");
       router.refresh();
     });
   }

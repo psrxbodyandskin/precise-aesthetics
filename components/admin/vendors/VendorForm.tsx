@@ -20,7 +20,9 @@ import type {
   VendorCategory,
   VendorStatus,
   VendorCreateInput,
+  MessagingHandle,
 } from "@/lib/schemas/vendor";
+import { MessagingHandlesEditor } from "./MessagingHandlesEditor";
 
 const CATEGORY_LABEL: Record<VendorCategory, string> = {
   manufacturer: "Manufacturer",
@@ -60,9 +62,9 @@ export function VendorForm({
   const [contactName, setContactName] = useState(initial?.contact_name ?? "");
   const [contactEmail, setContactEmail] = useState(initial?.contact_email ?? "");
   const [contactPhone, setContactPhone] = useState(initial?.contact_phone ?? "");
-  const [whatsapp, setWhatsapp] = useState(initial?.whatsapp ?? "");
-  const [telegram, setTelegram] = useState(initial?.telegram ?? "");
-  const [signal, setSignal] = useState(initial?.signal ?? "");
+  const [messagingHandles, setMessagingHandles] = useState<MessagingHandle[]>(
+    initial?.messaging_handles ?? [],
+  );
   const [website, setWebsite] = useState(initial?.website ?? "");
   const [accountId, setAccountId] = useState(initial?.account_id ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -83,9 +85,16 @@ export function VendorForm({
       contact_name: contactName.trim() || null,
       contact_email: contactEmail.trim() || null,
       contact_phone: contactPhone.trim() || null,
-      whatsapp: whatsapp.trim() || null,
-      telegram: telegram.trim() || null,
-      signal: signal.trim() || null,
+      messaging_handles: messagingHandles
+        .filter((h) => h.handle.trim().length > 0)
+        .map((h) => ({
+          platform: h.platform,
+          handle: h.handle.trim(),
+          custom_platform:
+            h.platform === "Other"
+              ? (h.custom_platform?.trim() || null)
+              : null,
+        })),
       website: website.trim() || null,
       account_id: accountId.trim() || null,
       notes: notes.trim() || null,
@@ -193,17 +202,18 @@ export function VendorForm({
         </Field>
       </Section>
 
-      <Section heading="Messaging handles">
-        <Field label="WhatsApp">
-          <Input value={whatsapp ?? ""} onChange={(e) => setWhatsapp(e.target.value)} />
-        </Field>
-        <Field label="Telegram">
-          <Input value={telegram ?? ""} onChange={(e) => setTelegram(e.target.value)} />
-        </Field>
-        <Field label="Signal">
-          <Input value={signal ?? ""} onChange={(e) => setSignal(e.target.value)} />
-        </Field>
-      </Section>
+      <section>
+        <p
+          className="mb-4 font-body text-overline font-medium uppercase text-ink-500"
+          style={{ letterSpacing: "0.18em" }}
+        >
+          Messaging handles
+        </p>
+        <MessagingHandlesEditor
+          value={messagingHandles}
+          onChange={setMessagingHandles}
+        />
+      </section>
 
       <Section heading="Web + account">
         <Field label="Website">

@@ -51,14 +51,14 @@ export default async function AdminStackPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-12 md:px-12 md:py-16">
-      <AdminBreadcrumb items={[{ label: "Stack" }]} />
+      <AdminBreadcrumb items={[{ label: "Settings" }, { label: "Stack" }]} />
       <AdminPageHeader
-        eyebrow="Admin · Stack"
+        eyebrow="Settings · Stack"
         title="Stack reference."
         lead="Every system we use, every env var name, where the credentials live. NO actual secrets stored here."
         actions={
           <Button asChild>
-            <Link href="/admin/stack/new">+ New service</Link>
+            <Link href="/admin/settings/stack/new">+ New service</Link>
           </Button>
         }
       />

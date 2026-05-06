@@ -145,7 +145,11 @@ export function StackServiceForm({
       }
       toast.success(serviceId ? "Updated." : "Service created.");
       onSaved?.();
-      router.push(serviceId ? `/admin/stack/${serviceId}` : `/admin/stack/${data.id}`);
+      router.push(
+        serviceId
+          ? `/admin/settings/stack/${serviceId}`
+          : `/admin/settings/stack/${data.id}`,
+      );
       router.refresh();
     });
   }

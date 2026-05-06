@@ -80,10 +80,12 @@ create table public.vendors (
   contact_email text,
   contact_phone text,
 
-  -- Messaging handles
-  whatsapp text,
-  telegram text,
-  signal text,
+  -- Messaging handles — JSONB list of { platform: string, handle: string }
+  -- objects. Platform is one of the curated list in the form (WhatsApp,
+  -- Telegram, Signal, Slack, Discord, LinkedIn, X, etc.) or "Other" for
+  -- free-text. Defaults to empty array so existing search queries don't
+  -- need to handle null.
+  messaging_handles jsonb not null default '[]'::jsonb,
 
   -- Web presence
   website text,

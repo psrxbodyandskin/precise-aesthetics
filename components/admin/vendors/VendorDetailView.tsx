@@ -15,9 +15,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { VendorRow } from "@/lib/admin/vendors";
+import type { MessagingHandle } from "@/lib/schemas/vendor";
 import { VendorCategoryChip } from "./VendorCategoryChip";
 import { VendorStatusChip } from "./VendorStatusChip";
 import { VendorForm } from "./VendorForm";
+import { formatMessagingHandle } from "./MessagingHandlesEditor";
 
 const EYEBROW_TRACKING = { letterSpacing: "0.18em" } as const;
 
@@ -75,7 +77,12 @@ export function VendorDetailView({ vendor }: VendorDetailViewProps) {
         </header>
         <VendorForm
           vendorId={vendor.id}
-          initial={vendor}
+          initial={{
+            ...vendor,
+            messaging_handles: Array.isArray(vendor.messaging_handles)
+              ? (vendor.messaging_handles as unknown as MessagingHandle[])
+              : [],
+          }}
           onSaved={() => setEditing(false)}
           onCancel={() => setEditing(false)}
         />
@@ -197,15 +204,24 @@ export function VendorDetailView({ vendor }: VendorDetailViewProps) {
         </DL>
       </Section>
 
-      {(vendor.whatsapp || vendor.telegram || vendor.signal) && (
-        <Section heading="Messaging">
-          <DL>
-            {vendor.whatsapp && <DT label="WhatsApp">{vendor.whatsapp}</DT>}
-            {vendor.telegram && <DT label="Telegram">{vendor.telegram}</DT>}
-            {vendor.signal && <DT label="Signal">{vendor.signal}</DT>}
-          </DL>
-        </Section>
-      )}
+      {Array.isArray(vendor.messaging_handles) &&
+        vendor.messaging_handles.length > 0 && (
+          <Section heading="Messaging">
+            <ul className="space-y-2">
+              {(vendor.messaging_handles as unknown as MessagingHandle[]).map(
+                (h, i) => (
+                  <li
+                    key={i}
+                    className="font-body text-small text-ink-900"
+                    style={{ lineHeight: 1.55 }}
+                  >
+                    {formatMessagingHandle(h)}
+                  </li>
+                ),
+              )}
+            </ul>
+          </Section>
+        )}
 
       {(vendor.website || vendor.account_id) && (
         <Section heading="Web + account">

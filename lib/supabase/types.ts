@@ -1302,9 +1302,7 @@ export interface Database {
           contact_name: string | null;
           contact_email: string | null;
           contact_phone: string | null;
-          whatsapp: string | null;
-          telegram: string | null;
-          signal: string | null;
+          messaging_handles: Json;
           website: string | null;
           account_id: string | null;
           notes: string | null;
@@ -1328,9 +1326,7 @@ export interface Database {
           contact_name?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
-          whatsapp?: string | null;
-          telegram?: string | null;
-          signal?: string | null;
+          messaging_handles?: Json;
           website?: string | null;
           account_id?: string | null;
           notes?: string | null;
