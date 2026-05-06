@@ -14,6 +14,7 @@ import {
 } from "@/lib/schemas/stack";
 import { AdminBreadcrumb } from "@/components/admin/shared/AdminBreadcrumb";
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
+import { SettingsNav } from "@/components/admin/settings/SettingsNav";
 import { StackServicesList } from "@/components/admin/stack/StackServicesList";
 import { Button } from "@/components/ui/button";
 
@@ -62,6 +63,10 @@ export default async function AdminStackPage({ searchParams }: PageProps) {
           </Button>
         }
       />
+
+      <div className="mt-8">
+        <SettingsNav />
+      </div>
 
       {services.length > 0 && (
         <div className="mt-10 rounded-md border border-ink-700/15 bg-bone-50 px-5 py-4">

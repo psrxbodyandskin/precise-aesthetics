@@ -62,9 +62,10 @@ const NAV_ITEMS: NavItem[] = [
   // P13 — admin utilities. Help chatbot is a global floating button
   // mounted in the admin layout, not a sidebar entry.
   { href: "/admin/vendors", label: "Vendors", icon: Building2, section: "main" },
-  // P13 — single Settings entry. Lands on the stack reference for now;
-  // when more settings ship, /admin/settings becomes an index.
-  { href: "/admin/settings/stack", label: "Settings", icon: Settings, section: "main" },
+  // P13 — Settings entry. Points at /admin/settings which redirects
+  // to /admin/settings/account; active-state lights up for any
+  // /admin/settings/* sub-page (account, notifications, stack).
+  { href: "/admin/settings", label: "Settings", icon: Settings, section: "main" },
   // P11 — AI tools section
   { href: "/admin/ai/query", label: "Query", icon: Sparkles, section: "ai" },
   { href: "/admin/ai/runs", label: "Runs", icon: History, section: "ai" },

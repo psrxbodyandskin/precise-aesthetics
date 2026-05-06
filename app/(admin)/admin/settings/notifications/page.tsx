@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth/server";
 import { getPreferencesForAdmin } from "@/lib/notifications/queries";
 import { AdminBreadcrumb } from "@/components/admin/shared/AdminBreadcrumb";
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
+import { SettingsNav } from "@/components/admin/settings/SettingsNav";
 import { NotificationPreferencesForm } from "@/components/portal/notifications/NotificationPreferencesForm";
 
 export const metadata: Metadata = {
@@ -24,12 +25,16 @@ export default async function AdminNotificationSettingsPage() {
         ]}
       />
       <AdminPageHeader
-        eyebrow="Settings"
+        eyebrow="Settings · Notifications"
         title="Notification preferences."
         lead="Choose which admin notifications you receive and how. Clinical-safety alerts are always on."
       />
 
-      <div className="mt-12">
+      <div className="mt-8">
+        <SettingsNav />
+      </div>
+
+      <div className="mt-10">
         <NotificationPreferencesForm
           variant="admin"
           initialPreferences={prefs?.preferences ?? {}}
