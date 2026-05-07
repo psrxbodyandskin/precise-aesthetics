@@ -436,7 +436,7 @@ export default function PicoPage() {
           href="/system/delivery"
           className={cn(
             "mt-10 inline-flex items-center gap-2",
-            "font-body text-small text-brand-700 hover:text-brand-500",
+            "font-body text-small text-brand-700 hover:text-ink-900",
             "transition-colors duration-[150ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
             "outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm",
           )}
@@ -789,7 +789,7 @@ export default function PicoPage() {
             <Link
               href="#updates"
               className={cn(
-                "font-body text-small text-brand-700 hover:text-brand-500",
+                "font-body text-small text-brand-700 hover:text-ink-900",
                 "transition-colors duration-[150ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
                 "outline-none focus-visible:[box-shadow:var(--pa-focus-ring)] rounded-sm",
                 "inline-flex items-center gap-2",

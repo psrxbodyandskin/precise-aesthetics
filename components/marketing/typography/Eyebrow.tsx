@@ -14,8 +14,11 @@ export function Eyebrow({
   className,
   as: Tag = "span",
 }: EyebrowProps) {
+  // P12.5 — A11y AA. brand-500 on bone-100 = 3.11:1, fails the 4.5:1
+  // text contrast bar. Eyebrows are typography (not large) so the
+  // floor applies. Bumped to brand-700 (~8:1) per CLAUDE.md known gotcha.
   const toneClass =
-    tone === "ink" ? "text-brand-500" : tone === "cream" ? "text-brand-300" : "";
+    tone === "ink" ? "text-brand-700" : tone === "cream" ? "text-brand-300" : "";
   const dataAttr = tone === "auto" ? { "data-tone-color": "auto-eyebrow" } : {};
 
   return (

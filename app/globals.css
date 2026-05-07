@@ -112,6 +112,33 @@
   --duration-base: 220ms;
   --duration-slow: 400ms;
   --duration-deliberate: 700ms;
+
+  /* P12.5 — shadcn token aliases. Tailwind v4 resolves `bg-popover`,
+     `bg-card`, etc. from `--color-popover` / `--color-card`. shadcn
+     ships components that use those classes; without aliases, those
+     utilities render transparent (KNOWN-GOTCHAS.md "Tailwind v4 ↔
+     shadcn token mismatch"). Aliasing here removes the per-component
+     `bg-bone-50` overrides scattered across Dialog / Select /
+     Popover / Sheet / DropdownMenu wrappers. */
+  --color-popover: #faf7f2;            /* bone-100 */
+  --color-popover-foreground: #0a0f1c; /* ink-900 */
+  --color-card: #faf7f2;
+  --color-card-foreground: #0a0f1c;
+  --color-background: #faf7f2;
+  --color-foreground: #0a0f1c;
+  --color-muted: #f2ede3;               /* bone-200 */
+  --color-muted-foreground: #4a5568;    /* ink-500 */
+  --color-accent: #f2ede3;
+  --color-accent-foreground: #0a0f1c;
+  --color-border: #e5ddcc;              /* bone-300 */
+  --color-input: #e5ddcc;
+  --color-ring: #2b5688;                /* brand-700 */
+  --color-secondary: #f2ede3;
+  --color-secondary-foreground: #0a0f1c;
+  --color-primary: #0c1426;             /* midnight-800 */
+  --color-primary-foreground: #fdfcf9;  /* cream-50 */
+  --color-destructive: #8a2c2c;
+  --color-destructive-foreground: #fdfcf9;
 }
 
 /* ---------------------------------------------------------------------------
