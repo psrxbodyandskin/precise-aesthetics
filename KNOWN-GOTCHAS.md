@@ -108,13 +108,21 @@ If a future change uploads photos via a different path (server-side intake, auto
 
 ## Performance + accessibility (P12.5 punch list)
 
-### 18 React-hooks strict-rule violations (eslint-plugin-react-hooks 7) — DOWNGRADED IN P12.5
+### 18 React-hooks strict-rule violations (eslint-plugin-react-hooks 7) — DEFERRED TO P15+
 
-Came in with the Next 16 / eslint-config-next 16 upgrade in P12. Production runtime unaffected — React Compiler is opt-in experimental, not enabled. Build / typecheck unaffected.
+Came in with the Next 16 / eslint-config-next 16 upgrade in P12. Production runtime unaffected — React Compiler is opt-in experimental, not enabled. Build / typecheck unaffected. Build is not gated on eslint (Next 16 doesn't auto-lint at build).
 
-**P12.5 resolution:** the three new strict rules (`react-hooks/set-state-in-effect`, `react-hooks/purity`, `react-hooks/immutability`) are downgraded to `warn` at the eslint config level (`eslint.config.mjs`). The 18 violations are NOT mechanical fixes per the spec's hard-stop criteria — they require either real refactor (changing component behavior — e.g., replacing `Date.now()` in render with a ref breaks live cert-expiry comparison) or per-line `eslint-disable`. Suppressing as warnings is the right call until React Compiler enablement is on the table; at that point every warning gets revisited with proper refactors.
+**P12.5 decision:** **deferred, not papered over.** The errors stay as errors at the eslint config level. We deliberately did NOT downgrade to warn or apply per-line disables — that would obscure the work owed.
 
-CI now passes lint cleanly. The 18 file:line entries below remain as the punch list for the React Compiler enablement session (P15+).
+**Why deferred (not refactored now):** these are Compiler-prep flags on patterns that work correctly today. Refactoring blind risks regressing real behavior. Per category:
+
+**Category A — `set-state-in-effect` (11 instances):** lazy-fetch-on-open, video-progress sync, animation start. Refactor would restructure components in ways that change render timing. Without React Compiler enabled to validate the result, "fix" can introduce subtle race conditions. When Compiler enablement is the actual goal, each refactor gets validated by Compiler immediately. Doing them now is blind.
+
+**Category B — `purity` (3 instances):** `PracticeTrainingProgressPanel.tsx:38` uses `Date.now()` to evaluate cert-expiry status. Replacing with a `useRef`-stable value would break the live display when admins keep the page open past expiry. The current behavior is **correct**; the rule is being overly strict. `CurriculumOverviewCard.tsx:61` and `ModulesProgressList.tsx:49` are similar. Refactor would require switching from "render-time computation" to "interval-driven re-render" — more code for the same semantic.
+
+**Category C — `immutability` (4 instances):** `FlowArrow.tsx:252,259,264` is 3D animation closure mutation in react-three-fiber — the mutation pattern is documented r3f idiom for animating ref-attached objects. `TreatmentsFilterBar.tsx:78,96` is function-declared-after-use (JS hoisting handles it; lint rule doesn't trust it). The r3f animation refactor in particular needs careful thought about animation loop semantics.
+
+**Resolution:** P15+, alongside React Compiler enablement.
 
 | # | File | Line | Rule |
 |---|------|------|------|
